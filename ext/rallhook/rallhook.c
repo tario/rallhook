@@ -71,6 +71,14 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	return Qnil;
 }
 
+VALUE hooked_send(int argc, VALUE* argv, VALUE self_) {
+
+	hook_enabled = 1;
+	VALUE ret = rb_call_copy( CLASS_OF(self_), self_, rb_intern("send"), argc, argv, 1, Qundef);
+	hook_enabled = 0;
+	return Qnil;
+}
+
 void Init_rallhook() {
 
 	const char* initcode = 	"require 'rubygems'\n"
@@ -82,6 +90,8 @@ void Init_rallhook() {
 	VALUE rb_mRallHook = rb_define_module("RallHook");
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
+
+	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(hooked_send), -1);
 
 	rb_call_fake_init();
 /*
