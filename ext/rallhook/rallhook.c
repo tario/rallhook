@@ -32,6 +32,15 @@ void unprotect(void* ptr) {
 }
 
 
+VALUE unhook(VALUE self) {
+
+	rb_hook_proc = Qnil;
+	hook_enabled = 0;
+
+	return Qnil;
+}
+
+
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
 	hook_enabled = 1;
@@ -53,13 +62,11 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	*address = &rb_call_fake;
 
-	return Qnil;
-}
+	if (rb_block_given_p() ) {
+		rb_yield(Qnil);
 
-VALUE unhook(VALUE self) {
-
-	rb_hook_proc = Qnil;
-	hook_enabled = 0;
+		unhook(self);
+	}
 
 	return Qnil;
 }
