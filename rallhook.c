@@ -21,15 +21,34 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <ruby.h>
 #include "ruby_symbols.h"
-
 #include "rb_call_fake.h"
-
+#include <sys/mman.h>
 
 VALUE rb_mRallHook;
 VALUE rb_hook_proc;
 
+void unprotect(void* ptr) {
+	unsigned long int mask = 0xFFFFFFFFFFF00000;
+	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x100000, PROT_READ | PROT_WRITE | PROT_EXEC);
+}
+
+
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
+
+	// insert inconditional jmp from rb_call to rb_call_copy
+	typedef unsigned char uchar;
+
+	uchar* p = (uchar*)rb_call_original;
+	//x86_64 inconditional jump
+
+	p[0] = 0x48; // movl XXX, %rax
+	p[1] = 0xb8;
+
+	void** address = (void**)(p+2);
+
+	*address = &rb_call_copy;
+
 	return Qnil;
 }
 
