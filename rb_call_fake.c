@@ -50,11 +50,19 @@ typedef VALUE (*RBCALL0) (
     NODE * volatile body,
     int flags);
 
+typedef NODE* (*RBGETMETHODBODY) (
+    VALUE *klassp,
+    ID *idp,
+    int *noexp
+    );
+
+
 
 void* rb_call_original;
 METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
 struct FRAME **_ruby_frame;
+RBGETMETHODBODY _rb_get_method_body;
 
 VALUE
 rb_call_copy(
@@ -85,7 +93,7 @@ rb_call_copy(
 	body  = ent->method;
     }
     else
-    */ if ((body = rb_get_method_body(&klass, &id, &noex)) == 0) {
+    */ if ((body = _rb_get_method_body(&klass, &id, &noex)) == 0) {
       nomethod:
 	if (scope == 3) {
 	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
@@ -141,6 +149,7 @@ rb_call_fake_init() {
 	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
+	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
 
 
 //	printf("rb_call: %p\n", rb_call_original);
