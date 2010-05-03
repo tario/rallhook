@@ -20,7 +20,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include "ruby_symbols.c"
+#include "ruby_symbols.h"
 #include <dlfcn.h>
 #include <stdarg.h>
 
