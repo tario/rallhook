@@ -212,11 +212,17 @@ rb_call_fake(
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
-
-//		printf("hook disabled\n");
 		hook_enabled = 0;
 
-		VALUE sym = ID2SYM(mid);
+		VALUE sym;
+
+		// avoid to send symbols without name (crash the interpreter)
+		if (rb_id2name(mid) == NULL){
+			sym = Qnil;
+		} else {
+			sym = ID2SYM(mid);
+		}
+
 		VALUE args = rb_ary_new2(argc);
 		int i;
 		for (i = 0; i < argc; i ++) {
