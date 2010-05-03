@@ -41,6 +41,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	uchar* p = (uchar*)rb_call_original;
 	//x86_64 inconditional jump
+	unprotect(p);
 
 	p[0] = 0x48; // movl XXX, %rax
 	p[1] = 0xb8;
