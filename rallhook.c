@@ -1,6 +1,6 @@
 #include <ruby.h>
 
-VALU rb_mRallHook;
+VALUE rb_mRallHook;
 
 VALUE hook(VALUE self, VALUE hook_proc) {
 }
