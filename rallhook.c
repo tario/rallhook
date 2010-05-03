@@ -15,6 +15,8 @@ void Init_rallhook() {
 
 	rb_eval_string(initcode);
 
+	typedef VALUE (*RBHOOK)(VALUE self, ...);
+
 	VALUE rb_mRallHook = rb_define_module("RallHook");
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
