@@ -20,7 +20,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include <node.h>
+#include <node.h> // from ruby
+#include <env.h> // from ruby
 #include <dlfcn.h>
 #include <stdarg.h>
 #include "ruby_symbols.h"
@@ -53,6 +54,7 @@ typedef VALUE (*RBCALL0) (
 void* rb_call_original;
 METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
+struct FRAME **_ruby_frame;
 
 static VALUE
 rb_call_copy(
@@ -100,7 +102,7 @@ rb_call_copy(
 	if (noex & NOEX_PROTECTED) {
 	    VALUE defined_class = klass;
 
-//	    if (self == Qundef) self = ruby_frame->self;
+	    if (self == Qundef) self = (*_ruby_frame)->self;
 	    if (TYPE(defined_class) == T_ICLASS) {
 		defined_class = RBASIC(defined_class)->klass;
 	    }
@@ -138,13 +140,17 @@ rb_call_fake_init() {
 	rb_call_original = ruby_resolv(base, "rb_call");
 	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
+	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
 
-	printf("rb_call: %p\n", rb_call_original);
-	printf("method_missing: %p\n", _method_missing);
-	printf("rb_call0: %p\n", _rb_call0);
+
+//	printf("rb_call: %p\n", rb_call_original);
+//	printf("method_missing: %p\n", _method_missing);
+//	printf("rb_call0: %p\n", _rb_call0);
+//	printf("ruby_frame addr: %p\n", _ruby_frame);
 
 
 }
+
 
 
 
