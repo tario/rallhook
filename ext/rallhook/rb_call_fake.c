@@ -181,6 +181,22 @@ rb_call_copy(
     return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
 }
 
+VALUE restore_hook_status_ensure(VALUE ary) {
+	printf("hook enabled\n");
+	hook_enabled = 1;
+}
+
+VALUE rb_call_wrapper(VALUE ary){
+
+		VALUE klass = rb_ary_entry(ary,0);
+		VALUE self = rb_ary_entry(ary,1);
+		VALUE sym = rb_ary_entry(ary,2);
+		VALUE args = rb_ary_entry(ary,3);
+
+		return rb_funcall_copy(rb_hook_proc, id_call, 4, klass, self, sym, args );
+}
+
+
 VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,
@@ -194,22 +210,25 @@ rb_call_fake(
 	if (hook_enabled == 0) {
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
+
+
 		printf("hook disabled\n");
 		hook_enabled = 0;
 
 		VALUE sym = ID2SYM(mid);
-		VALUE ary = rb_ary_new2 (argc);
+		VALUE args = rb_ary_new2(argc);
 		int i;
 		for (i = 0; i < argc; i ++) {
-			rb_ary_store (ary, i, argv[i] );
+			rb_ary_store (args, i, argv[i] );
 		}
 
-		VALUE ret = rb_funcall_copy(rb_hook_proc, id_call, 4, klass, self, sym, ary );
+		VALUE ary = rb_ary_new2(4);
+		rb_ary_store(ary,0, klass);
+		rb_ary_store(ary,1, self);
+		rb_ary_store(ary,2, sym);
+		rb_ary_store(ary,3, args);
 
-		printf("hook enabled\n");
-		hook_enabled = 1;
-
-		return ret;
+		return rb_ensure(rb_call_wrapper,ary,restore_hook_status_ensure,Qnil);
 
 	}
 }
