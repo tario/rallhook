@@ -48,6 +48,9 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	void** address = (void**)(p+2);
 
+	p[10] = 0xff; // jmp %rax
+	p[11] = 0xe0;
+
 	*address = &rb_call_copy;
 
 	return Qnil;
