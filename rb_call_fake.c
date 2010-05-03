@@ -19,11 +19,12 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "rb_call_fake.h"
 #include <ruby.h>
 #include <node.h>
 #include <dlfcn.h>
 #include <stdarg.h>
+#include "ruby_symbols.h"
+#include "rb_call_fake.h"
 
 // same constant as eval.c
 #define CSTAT_PRIV  1
