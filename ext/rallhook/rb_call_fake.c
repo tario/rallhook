@@ -33,6 +33,17 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define CSTAT_VCALL 4
 #define CSTAT_SUPER 8
 
+
+// same defs as eval.c
+#ifdef HAVE_STDARG_PROTOTYPES
+#include <stdarg.h>
+#define va_init_list(a,b) va_start(a,b)
+#else
+#include <varargs.h>
+#define va_init_list(a,b) va_start(a)
+#endif
+
+
 ID missing, id_call;
 VALUE rb_hook_proc;
 

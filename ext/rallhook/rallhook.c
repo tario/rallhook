@@ -39,7 +39,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	// insert inconditional jmp from rb_call to rb_call_copy
 	typedef unsigned char uchar;
 
-	uchar* p = (uchar*)rb_call_fake;
+	uchar* p = (uchar*)rb_call_original;
 	//x86_64 inconditional jump
 	unprotect(p);
 
@@ -51,7 +51,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	p[10] = 0xff; // jmp %rax
 	p[11] = 0xe0;
 
-	*address = &rb_call_copy;
+	*address = &rb_call_fake;
 
 	return Qnil;
 }

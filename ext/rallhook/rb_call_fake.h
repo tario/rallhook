@@ -49,5 +49,7 @@ rb_call_fake(
 );
 
 extern void* rb_call_original;
+extern int hook_enabled;
+extern VALUE rb_hook_proc;
 
 #endif
