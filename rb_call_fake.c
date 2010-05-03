@@ -40,7 +40,7 @@ typedef VALUE (*METHODMISSING)(VALUE obj,
     int   call_status);
 
 typedef VALUE (*RBCALL0) (
-    VALUE klass, recv,
+    VALUE klass, VALUE recv,
     ID    id,
     ID    oid,
     int argc,			/* OK */
