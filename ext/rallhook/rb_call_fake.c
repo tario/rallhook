@@ -33,7 +33,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define CSTAT_VCALL 4
 #define CSTAT_SUPER 8
 
-ID missing;
+ID missing, id_call;
+VALUE rb_hook_proc;
+
 
 typedef VALUE (*METHODMISSING)(VALUE obj,
     ID    id,
@@ -63,6 +65,52 @@ METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
 struct FRAME **_ruby_frame;
 RBGETMETHODBODY _rb_get_method_body;
+
+int hook_enabled = 0;
+
+
+static VALUE
+vafuncall_copy(recv, mid, n, ar)
+    VALUE recv;
+    ID mid;
+    int n;
+    va_list *ar;
+{
+    VALUE *argv;
+
+    if (n > 0) {
+	long i;
+
+	argv = ALLOCA_N(VALUE, n);
+
+	for (i=0;i<n;i++) {
+	    argv[i] = va_arg(*ar, VALUE);
+	}
+	va_end(*ar);
+    }
+    else {
+	argv = 0;
+    }
+
+    return rb_call_copy(CLASS_OF(recv), recv, mid, n, argv, 1, Qundef);
+}
+
+VALUE
+#ifdef HAVE_STDARG_PROTOTYPES
+rb_funcall_copy(VALUE recv, ID mid, int n, ...)
+#else
+rb_funcall_copy(recv, mid, n, va_alist)
+    VALUE recv;
+    ID mid;
+    int n;
+    va_dcl
+#endif
+{
+    va_list ar;
+    va_init_list(ar, n);
+
+    return vafuncall_copy(recv, mid, n, &ar);
+}
 
 VALUE
 rb_call_copy(
@@ -131,7 +179,28 @@ rb_call_fake(
     int scope,
     VALUE self
 ) {
-	return Qnil;
+
+	if (hook_enabled == 0) {
+		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
+	} else {
+		printf("hook disabled\n");
+		hook_enabled = 0;
+
+		VALUE sym = ID2SYM(mid);
+		VALUE ary = rb_ary_new2 (argc);
+		int i;
+		for (i = 0; i < argc; i ++) {
+			rb_ary_store (ary, i, argv[i] );
+		}
+
+		VALUE ret = rb_funcall_copy(rb_hook_proc, id_call, 4, klass, self, sym, ary );
+
+		printf("hook enabled\n");
+		hook_enabled = 1;
+
+		return ret;
+
+	}
 }
 
 void
@@ -150,6 +219,8 @@ rb_call_fake_init() {
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
 	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
+
+	id_call = rb_intern("call");
 
 
 //	printf("rb_call: %p\n", rb_call_original);

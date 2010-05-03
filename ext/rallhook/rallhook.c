@@ -25,7 +25,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <sys/mman.h>
 
 VALUE rb_mRallHook;
-VALUE rb_hook_proc;
 
 void unprotect(void* ptr) {
 	unsigned long int mask = 0xFFFFFFFFFFF00000;
@@ -35,11 +34,12 @@ void unprotect(void* ptr) {
 
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
+	hook_enabled = 1;
 
 	// insert inconditional jmp from rb_call to rb_call_copy
 	typedef unsigned char uchar;
 
-	uchar* p = (uchar*)rb_call_original;
+	uchar* p = (uchar*)rb_call_fake;
 	//x86_64 inconditional jump
 	unprotect(p);
 
@@ -57,7 +57,10 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 }
 
 VALUE unhook(VALUE self) {
+
 	rb_hook_proc = Qnil;
+	hook_enabled = 0;
+
 	return Qnil;
 }
 
