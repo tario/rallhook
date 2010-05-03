@@ -53,7 +53,7 @@ void Init_rallhook() {
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
 
-	void* handle = dlopen("/usr/lib/debug/usr/lib/libruby1.8.so.1.8.7",0x101);
+	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
 	Dl_info info;
 	dladdr(rb_funcall, &info);
@@ -62,6 +62,9 @@ void Init_rallhook() {
 
 	rb_call = ruby_resolv(base, "rb_call");
 	method_missing = ruby_resolv(base, "method_missing");
+
+	printf("rb_call: %p\n", rb_call);
+	printf("method_missing: %p\n", method_missing);
 
 }
 
