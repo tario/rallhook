@@ -22,6 +22,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include <ruby.h>
 #include <node.h>
+#include <dlfcn.h>
+#include <stdarg.h>
 
 // same constant as eval.c
 #define CSTAT_PRIV  1
@@ -30,6 +32,26 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define CSTAT_SUPER 8
 
 ID missing;
+
+typedef VALUE (*METHODMISSING)(VALUE obj,
+    ID    id,
+    int   argc,
+    const VALUE *argv,
+    int   call_status);
+
+typedef VALUE (*RBCALL0) (
+    VALUE klass, recv,
+    ID    id,
+    ID    oid,
+    int argc,			/* OK */
+    VALUE *argv,		/* OK */
+    NODE * volatile body,
+    int flags);
+
+
+void* rb_call_original;
+METHODMISSING _method_missing;
+RBCALL0 _rb_call0;
 
 static VALUE
 rb_call_copy(
@@ -63,30 +85,30 @@ rb_call_copy(
     */ if ((body = rb_get_method_body(&klass, &id, &noex)) == 0) {
       nomethod:
 	if (scope == 3) {
-	    return method_missing(recv, mid, argc, argv, CSTAT_SUPER);
+	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
 	}
-	return method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
+	return _method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
     }
 
     if (mid != missing && scope == 0) {
 	/* receiver specified form for private method */
 	if (noex & NOEX_PRIVATE)
-	    return method_missing(recv, mid, argc, argv, CSTAT_PRIV);
+	    return _method_missing(recv, mid, argc, argv, CSTAT_PRIV);
 
 	/* self must be kind of a specified form for protected method */
 	if (noex & NOEX_PROTECTED) {
 	    VALUE defined_class = klass;
 
-	    if (self == Qundef) self = ruby_frame->self;
+//	    if (self == Qundef) self = ruby_frame->self;
 	    if (TYPE(defined_class) == T_ICLASS) {
 		defined_class = RBASIC(defined_class)->klass;
 	    }
 	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class)))
-		return method_missing(recv, mid, argc, argv, CSTAT_PROT);
+		return _method_missing(recv, mid, argc, argv, CSTAT_PROT);
 	}
     }
 
-    return rb_call0(klass, recv, mid, id, argc, argv, body, noex);
+    return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
 }
 
 static VALUE
@@ -112,11 +134,13 @@ rb_call_fake_init() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	rb_call = ruby_resolv(base, "rb_call");
-	method_missing = ruby_resolv(base, "method_missing");
+	rb_call_original = ruby_resolv(base, "rb_call");
+	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
+	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 
-	printf("rb_call: %p\n", rb_call);
-	printf("method_missing: %p\n", method_missing);
+	printf("rb_call: %p\n", rb_call_original);
+	printf("method_missing: %p\n", _method_missing);
+	printf("rb_call0: %p\n", _rb_call0);
 
 
 }
