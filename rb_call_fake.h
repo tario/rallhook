@@ -28,7 +28,7 @@ void
 rb_call_fake_init();
 
 
-static VALUE
+VALUE
 rb_call_copy(
     VALUE klass, VALUE recv,
     ID    mid,
@@ -38,7 +38,7 @@ rb_call_copy(
     VALUE self
 );
 
-static VALUE
+VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,
     ID    mid,
@@ -48,5 +48,6 @@ rb_call_fake(
     VALUE self
 );
 
+extern void* rb_call_original;
 
 #endif

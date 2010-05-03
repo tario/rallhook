@@ -56,7 +56,7 @@ METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
 struct FRAME **_ruby_frame;
 
-static VALUE
+VALUE
 rb_call_copy(
     VALUE klass, VALUE recv,
     ID    mid,
@@ -114,7 +114,7 @@ rb_call_copy(
     return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
 }
 
-static VALUE
+VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,
     ID    mid,
