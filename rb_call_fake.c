@@ -21,6 +21,15 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include "rb_call_fake.h"
 #include <ruby.h>
+#include <node.h>
+
+// same constant as eval.c
+#define CSTAT_PRIV  1
+#define CSTAT_PROT  2
+#define CSTAT_VCALL 4
+#define CSTAT_SUPER 8
+
+ID missing;
 
 static VALUE
 rb_call_copy(
@@ -41,7 +50,7 @@ rb_call_copy(
 		 rb_id2name(mid), recv);
     }
     /* is it in the method cache? */
-    ent = cache + EXPR1(klass, mid);
+/*    ent = cache + EXPR1(klass, mid);
     if (ent->mid == mid && ent->klass == klass) {
 	if (!ent->method)
 	    goto nomethod;
@@ -50,7 +59,8 @@ rb_call_copy(
 	noex  = ent->noex;
 	body  = ent->method;
     }
-    else if ((body = rb_get_method_body(&klass, &id, &noex)) == 0) {
+    else
+    */ if ((body = rb_get_method_body(&klass, &id, &noex)) == 0) {
       nomethod:
 	if (scope == 3) {
 	    return method_missing(recv, mid, argc, argv, CSTAT_SUPER);
@@ -90,4 +100,26 @@ rb_call_fake(
 ) {
 	return Qnil;
 }
+
+void
+rb_call_fake_init() {
+	missing = rb_intern("method_missing");
+
+	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
+	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+	Dl_info info;
+	dladdr(rb_funcall, &info);
+
+	unsigned char* base = (unsigned char*)info.dli_fbase;
+
+	rb_call = ruby_resolv(base, "rb_call");
+	method_missing = ruby_resolv(base, "method_missing");
+
+	printf("rb_call: %p\n", rb_call);
+	printf("method_missing: %p\n", method_missing);
+
+
+}
+
+
 

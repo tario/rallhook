@@ -24,6 +24,10 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <ruby.h>
 
+void
+rb_call_fake_init();
+
+
 static VALUE
 rb_call_copy(
     VALUE klass, VALUE recv,

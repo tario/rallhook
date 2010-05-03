@@ -29,9 +29,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 VALUE rb_mRallHook;
 VALUE rb_hook_proc;
 
-void* rb_call;
-void* method_missing;
-
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
 	return Qnil;
@@ -54,18 +51,9 @@ void Init_rallhook() {
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
 
-	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
-	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-	Dl_info info;
-	dladdr(rb_funcall, &info);
+	rb_call_fake_init();
+/*
 
-	unsigned char* base = (unsigned char*)info.dli_fbase;
-
-	rb_call = ruby_resolv(base, "rb_call");
-	method_missing = ruby_resolv(base, "method_missing");
-
-	printf("rb_call: %p\n", rb_call);
-	printf("method_missing: %p\n", method_missing);
-
+*/
 }
 
