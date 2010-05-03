@@ -79,6 +79,35 @@ VALUE hooked_send(int argc, VALUE* argv, VALUE self_) {
 	return Qnil;
 }
 
+static VALUE
+rb_f_send_copy(argc, argv, recv)
+    int argc;
+    VALUE *argv;
+    VALUE recv;
+{
+    VALUE vid;
+
+    if (argc == 0) rb_raise(rb_eArgError, "no method name given");
+
+    vid = *argv++; argc--;
+//    PUSH_ITER(rb_block_given_p()?ITER_PRE:ITER_NOT);
+
+	ID mid;
+
+	if (rb_obj_is_kind_of(vid,rb_cSymbol) ) {
+		mid = rb_to_id(vid);
+	} else {
+		mid = FIX2LONG(vid);
+	}
+
+	hook_enabled = 1;
+    vid = rb_call_copy(CLASS_OF(recv), recv, mid, argc, argv, 1, Qundef);
+    hook_enabled = 0;
+//    POP_ITER();
+
+    return vid;
+}
+
 void Init_rallhook() {
 
 	const char* initcode = 	"require 'rubygems'\n"
@@ -91,7 +120,7 @@ void Init_rallhook() {
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
 
-	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(hooked_send), -1);
+	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
 /*

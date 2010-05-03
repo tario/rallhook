@@ -192,8 +192,9 @@ VALUE rb_call_wrapper(VALUE ary){
 		VALUE self = rb_ary_entry(ary,1);
 		VALUE sym = rb_ary_entry(ary,2);
 		VALUE args = rb_ary_entry(ary,3);
+		VALUE method_id = rb_ary_entry(ary,4);
 
-		return rb_funcall_copy(rb_hook_proc, id_call, 4, klass, self, sym, args );
+		return rb_funcall_copy(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
 }
 
 
@@ -224,11 +225,12 @@ rb_call_fake(
 
 	    if (recv == Qundef) recv = (*_ruby_frame)->self;
 
-		VALUE ary = rb_ary_new2(4);
+		VALUE ary = rb_ary_new2(5);
 		rb_ary_store(ary,0, klass);
 		rb_ary_store(ary,1, recv);
 		rb_ary_store(ary,2, sym);
 		rb_ary_store(ary,3, args);
+		rb_ary_store(ary,4, LONG2FIX(mid) );
 
 		return rb_ensure(rb_call_wrapper,ary,restore_hook_status_ensure,Qnil);
 
