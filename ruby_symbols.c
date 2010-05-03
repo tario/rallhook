@@ -28,7 +28,7 @@ void* ruby_resolv(unsigned char* p_base, const char* symbol_name) {
 
 	VALUE rb_offset = rb_funcall(rb_mCymbol,rb_intern("resolv"), 1, rb_str_symbol_name);
 
-	unsigned long long offset = FIX2NUM(rb_offset);
+	unsigned long long offset = FIX2LONG(rb_offset);
 
 	return (p_base + offset);
 }
