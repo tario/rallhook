@@ -1,11 +1,16 @@
 #include <ruby.h>
 
 VALUE rb_mRallHook;
+VALUE rb_hook_proc;
 
 VALUE hook(VALUE self, VALUE hook_proc) {
+	rb_hook_proc = hook_proc;
+	return Qnil;
 }
 
 VALUE unhook(VALUE self) {
+	rb_hook_proc = Qnil;
+	return Qnil;
 }
 
 void Init_rallhook() {
