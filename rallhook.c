@@ -20,9 +20,16 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
+#include "ruby_symbols.c"
+#include <dlfcn.h>
+#include <stdarg.h>
+
 
 VALUE rb_mRallHook;
 VALUE rb_hook_proc;
+
+void* rb_call;
+void* method_missing;
 
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
@@ -42,11 +49,19 @@ void Init_rallhook() {
 	rb_eval_string(initcode);
 
 	typedef VALUE (*RBHOOK)(VALUE self, ...);
-
 	VALUE rb_mRallHook = rb_define_module("RallHook");
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
 
+	void* handle = dlopen("/usr/lib/debug/usr/lib/libruby1.8.so.1.8.7",0x101);
+	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+	Dl_info info;
+	dladdr(rb_funcall, &info);
+
+	unsigned char* base = (unsigned char*)info.dli_fbase;
+
+	rb_call = ruby_resolv(base, "rb_call");
+	method_missing = ruby_resolv(base, "method_missing");
 
 }
 
