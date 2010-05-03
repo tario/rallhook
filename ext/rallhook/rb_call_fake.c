@@ -182,7 +182,7 @@ rb_call_copy(
 }
 
 VALUE restore_hook_status_ensure(VALUE ary) {
-	printf("hook enabled\n");
+//	printf("hook enabled\n");
 	hook_enabled = 1;
 }
 
@@ -212,7 +212,7 @@ rb_call_fake(
 	} else {
 
 
-		printf("hook disabled\n");
+//		printf("hook disabled\n");
 		hook_enabled = 0;
 
 		VALUE sym = ID2SYM(mid);
@@ -222,9 +222,11 @@ rb_call_fake(
 			rb_ary_store (args, i, argv[i] );
 		}
 
+	    if (recv == Qundef) recv = (*_ruby_frame)->self;
+
 		VALUE ary = rb_ary_new2(4);
 		rb_ary_store(ary,0, klass);
-		rb_ary_store(ary,1, self);
+		rb_ary_store(ary,1, recv);
 		rb_ary_store(ary,2, sym);
 		rb_ary_store(ary,3, args);
 
