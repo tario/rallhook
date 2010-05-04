@@ -185,7 +185,7 @@ rb_call_copy(
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
-	hook_enable_left = 0;
+//	hook_enable_left = 0;
 }
 
 VALUE call_block_handle( VALUE parameter, VALUE* args) {
@@ -222,7 +222,6 @@ rb_call_fake(
 	} else {
 
 		hook_enabled = 0;
-		hook_enable_left = 0;
 
 		VALUE sym;
 
