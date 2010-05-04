@@ -78,7 +78,10 @@ VALUE from(VALUE self, VALUE num) {
 }
 
 VALUE reyield(VALUE argument, VALUE args ) {
-	return rb_yield(argument);
+	hook_enabled = 0;
+	VALUE  ret = rb_yield(argument);
+	hook_enabled = 1;
+	return ret;
 }
 
 static VALUE
