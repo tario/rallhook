@@ -77,7 +77,9 @@ RBCALL0 _rb_call0;
 struct FRAME **_ruby_frame;
 RBGETMETHODBODY _rb_get_method_body;
 
+// extern, exported variables
 int hook_enabled = 0;
+int hook_enable_left = 0;
 
 
 static VALUE
@@ -182,8 +184,8 @@ rb_call_copy(
 }
 
 VALUE restore_hook_status_ensure(VALUE ary) {
-//	printf("hook enabled\n");
 	hook_enabled = 1;
+	hook_enable_left = 0;
 }
 
 VALUE call_block_handle( VALUE parameter, VALUE* args) {
@@ -201,7 +203,6 @@ VALUE rb_call_wrapper(VALUE ary){
 		return rb_funcall_copy(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
 }
 
-
 VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,
@@ -212,11 +213,16 @@ rb_call_fake(
     VALUE self
 ) {
 
-	if (hook_enabled == 0) {
+	int must_hook = hook_enabled;
+
+	if (must_hook == 0 || hook_enable_left > 0) {
+		if (hook_enable_left > 0) hook_enable_left--;
+
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
 		hook_enabled = 0;
+		hook_enable_left = 0;
 
 		VALUE sym;
 

@@ -50,6 +50,7 @@ rb_call_fake(
 
 extern void* rb_call_original;
 extern int hook_enabled;
+extern int hook_enable_left;
 extern VALUE rb_hook_proc;
 
 #endif

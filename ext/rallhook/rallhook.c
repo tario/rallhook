@@ -72,6 +72,10 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 }
 
 
+VALUE from(VALUE self, VALUE num) {
+	hook_enable_left = FIX2INT(num);
+	return self;
+}
 
 VALUE reyield(VALUE argument, VALUE args ) {
 	return rb_yield(argument);
@@ -98,9 +102,7 @@ rb_f_send_copy(argc, argv, recv)
 	}
 
 
-//	hook_enabled = 1;
 	VALUE ret =  rb_block_call(recv, mid, argc, argv, reyield, Qnil);
-//    hook_enabled = 0;
 
     return ret;
 }
@@ -127,11 +129,12 @@ void Init_rallhook() {
 	VALUE rb_cRallHook = rb_define_class("RallHook", rb_cObject);
 	rb_define_method(rb_cRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_method(rb_cRallHook, "unhook", (RBHOOK*)(unhook), 0);
+	rb_define_method(rb_cRallHook, "from", (RBHOOK*)(from), 1);
 
 	rb_define_method(rb_cObject, "_hooked?", (RBHOOK*)(_hooked_p ), 0);
 	rb_define_method(rb_cObject, "_hooked", (RBHOOK*)(_hooked), 0);
 
-//	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
+	rb_define_method(rb_cObject, "send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
 /*
