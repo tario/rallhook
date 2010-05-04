@@ -73,7 +73,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 
 VALUE from(VALUE self, VALUE num) {
-	hook_enable_left = FIX2INT(num);
+	hook_enable_left = FIX2INT(num)+1;
 	return self;
 }
 
