@@ -143,6 +143,10 @@ rb_call_copy(
 	rb_raise(rb_eNotImpError, "method `%s' called on terminated object (0x%lx)",
 		 rb_id2name(mid), recv);
     }
+
+    const char* mname = rb_id2name(mid);
+    mname = mname ? mname : "";
+
     /* is it in the method cache? */
 /*    ent = cache + EXPR1(klass, mid);
     if (ent->mid == mid && ent->klass == klass) {
@@ -157,15 +161,19 @@ rb_call_copy(
     */ if ((body = _rb_get_method_body(&klass, &id, &noex)) == 0) {
       nomethod:
 	if (scope == 3) {
+		printf("1 method_missing for %s\n", mname);
 	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
 	}
+		printf("2 method_missing for method:%s object:%lx\n", mname, recv);
 	return _method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
     }
 
     if (mid != missing && scope == 0) {
 	/* receiver specified form for private method */
-	if (noex & NOEX_PRIVATE)
+	if (noex & NOEX_PRIVATE) {
+		printf("3 method_missing for %s\n", mname);
 	    return _method_missing(recv, mid, argc, argv, CSTAT_PRIV);
+	    }
 
 	/* self must be kind of a specified form for protected method */
 	if (noex & NOEX_PROTECTED) {
@@ -175,8 +183,10 @@ rb_call_copy(
 	    if (TYPE(defined_class) == T_ICLASS) {
 		defined_class = RBASIC(defined_class)->klass;
 	    }
-	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class)))
+	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class))) {
+		printf("4 method_missing for %s\n", mname);
 		return _method_missing(recv, mid, argc, argv, CSTAT_PROT);
+		}
 	}
     }
 
@@ -185,7 +195,7 @@ rb_call_copy(
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
-	hook_enable_left = 0;
+	return Qnil;
 }
 
 VALUE call_block_handle( VALUE parameter, VALUE* args) {
@@ -215,14 +225,27 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
+	const char* mname = rb_id2name(mid);
+
+	if (mname == NULL) mname = "";
+
+	printf("call %s ", mname);
+
 	if (must_hook == 0 || hook_enable_left > 0) {
-		if (hook_enable_left > 0) hook_enable_left--;
+
+
+		if (hook_enable_left > 0) {
+			hook_enable_left--;
+			//printf("hook_enable_left: %d\n", hook_enable_left);
+		}
+
+		printf("NO hooked must_hook=%d hook_enable_left=%d\n", must_hook, hook_enable_left);
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
+		printf("hooked\n");
 
 		hook_enabled = 0;
-		hook_enable_left = 0;
 
 		VALUE sym;
 

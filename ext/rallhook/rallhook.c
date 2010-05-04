@@ -34,7 +34,7 @@ void unprotect(void* ptr) {
 
 VALUE unhook(VALUE self) {
 
-	rb_hook_proc = Qnil;
+//	rb_hook_proc = Qnil;
 	hook_enabled = 0;
 
 	return Qnil;
@@ -134,7 +134,7 @@ void Init_rallhook() {
 	rb_define_method(rb_cObject, "_hooked?", (RBHOOK*)(_hooked_p ), 0);
 	rb_define_method(rb_cObject, "_hooked", (RBHOOK*)(_hooked), 0);
 
-	rb_define_method(rb_cObject, "send", (RBHOOK*)(rb_f_send_copy), -1);
+	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
 /*
