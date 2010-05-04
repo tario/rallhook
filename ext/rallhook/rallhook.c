@@ -25,7 +25,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <sys/mman.h>
 
 VALUE rb_mRallHook;
-ID id_send;
 
 void unprotect(void* ptr) {
 	unsigned long int mask = 0xFFFFFFFFFFF00000;
@@ -72,25 +71,26 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	return Qnil;
 }
 
+VALUE hooked_send(int argc, VALUE* argv, VALUE self_) {
 
-VALUE restore_unhook_status_ensure(VALUE unused) {
 	hook_enabled = 1;
+	VALUE ret = rb_call_copy( CLASS_OF(self_), self_, rb_intern("send"), argc, argv, 1, Qundef);
+	hook_enabled = 0;
+	return Qnil;
 }
 
-VALUE rb_call_copy_not_ensure(VALUE ary) {
-
+static VALUE
+rb_f_send_copy(argc, argv, recv)
     int argc;
     VALUE *argv;
     VALUE recv;
-
-	argc = (int)rb_ary_entry(ary,0);
-	argv = (VALUE*)rb_ary_entry(ary,1);
-	recv = rb_ary_entry(ary,2);
-
+{
     VALUE vid;
+
     if (argc == 0) rb_raise(rb_eArgError, "no method name given");
 
     vid = *argv++; argc--;
+//    PUSH_ITER(rb_block_given_p()?ITER_PRE:ITER_NOT);
 
 	ID mid;
 
@@ -100,29 +100,12 @@ VALUE rb_call_copy_not_ensure(VALUE ary) {
 		mid = FIX2LONG(vid);
 	}
 
-    return rb_call_copy(CLASS_OF(recv), recv, mid, argc, argv, 1, Qundef);
-
-}
-
-static VALUE
-rb_f_send_copy(argc, argv, recv)
-    int argc;
-    VALUE *argv;
-    VALUE recv;
-{
-
-//    PUSH_ITER(rb_block_given_p()?ITER_PRE:ITER_NOT);
-
-	VALUE ary = rb_ary_new2(3);
-	rb_ary_store(ary,0,(VALUE)argc);
-	rb_ary_store(ary,1,(VALUE)argv);
-	rb_ary_store(ary,1,(VALUE)recv);
-
 	hook_enabled = 1;
-	return rb_ensure( rb_call_copy_not_ensure, ary, restore_unhook_status_ensure, Qnil);
-
+    vid = rb_call_copy(CLASS_OF(recv), recv, mid, argc, argv, 1, Qundef);
+    hook_enabled = 0;
 //    POP_ITER();
 
+    return vid;
 }
 
 void Init_rallhook() {
@@ -140,8 +123,6 @@ void Init_rallhook() {
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
-
-	id_send = rb_intern("send");
 /*
 
 */
