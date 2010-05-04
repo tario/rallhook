@@ -198,21 +198,7 @@ VALUE rb_call_wrapper(VALUE ary){
 		VALUE args = rb_ary_entry(ary,3);
 		VALUE method_id = rb_ary_entry(ary,4);
 
-/*		if (rb_block_given_p() ) {
-
-			VALUE val_args[5];
-			val_args[0] = klass;
-			val_args[1] = self;
-			val_args[2] = sym;
-			val_args[3] = args;
-			val_args[4] = method_id;
-
-			return rb_call_block(rb_hook_proc, id_call, 5, val_args, call_block_handle, Qnil );
-		} else 	*/
-			printf("NO block call\n");
-			return rb_funcall_copy(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
-
-//		}
+		return rb_funcall_copy(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
 }
 
 
