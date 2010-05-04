@@ -71,12 +71,10 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	return Qnil;
 }
 
-VALUE hooked_send(int argc, VALUE* argv, VALUE self_) {
 
-	hook_enabled = 1;
-	VALUE ret = rb_call_copy( CLASS_OF(self_), self_, rb_intern("send"), argc, argv, 1, Qundef);
-	hook_enabled = 0;
-	return Qnil;
+
+VALUE reyield(VALUE argument, VALUE args ) {
+	return rb_yield(argument);
 }
 
 static VALUE
@@ -90,7 +88,6 @@ rb_f_send_copy(argc, argv, recv)
     if (argc == 0) rb_raise(rb_eArgError, "no method name given");
 
     vid = *argv++; argc--;
-//    PUSH_ITER(rb_block_given_p()?ITER_PRE:ITER_NOT);
 
 	ID mid;
 
@@ -100,13 +97,26 @@ rb_f_send_copy(argc, argv, recv)
 		mid = FIX2LONG(vid);
 	}
 
-	hook_enabled = 1;
-    vid = rb_call_copy(CLASS_OF(recv), recv, mid, argc, argv, 1, Qundef);
-    hook_enabled = 0;
-//    POP_ITER();
+
+	return rb_block_call(recv, mid, argc, argv, reyield, Qnil);
+
+	//hook_enabled = 1;
+//    vid = rb_call_copy(CLASS_OF(recv), recv, mid, argc, argv, 1, Qundef);
+//    hook_enabled = 0;
 
     return vid;
 }
+
+VALUE _hooked(VALUE self) {
+	rb_ivar_set(self,"@_hooked", Qtrue);
+	return self;
+}
+
+VALUE _hooked_p(VALUE self) {
+	return rb_ivar_get(self,"@_hooked");
+}
+
+
 
 void Init_rallhook() {
 
@@ -119,6 +129,9 @@ void Init_rallhook() {
 	VALUE rb_mRallHook = rb_define_module("RallHook");
 	rb_define_singleton_method(rb_mRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_singleton_method(rb_mRallHook, "unhook", (RBHOOK*)(unhook), 0);
+
+	rb_define_method(rb_cObject, "_hooked?", (RBHOOK*)(_hooked_p ), 0);
+	rb_define_method(rb_cObject, "_hooked", (RBHOOK*)(_hooked), 0);
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
