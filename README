@@ -1,0 +1,86 @@
+= rallhook - An ruby absolute method hooker
+
+This package contains rallhook, a ruby C extension to intercept ruby methods calls at interpreter level in a transparent way from ruby itself.
+
+== Installation
+
+=== Prerequisites
+
+* ruby-cymbol >= 0.1.0 (found at  http://github.com/tario/ruby-cymbol)
+
+
+=== Gem installation
+
+* Download the last version of the gem from http://github.com/tario/ruby-cpp/downloads
+* Install the gem with the following;
+
+gem install rallhook-X.X.X.gem
+
+=== Ext installation
+
+* Go to the gem install directory (Usually /var/lib/gems/1.8/gems/rallhook-X.X.X )
+* Run:
+
+sudo rake install
+
+== Usage
+
+=== Basic Example
+
+---- test.rb ----
+class HookReceiver
+	
+	attr_accessor :rallhook
+	
+	def call (klass,self_,m,args, method_id)
+	
+		# print to the standar output details about the method called
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} args: #{args.inspect}\n" if m!=:write
+		
+		# in the call method, the hook is disabled and you can use whatever without hook
+		# for this reason, we must to reactivate the hook to do nested calls to intercept calls made in that method
+		
+		ret = nil
+		rallhook.from(2).hook self do
+		
+			# the hooked_send method is the same send method but doing unhook in yield calling
+			# also, the hooked_send method allow method_id as method specification 
+			# (some "internal" methods come with no method name by all the methods come with method_id )
+			ret = self_.hooked_send(method_id,*args) do |*args_|
+			
+				# reactivate hook before call yield, this is necesary to intercept calls in the block passed to this method
+				rallhook.hook self do
+					yield(*args_)
+				end
+			end
+		end
+		
+		ret
+	end
+end
+
+hook_recv = HookReceiver.new
+hook_recv.rallhook = RallHook.new
+
+hook_recv.rallhook.hook hook_recv do
+# all ruby calls in this block are intercepted by hook_recv::call 
+
+[1,2,3].each do |x|
+print x,"\n"
+end
+
+end
+
+---- standard output result ----
+method call each:4001 over 123:Array args: []
+method call print:7697 over main:Object args: [1, "\n"]
+method call to_s:3137 over 1:Fixnum args: []
+1
+method call print:7697 over main:Object args: [2, "\n"]
+method call to_s:3137 over 2:Fixnum args: []
+2
+method call print:7697 over main:Object args: [3, "\n"]
+method call to_s:3137 over 3:Fixnum args: []
+3
+
+
