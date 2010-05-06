@@ -78,12 +78,19 @@ VALUE from(VALUE self, VALUE num) {
 	return self;
 }
 
-VALUE reyield(VALUE argument, VALUE args ) {
-	hook_enabled = 0;
-	VALUE  ret = rb_yield(argument);
+VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 1;
-	return ret;
+	rb_yield(arguments);
 }
+
+VALUE restore_hook_status( VALUE unused) {
+	hook_enabled = 0;
+}
+
+VALUE reunhook_reyield( VALUE arguments, VALUE args) {
+	return rb_ensure(reunhook_reyield_ensure, arguments, restore_hook_status, Qnil);
+}
+
 
 static VALUE
 rb_f_send_copy(argc, argv, recv)
@@ -106,9 +113,11 @@ rb_f_send_copy(argc, argv, recv)
 	}
 
 
-	VALUE ret =  rb_block_call(recv, mid, argc, argv, reyield, Qnil);
-
-    return ret;
+	if (rb_block_given_p() ) {
+		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
+	} else {
+		return rb_funcall2(recv,mid,argc,argv);
+	}
 }
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
