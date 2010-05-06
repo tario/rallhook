@@ -35,24 +35,21 @@ class HookReceiver
 	def call (klass,self_,m,args, method_id)
 	
 		# print to the standar output details about the method called
-		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} args: #{args.inspect}\n" if m!=:write
-		
-		# in the call method, the hook is disabled and you can use whatever without hook
-		# for this reason, we must to reactivate the hook to do nested calls to intercept calls made in that method
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} args: #{args.inspect}\n"
 		
 		ret = nil
-		rallhook.from(2).hook self do
 		
-			# the hooked_send method is the same send method but doing unhook in yield calling
-			# also, the hooked_send method allow method_id as method specification 
-			# (some "internal" methods come with no method name by all the methods come with method_id )
+		# the hooked_send method is the same send method but doing hook at calling at unhook in yield calling
+		# also, the hooked_send method allow method_id as method specification 
+		# (some "internal" methods come with no method name, but all the methods come with method_id )
+		
+		if block_given?
 			ret = self_.hooked_send(method_id,*args) do |*args_|
-			
-				# reactivate hook before call yield, this is necesary to intercept calls in the block passed to this method
-				rallhook.hook self do
-					yield(*args_)
-				end
+			# 
+				yield(*args_)
 			end
+		else
+			ret = self_.hooked_send(method_id,*args)
 		end
 		
 		ret
@@ -74,13 +71,19 @@ end
 ---- standard output result ----
 method call each:4001 over 123:Array args: []
 method call print:7697 over main:Object args: [1, "\n"]
+method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: [1]
 method call to_s:3137 over 1:Fixnum args: []
-1
+1method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: ["\n"]
+
 method call print:7697 over main:Object args: [2, "\n"]
+method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: [2]
 method call to_s:3137 over 2:Fixnum args: []
-2
+2method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: ["\n"]
+
 method call print:7697 over main:Object args: [3, "\n"]
+method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: [3]
 method call to_s:3137 over 3:Fixnum args: []
-3
+3method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: ["\n"]
+
 
 
