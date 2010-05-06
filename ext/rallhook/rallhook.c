@@ -111,15 +111,6 @@ rb_f_send_copy(argc, argv, recv)
     return ret;
 }
 
-VALUE _hooked(VALUE self) {
-	rb_ivar_set(self,"@_hooked", Qtrue);
-	return self;
-}
-
-VALUE _hooked_p(VALUE self) {
-	return rb_ivar_get(self,"@_hooked");
-}
-
 VALUE rehook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 1;
 	rb_yield(arguments);
@@ -158,10 +149,6 @@ void Init_rallhook() {
 	rb_define_method(rb_cRallHook, "from", (RBHOOK*)(from), 1);
 
 	rb_define_singleton_method(rb_cRallHook, "call", (RBHOOK*)(rallhook_call), 5);
-
-
-	rb_define_method(rb_cObject, "_hooked?", (RBHOOK*)(_hooked_p ), 0);
-	rb_define_method(rb_cObject, "_hooked", (RBHOOK*)(_hooked), 0);
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
