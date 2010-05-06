@@ -149,15 +149,17 @@ VALUE call_block_handle( VALUE parameter, VALUE* args) {
 	return rb_yield( args[0] );
 }
 
+VALUE rehook_reyield( VALUE arguments, VALUE args) {
+	hook_enabled = 1;
+	VALUE ret = rb_yield( arguments );
+	hook_enabled = 0;
+	return ret;
+}
+
+
 VALUE rb_call_wrapper(VALUE ary){
-
-		VALUE klass = rb_ary_entry(ary,0);
-		VALUE self = rb_ary_entry(ary,1);
-		VALUE sym = rb_ary_entry(ary,2);
-		VALUE args = rb_ary_entry(ary,3);
-		VALUE method_id = rb_ary_entry(ary,4);
-
-		return rb_funcall(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
+		VALUE* argv = (VALUE*)ary;
+		return rb_call_copy(CLASS_OF(rb_hook_proc), rb_hook_proc, id_call,5,argv,3,Qnil);
 }
 
 VALUE
@@ -197,14 +199,14 @@ rb_call_fake(
 
 	    if (recv == Qundef) recv = (*_ruby_frame)->self;
 
-		VALUE ary = rb_ary_new2(5);
-		rb_ary_store(ary,0, klass);
-		rb_ary_store(ary,1, recv);
-		rb_ary_store(ary,2, sym);
-		rb_ary_store(ary,3, args);
-		rb_ary_store(ary,4, LONG2FIX(mid) );
+		VALUE argv_[6];
+		argv_[0] = klass;
+		argv_[1] = recv;
+		argv_[2] = sym;
+		argv_[3] = args;
+		argv_[4] = LONG2FIX(mid);
 
-		return rb_ensure(rb_call_wrapper,ary,restore_hook_status_ensure,Qnil);
+		return rb_ensure(rb_call_wrapper,(VALUE)argv_,restore_hook_status_ensure,Qnil);
 
 	}
 }
