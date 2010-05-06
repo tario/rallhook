@@ -24,7 +24,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include <sys/mman.h>
 
-VALUE rb_mRallHook;
+VALUE rb_cRallHook;
+ID id_call_;
 
 void unprotect(void* ptr) {
 	unsigned long int mask = 0xFFFFFFFFFFF00000;
@@ -119,6 +120,22 @@ VALUE _hooked_p(VALUE self) {
 	return rb_ivar_get(self,"@_hooked");
 }
 
+VALUE rehook_reyield( VALUE arguments, VALUE args) {
+	hook_enabled = 1;
+	VALUE ret = rb_yield( arguments );
+	hook_enabled = 0;
+	return ret;
+}
+
+VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, VALUE mid){
+	if (rb_block_given_p() ) {
+		VALUE argv[6] = {klass, recv, sym, args, mid};
+		return rb_block_call(rb_hook_proc, id_call_, 5, argv, rehook_reyield, Qnil );
+	} else {
+		return rb_funcall(rb_hook_proc, id_call_, 5, klass, recv, sym, args, mid );
+	}
+}
+
 
 
 void Init_rallhook() {
@@ -129,10 +146,13 @@ void Init_rallhook() {
 	rb_eval_string(initcode);
 
 	typedef VALUE (*RBHOOK)(VALUE self, ...);
-	VALUE rb_cRallHook = rb_define_class("RallHook", rb_cObject);
+	rb_cRallHook = rb_define_class("RallHook", rb_cObject);
 	rb_define_method(rb_cRallHook, "hook", (RBHOOK*)(hook), 1);
 	rb_define_method(rb_cRallHook, "unhook", (RBHOOK*)(unhook), 0);
 	rb_define_method(rb_cRallHook, "from", (RBHOOK*)(from), 1);
+
+	rb_define_singleton_method(rb_cRallHook, "call", (RBHOOK*)(rallhook_call), 5);
+
 
 	rb_define_method(rb_cObject, "_hooked?", (RBHOOK*)(_hooked_p ), 0);
 	rb_define_method(rb_cObject, "_hooked", (RBHOOK*)(_hooked), 0);
@@ -140,6 +160,8 @@ void Init_rallhook() {
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
+
+	id_call_ = rb_intern("call");
 /*
 
 */
