@@ -1,0 +1,6 @@
+
+
+0.1.1:	Changed hooking and unhooking mechanism in the call of the handler of hooks
+to make it internal at rallhooking (calling of hook and unhook from the call method are unnecesary now)
+
+0.1.0:	implemented basic hooking as PoC of rallhook, basic example works fine
