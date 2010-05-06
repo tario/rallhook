@@ -82,49 +82,6 @@ int hook_enabled = 0;
 int hook_enable_left = 0;
 
 
-static VALUE
-vafuncall_copy(recv, mid, n, ar)
-    VALUE recv;
-    ID mid;
-    int n;
-    va_list *ar;
-{
-    VALUE *argv;
-
-    if (n > 0) {
-	long i;
-
-	argv = ALLOCA_N(VALUE, n);
-
-	for (i=0;i<n;i++) {
-	    argv[i] = va_arg(*ar, VALUE);
-	}
-	va_end(*ar);
-    }
-    else {
-	argv = 0;
-    }
-
-    return rb_call_copy(CLASS_OF(recv), recv, mid, n, argv, 1, Qundef);
-}
-
-VALUE
-#ifdef HAVE_STDARG_PROTOTYPES
-rb_funcall_copy(VALUE recv, ID mid, int n, ...)
-#else
-rb_funcall_copy(recv, mid, n, va_alist)
-    VALUE recv;
-    ID mid;
-    int n;
-    va_dcl
-#endif
-{
-    va_list ar;
-    va_init_list(ar, n);
-
-    return vafuncall_copy(recv, mid, n, &ar);
-}
-
 VALUE
 rb_call_copy(
     VALUE klass, VALUE recv,
@@ -200,7 +157,7 @@ VALUE rb_call_wrapper(VALUE ary){
 		VALUE args = rb_ary_entry(ary,3);
 		VALUE method_id = rb_ary_entry(ary,4);
 
-		return rb_funcall_copy(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
+		return rb_funcall(rb_hook_proc, id_call, 5, klass, self, sym, args, method_id );
 }
 
 VALUE
@@ -215,7 +172,7 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
-	if (must_hook == 0 || hook_enable_left > 0) {
+	if (must_hook == 0 || hook_enable_left > 0 || (recv == rb_hook_proc && mid == id_call)) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
