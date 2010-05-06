@@ -120,11 +120,17 @@ VALUE _hooked_p(VALUE self) {
 	return rb_ivar_get(self,"@_hooked");
 }
 
-VALUE rehook_reyield( VALUE arguments, VALUE args) {
+VALUE rehook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 1;
-	VALUE ret = rb_yield( arguments );
+	rb_yield(arguments);
+}
+
+VALUE restore_unhook_status( VALUE unused) {
 	hook_enabled = 0;
-	return ret;
+}
+
+VALUE rehook_reyield( VALUE arguments, VALUE args) {
+	return rb_ensure(rehook_reyield_ensure, arguments, restore_unhook_status, Qnil);
 }
 
 VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, VALUE mid){
