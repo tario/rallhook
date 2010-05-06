@@ -174,7 +174,7 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
-	if (must_hook == 0 || hook_enable_left > 0 || (recv == rb_hook_proc && mid == id_call)) {
+	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
