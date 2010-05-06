@@ -79,18 +79,38 @@ VALUE from(VALUE self, VALUE num) {
 }
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
-	hook_enabled = 1;
+	hook_enabled = 0;
 	rb_yield(arguments);
 }
 
 VALUE restore_hook_status( VALUE unused) {
+	hook_enabled = 1;
+}
+
+VALUE restore_unhook_status( VALUE unused) {
 	hook_enabled = 0;
 }
+
 
 VALUE reunhook_reyield( VALUE arguments, VALUE args) {
 	return rb_ensure(reunhook_reyield_ensure, arguments, restore_hook_status, Qnil);
 }
 
+VALUE ensured_recall( VALUE arguments ) {
+	VALUE* vect = (VALUE*)arguments;
+	VALUE recv = vect[0];
+	ID mid = (ID)vect[1];
+	int argc = (int)vect[2];
+	VALUE* argv = (VALUE*)vect[3];
+
+	if (rb_block_given_p() ) {
+		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
+	} else {
+		return rb_funcall2(recv,mid,argc,argv);
+	}
+
+
+}
 
 static VALUE
 rb_f_send_copy(argc, argv, recv)
@@ -112,21 +132,22 @@ rb_f_send_copy(argc, argv, recv)
 		mid = FIX2LONG(vid);
 	}
 
+	hook_enabled = 1;
+	hook_enable_left = 1;
 
-	if (rb_block_given_p() ) {
+	VALUE args[5] = {recv,(VALUE)mid,(VALUE)argc,(VALUE)argv};
+
+	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
+/*	if (rb_block_given_p() ) {
 		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
 	} else {
 		return rb_funcall2(recv,mid,argc,argv);
-	}
+	}*/
 }
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 1;
 	rb_yield(arguments);
-}
-
-VALUE restore_unhook_status( VALUE unused) {
-	hook_enabled = 0;
 }
 
 VALUE rehook_reyield( VALUE arguments, VALUE args) {
