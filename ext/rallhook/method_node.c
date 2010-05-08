@@ -72,7 +72,14 @@ VALUE rb_node_file(VALUE self) {
 VALUE rb_node_method_body(VALUE self, VALUE klass, VALUE method_id) {
 
     NODE* _node;
-	_node = rb_method_node(klass, SYM2ID(method_id));
+    ID mid;
+
+	if (rb_obj_is_kind_of(method_id,rb_cSymbol) ) {
+		mid = rb_to_id(method_id);
+	} else {
+		mid = FIX2LONG(method_id);
+	}
+	_node = rb_method_node(klass, mid);
 
 	if (_node == NULL) {
 		return Qnil;
@@ -85,7 +92,15 @@ VALUE rb_node_method_body(VALUE self, VALUE klass, VALUE method_id) {
 VALUE rb_class_method_body(VALUE self, VALUE method_id) {
 
     NODE* _node;
-	_node = rb_method_node(self, SYM2ID(method_id));
+    ID mid;
+
+	if (rb_obj_is_kind_of(method_id,rb_cSymbol) ) {
+		mid = rb_to_id(method_id);
+	} else {
+		mid = FIX2LONG(method_id);
+	}
+
+	_node = rb_method_node(self, mid);
 
 	if (_node == NULL) {
 		return Qnil;
