@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
+#include "method_node.h"
 #include <sys/mman.h>
 
 VALUE rb_cRallHook;
@@ -183,6 +184,7 @@ void Init_rallhook() {
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
 	rb_call_fake_init();
+	init_node();
 
 	id_call_ = rb_intern("call");
 /*
