@@ -108,7 +108,7 @@ VALUE ensured_recall( VALUE arguments ) {
 	if (rb_block_given_p() ) {
 		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
 	} else {
-		return rb_funcall2(recv,mid,argc,argv);
+		return rb_call_copy(klass,recv,mid,argc,argv,3,Qnil);
 	}
 
 

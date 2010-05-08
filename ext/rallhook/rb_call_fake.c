@@ -169,6 +169,8 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
+    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
+
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
