@@ -99,10 +99,11 @@ VALUE reunhook_reyield( VALUE arguments, VALUE args) {
 
 VALUE ensured_recall( VALUE arguments ) {
 	VALUE* vect = (VALUE*)arguments;
-	VALUE recv = vect[0];
-	ID mid = (ID)vect[1];
-	int argc = (int)vect[2];
-	VALUE* argv = (VALUE*)vect[3];
+	VALUE klass = vect[0];
+	VALUE recv = vect[1];
+	ID mid = (ID)vect[2];
+	int argc = (int)vect[3];
+	VALUE* argv = (VALUE*)vect[4];
 
 	if (rb_block_given_p() ) {
 		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
@@ -120,9 +121,13 @@ rb_f_send_copy(argc, argv, recv)
     VALUE recv;
 {
     VALUE vid;
+    VALUE klass;
 
-    if (argc == 0) rb_raise(rb_eArgError, "no method name given");
+    if (argc < 1) rb_raise(rb_eArgError, "no method name given");
 
+
+
+    klass = *argv++; argc--;
     vid = *argv++; argc--;
 
 	ID mid;
@@ -136,14 +141,9 @@ rb_f_send_copy(argc, argv, recv)
 	hook_enabled = 1;
 	hook_enable_left = 1;
 
-	VALUE args[5] = {recv,(VALUE)mid,(VALUE)argc,(VALUE)argv};
+	VALUE args[7] = {klass,recv,(VALUE)mid,(VALUE)argc,(VALUE)argv};
 
 	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
-/*	if (rb_block_given_p() ) {
-		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
-	} else {
-		return rb_funcall2(recv,mid,argc,argv);
-	}*/
 }
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
