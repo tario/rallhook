@@ -154,7 +154,7 @@ VALUE call_block_handle( VALUE parameter, VALUE* args) {
 
 VALUE rb_call_wrapper(VALUE ary){
 		VALUE* argv = (VALUE*)ary;
-		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,3,Qnil);
+		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
 }
 
 VALUE
@@ -169,13 +169,13 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
-    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
-
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
+
+	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
 
 		hook_enabled = 0;
 
