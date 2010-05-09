@@ -66,7 +66,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	*address = &rb_call_fake;
 
 	if (rb_block_given_p() ) {
-		rb_ensure(rb_yield, Qnil, unhook, self);
+		return rb_ensure(rb_yield, Qnil, unhook, self);
 	}
 
 	return Qnil;
