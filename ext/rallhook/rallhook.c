@@ -139,7 +139,9 @@ rb_f_send_copy(argc, argv, recv)
 		mid = FIX2LONG(vid);
 	}
 
-	recv = tag_container(recv,klass);
+	if (rb_block_given_p() ) {
+		recv = tag_container(recv,klass);
+	}
 
 	hook_enabled = 1;
 	hook_enable_left = 1;
