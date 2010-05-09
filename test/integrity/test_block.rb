@@ -10,17 +10,19 @@ class TestBlock < Test::Unit::TestCase
     yield(*a)
   end
 
-  def _test_block_passing(*test_args)
+  def f0(test_args)
 
     result = nil
-    hook do
-      block_func(*test_args) do |*args|
-        result = args
-      end
+    block_func(*test_args) do |*args|
+      result = args
     end
 
-    assert_equal result, test_args
+    result
+  end
 
+  def _test_block_passing(*test_args)
+    # oracle testing, the result with hook and without hook must be the same
+    assert_equal hook{f0(test_args)}, f0(test_args)
   end
 
   def test_block
