@@ -26,6 +26,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
+#include "tag_container.h"
 
 // same constant as eval.c
 #define CSTAT_PRIV  1
@@ -169,13 +170,24 @@ rb_call_fake(
 
 	int must_hook = hook_enabled;
 
+	if (is_tag(recv) ) {
+		volatile VALUE orig_recv = recv;
+		volatile VALUE klass_;
+		recv = tag_container_get_self(orig_recv);
+		klass_ = tag_container_get_tag(orig_recv);
+
+		if (klass_ != Qnil ) {
+			klass = klass_;
+		}
+	}
+
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
-	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
+//	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
 
 		hook_enabled = 0;
 

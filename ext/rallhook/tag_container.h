@@ -25,7 +25,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 VALUE tag_container(VALUE self, VALUE tag);
 VALUE tag_container_get_self(VALUE tag);
-VALUE tag_container_get_klass(VALUE tag);
+VALUE tag_container_get_tag(VALUE tag);
 int is_tag(VALUE tag);
 
 void init_tag_container();

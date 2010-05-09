@@ -32,24 +32,10 @@ VALUE tag_container(VALUE self, VALUE tag) {
 	return ret;
 }
 VALUE tag_container_get_self(VALUE tag) {
-
-	if (rb_obj_is_kind_of(tag,rb_cTagContainer ) ) {
-		return rb_ivar_get( tag, "@self_");
-	} else {
-		return tag;
-	}
-
-}
-VALUE tag_container_get_tag(VALUE tag) {
 	return rb_ivar_get( tag, "@self_");
 }
-
-VALUE tag_container_get_klass(VALUE tag) {
-	if (rb_obj_is_kind_of(tag,rb_cTagContainer ) ) {
-		return rb_ivar_get( tag, "@self_");
-	} else {
-		return CLASS_OF(tag);
-	}
+VALUE tag_container_get_tag(VALUE tag) {
+	return rb_ivar_get( tag, "@tag");
 }
 
 int is_tag(VALUE tag) {
