@@ -1,4 +1,9 @@
+0.1.2:	Added klass parameter to hooked_send, fixing the issue #1: undesirable nest at super call ( http://github.com/tario/rallhook/issues/issue/1 )
 
+		Added classes and methods to read method body info as the file and line where that method was defined
+			obj.method(:foo).body.file
+			obj.method(:foo).body.line
+		
 
 0.1.1:	Changed hooking and unhooking mechanism in the call of the handler of hooks
 to make it internal at rallhooking (calling of hook and unhook from the call method are unnecesary now)
