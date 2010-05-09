@@ -25,20 +25,20 @@ ID internal_new;
 
 VALUE tag_container(VALUE self, VALUE tag) {
 	VALUE ret = rb_funcall(rb_cTagContainer, internal_new, 0);
-	
+
 	rb_ivar_set( ret, "@self_", self);
 	rb_ivar_set( ret, "@tag", tag);
-	
+
 	return ret;
 }
 VALUE tag_container_get_self(VALUE tag) {
-	
+
 	if (rb_obj_is_kind_of(tag,rb_cTagContainer ) ) {
 		return rb_ivar_get( tag, "@self_");
 	} else {
 		return tag;
 	}
-	
+
 }
 VALUE tag_container_get_tag(VALUE tag) {
 	return rb_ivar_get( tag, "@self_");
@@ -48,18 +48,23 @@ VALUE tag_container_get_klass(VALUE tag) {
 	if (rb_obj_is_kind_of(tag,rb_cTagContainer ) ) {
 		return rb_ivar_get( tag, "@self_");
 	} else {
-		return tag;
+		return CLASS_OF(tag);
 	}
 }
 
+int is_tag(VALUE tag) {
+	return rb_obj_is_kind_of(tag,rb_cTagContainer );
+}
+
+
 
 void init_tag_container() {
-	
+
 	rb_cTagContainer = rb_define_class("TagContainer", rb_cObject);
-	
+
 	rb_define_method( rb_cTagContainer, "self_", tag_container_get_self, 0);
 	rb_define_method( rb_cTagContainer, "tag", tag_container_get_tag, 0);
-	
+
 	internal_new = rb_intern("new");
-	
+
 }
