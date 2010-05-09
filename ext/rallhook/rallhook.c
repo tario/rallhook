@@ -66,9 +66,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	*address = &rb_call_fake;
 
 	if (rb_block_given_p() ) {
-		rb_yield(Qnil);
-
-		unhook(self);
+		rb_ensure(rb_yield, Qnil, unhook, self);
 	}
 
 	return Qnil;
@@ -77,7 +75,6 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 VALUE from(VALUE self, VALUE num) {
 	hook_enable_left = FIX2INT(num)+1;
-	return self;
 }
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
