@@ -50,6 +50,47 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 RUBY_EXTERN rb_thread_t *ruby_current_thread;
 #define GET_THREAD() ruby_current_thread
 #define UNLIKELY(x) (x)
+#ifndef FUNC_FASTCALL
+#define FUNC_FASTCALL(x) x
+#endif
+
+typedef struct {
+    VALUE *pc;			/* cfp[0] */
+    VALUE *sp;			/* cfp[1] */
+    VALUE *bp;			/* cfp[2] */
+    void *iseq;		/* cfp[3] */
+    VALUE flag;			/* cfp[4] */
+    VALUE self;			/* cfp[5] / block[0] */
+    VALUE *lfp;			/* cfp[6] / block[1] */
+    VALUE *dfp;			/* cfp[7] / block[2] */
+    void *block_iseq;	/* cfp[8] / block[3] */
+    VALUE proc;			/* cfp[9] / block[4] */
+    ID method_id;               /* cfp[10] saved in special case */
+    VALUE method_class;         /* cfp[11] saved in special case */
+} rb_control_frame_t;
+
+
+typedef struct rb_thread_struct
+{
+    VALUE self;
+    rb_vm_t *vm;
+
+    /* execution information */
+    VALUE *stack;		/* must free, must mark */
+    unsigned long stack_size;
+    rb_control_frame_t *cfp;
+    int safe_level;
+    int raised_flag;
+    VALUE last_status; /* $? */
+
+    /* passing state */
+    int state;
+
+    /* for rb_iterate */
+    void *passed_block;// rb_block_t
+
+} _rb_thread_t;
+
 
 
 // same defs as eval.c
@@ -121,7 +162,7 @@ rb_call0_copy(VALUE klass, VALUE recv, ID mid, int argc, const VALUE *argv,
     int noex;
     ID id = mid;
     struct cache_entry *ent;
-    rb_thread_t *th = GET_THREAD();
+    _rb_thread_t *th = (_rb_thread_t*) GET_THREAD();
 
     if (!klass) {
 	rb_raise(rb_eNotImpError,
@@ -172,16 +213,16 @@ rb_call0_copy(VALUE klass, VALUE recv, ID mid, int argc, const VALUE *argv,
 		}
 
 		if (self == Qundef) {
-		//    self = th->cfp->self; // FIXME: discomment
+		    self = th->cfp->self;
 		}
 		if (!rb_obj_is_kind_of(self, rb_class_real(defined_class))) {
 		    return _method_missing(recv, mid, argc, argv, NOEX_PROTECTED);
 		}
 	    }
 
-//	    if (NOEX_SAFE(noex) > th->safe_level) {	// FIXME: discomment
-//		rb_raise(rb_eSecurityError, "calling insecure method: %s", rb_id2name(mid));
-//	    }
+	    if (NOEX_SAFE(noex) > th->safe_level) {	// FIXME: discomment
+		rb_raise(rb_eSecurityError, "calling insecure method: %s", rb_id2name(mid));
+	    }
 	}
     }
 
