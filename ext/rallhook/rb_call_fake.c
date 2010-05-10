@@ -20,8 +20,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include <node.h> // from ruby
-#include <env.h> // from ruby
+#include <ruby/node.h> // from ruby
+//#include <ruby/env.h> // from ruby
 #include <dlfcn.h>
 #include <stdarg.h>
 #include "ruby_symbols.h"
@@ -130,7 +130,7 @@ rb_call_copy(
 	if (noex & NOEX_PROTECTED) {
 	    VALUE defined_class = klass;
 
-	    if (self == Qundef) self = (*_ruby_frame)->self;
+//	    if (self == Qundef) self = (*_ruby_frame)->self;
 	    if (TYPE(defined_class) == T_ICLASS) {
 		defined_class = RBASIC(defined_class)->klass;
 	    }
@@ -200,7 +200,7 @@ rb_call_fake(
 			rb_ary_store (args, i, argv[i] );
 		}
 
-	    if (recv == Qundef) recv = (*_ruby_frame)->self;
+//	    if (recv == Qundef) recv = (*_ruby_frame)->self;
 
 		VALUE argv_[6];
 		argv_[0] = klass;
@@ -218,8 +218,20 @@ void
 rb_call_fake_init() {
 	missing = rb_intern("method_missing");
 
-	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
+	const char* strlibruby = "/usr/lib/libruby1.8.so.1.8.7";
+
+	void* handle = dlopen(strlibruby,0x101);
+
+	if (handle == NULL) {
+		rb_raise(rb_eLoadError, "Cannot find %s", strlibruby);
+	}
+
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+
+	if (rb_funcall == NULL) {
+		rb_raise(rb_eLoadError, "Cannot find rb_funcall in %s",  strlibruby);
+	}
+
 	Dl_info info;
 	dladdr(rb_funcall, &info);
 
