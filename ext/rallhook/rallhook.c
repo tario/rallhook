@@ -72,10 +72,6 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	return Qnil;
 }
 
-VALUE get_rb_yield_0_avalue() {
-	__asm__("mov %r8, %rax");
-}
-
 
 VALUE from(VALUE self, VALUE num) {
 	hook_enable_left = FIX2INT(num)+1;
@@ -151,6 +147,12 @@ rb_f_send_copy(argc, argv, recv)
 
 	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
 }
+
+
+VALUE get_rb_yield_0_avalue() {
+	__asm__("mov %r8, %rax");
+}
+
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
