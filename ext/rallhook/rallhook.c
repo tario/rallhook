@@ -85,7 +85,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	}
 
 	if (!replaced) {
-		rb_bug("libruby incompatible with rallhook");
+		rb_raise( rb_eFatal, "libruby incompatible with rallhook");
 	}
 
 
