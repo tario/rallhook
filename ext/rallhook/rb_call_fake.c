@@ -30,6 +30,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby/node.h>
 #endif
 
+#ifdef RUBY1_8
+
 //#include <ruby/env.h> // from ruby
 #include <dlfcn.h>
 #include <stdarg.h>
@@ -263,6 +265,4 @@ rb_call_fake_init() {
 
 }
 
-
-
-
+#endif
