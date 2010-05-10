@@ -66,14 +66,24 @@ typedef VALUE (*METHODMISSING)(VALUE obj,
     const VALUE *argv,
     int   call_status);
 
+typedef VALUE (*VMCALL0) (
+   	rb_thread_t * th, VALUE klass, VALUE recv,
+    VALUE   id,
+    ID    oid,
+    int argc,			/* OK */
+    VALUE *argv,		/* OK */
+    NODE * volatile body,
+    int nosuper);
+
 typedef VALUE (*RBCALL0) (
     VALUE klass, VALUE recv,
     ID    id,
     ID    oid,
     int argc,			/* OK */
     VALUE *argv,		/* OK */
-    NODE * volatile body,
-    int flags);
+    int scope,
+    VALUE self);
+
 
 typedef NODE* (*RBGETMETHODBODY) (
     VALUE *klassp,
@@ -83,11 +93,11 @@ typedef NODE* (*RBGETMETHODBODY) (
 
 
 
-void* rb_call_original;
+void* rb_call0_original;
 METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
-struct FRAME **_ruby_frame;
 RBGETMETHODBODY _rb_get_method_body;
+VMCALL0 _vm_call0;
 
 // extern, exported variables
 int hook_enabled = 0;
@@ -95,62 +105,80 @@ int hook_enable_left = 0;
 
 extern VALUE rb_cRallHook;
 
-VALUE
-rb_call_copy(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
-) {
-    NODE  *body;		/* OK */
-    int    noex;
-    ID     id = mid;
+static VALUE
+rb_call0_copy(VALUE klass, VALUE recv, ID mid, int argc, const VALUE *argv,
+	 int scope, VALUE self)
+{
+    NODE *body, *method;
+    int noex;
+    ID id = mid;
     struct cache_entry *ent;
+    rb_thread_t *th = GET_THREAD();
 
     if (!klass) {
-	rb_raise(rb_eNotImpError, "method `%s' called on terminated object (0x%lx)",
-		 rb_id2name(mid), recv);
+	rb_raise(rb_eNotImpError,
+		 "method `%s' called on terminated object (%p)",
+		 rb_id2name(mid), (void *)recv);
     }
     /* is it in the method cache? */
-/*    ent = cache + EXPR1(klass, mid);
+    /*ent = cache + EXPR1(klass, mid);
+
     if (ent->mid == mid && ent->klass == klass) {
 	if (!ent->method)
-	    goto nomethod;
-	klass = ent->origin;
-	id    = ent->mid0;
-	noex  = ent->noex;
-	body  = ent->method;
+	    return _method_missing(recv, mid, argc, argv,
+				  scope == 2 ? NOEX_VCALL : 0);
+	id = ent->mid0;
+	noex = ent->method->nd_noex;
+	klass = ent->method->nd_clss;
+	body = ent->method->nd_body;
     }
-    else
-    */ if ((body = _rb_get_method_body(&klass, &id, &noex)) == 0) {
-      nomethod:
+    else */
+
+    if ((method = _rb_get_method_body(klass, id, &id)) != 0) {
+	noex = method->nd_noex;
+	klass = method->nd_clss;
+	body = method->nd_body;
+    }
+    else {
 	if (scope == 3) {
-	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
+	    return _method_missing(recv, mid, argc, argv, NOEX_SUPER);
 	}
-	return _method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
+	return _method_missing(recv, mid, argc, argv,
+			      scope == 2 ? NOEX_VCALL : 0);
     }
 
-    if (mid != missing && scope == 0) {
+
+    if (mid != missing) {
 	/* receiver specified form for private method */
-	if (noex & NOEX_PRIVATE)
-	    return _method_missing(recv, mid, argc, argv, CSTAT_PRIV);
-
-	/* self must be kind of a specified form for protected method */
-	if (noex & NOEX_PROTECTED) {
-	    VALUE defined_class = klass;
-
-//	    if (self == Qundef) self = (*_ruby_frame)->self;
-	    if (TYPE(defined_class) == T_ICLASS) {
-		defined_class = RBASIC(defined_class)->klass;
+	if (UNLIKELY(noex)) {
+	    if (((noex & NOEX_MASK) & NOEX_PRIVATE) && scope == 0) {
+		return _method_missing(recv, mid, argc, argv, NOEX_PRIVATE);
 	    }
-	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class)))
-		return _method_missing(recv, mid, argc, argv, CSTAT_PROT);
+
+	    /* self must be kind of a specified form for protected method */
+	    if (((noex & NOEX_MASK) & NOEX_PROTECTED) && scope == 0) {
+		VALUE defined_class = klass;
+
+		if (TYPE(defined_class) == T_ICLASS) {
+		    defined_class = RBASIC(defined_class)->klass;
+		}
+
+		if (self == Qundef) {
+		//    self = th->cfp->self; // FIXME: discomment
+		}
+		if (!rb_obj_is_kind_of(self, rb_class_real(defined_class))) {
+		    return _method_missing(recv, mid, argc, argv, NOEX_PROTECTED);
+		}
+	    }
+
+//	    if (NOEX_SAFE(noex) > th->safe_level) {	// FIXME: discomment
+//		rb_raise(rb_eSecurityError, "calling insecure method: %s", rb_id2name(mid));
+//	    }
 	}
     }
 
-    return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
+    stack_check();
+    return _vm_call0(th, klass, recv, mid, id, argc, argv, body, noex & NOEX_NOSUPER);
 }
 
 VALUE restore_hook_status_ensure(VALUE ary) {
@@ -164,7 +192,7 @@ VALUE rb_call_wrapper(VALUE ary){
 }
 
 VALUE
-rb_call_fake(
+rb_call0_fake(
     VALUE klass, VALUE recv,
     ID    mid,
     int argc,			/* OK */
@@ -189,7 +217,7 @@ rb_call_fake(
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
-		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
+		return rb_call0_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
 //	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
@@ -248,19 +276,13 @@ rb_call_fake1_9_init() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	rb_call_original = ruby_resolv(base, "rb_call");
+	rb_call0_original = ruby_resolv(base, "rb_call0");
 	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
-	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
 	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
+	_vm_call0 = (VMCALL0)ruby_resolv(base,"vm_call0");
 
 	id_call = rb_intern("call");
-
-
-//	printf("rb_call: %p\n", rb_call_original);
-//	printf("method_missing: %p\n", _method_missing);
-//	printf("rb_call0: %p\n", _rb_call0);
-//	printf("ruby_frame addr: %p\n", _ruby_frame);
 
 
 }

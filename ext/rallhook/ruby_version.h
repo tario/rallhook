@@ -19,4 +19,4 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#define RUBY1_8
+#define RUBY1_9
