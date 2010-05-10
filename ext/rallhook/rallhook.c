@@ -25,6 +25,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "method_node.h"
 #include <sys/mman.h>
 #include <tag_container.h>
+#include "ruby_version.h"
 
 VALUE rb_cRallHook;
 ID id_call_;
@@ -51,7 +52,13 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	// insert inconditional jmp from rb_call to rb_call_copy
 	typedef unsigned char uchar;
 
+#ifdef RUBY1_8
 	uchar* p = (uchar*)rb_call_original;
+#endif
+#ifdef RUBY1_9
+	uchar* p = (uchar*)rb_call0_original;
+#endif
+
 	//x86_64 inconditional jump
 	unprotect(p);
 
@@ -63,7 +70,12 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	p[10] = 0xff; // jmp %rax
 	p[11] = 0xe0;
 
+#ifdef RUBY1_8
 	*address = &rb_call_fake;
+#endif
+#ifdef RUBY1_9
+	*address = &rb_call0_fake;
+#endif
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
@@ -198,7 +210,13 @@ void Init_rallhook() {
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
+#ifdef RUBY1_8
 	rb_call_fake_init();
+#endif
+#ifdef RUBY1_9
+	rb_call_fake1_9_init();
+#endif
+
 	init_node();
 	init_tag_container();
 

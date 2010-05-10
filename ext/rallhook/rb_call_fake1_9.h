@@ -19,20 +19,20 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef __RB_CALL_FAKE_H
-#define __RB_CALL_FAKE_H
+#ifndef __RB_CALL_FAKE1_9_H
+#define __RB_CALL_FAKE1_9_H
 
 #include <ruby.h>
 #include "ruby_version.h"
 
-#ifdef RUBY1_8
+#ifdef RUBY1_9
 
 void
-rb_call_fake_init();
+rb_call_fake1_9_init();
 
 
 VALUE
-rb_call_copy(
+rb_call0_copy(
     VALUE klass, VALUE recv,
     ID    mid,
     int argc,			/* OK */
@@ -42,7 +42,7 @@ rb_call_copy(
 );
 
 VALUE
-rb_call_fake(
+rb_call0_fake(
     VALUE klass, VALUE recv,
     ID    mid,
     int argc,			/* OK */
@@ -51,10 +51,11 @@ rb_call_fake(
     VALUE self
 );
 
-extern void* rb_call_original;
+extern void* rb_call0_original;
 extern int hook_enabled;
 extern int hook_enable_left;
 extern VALUE rb_hook_proc;
 
 #endif
+
 #endif
