@@ -84,64 +84,6 @@ int hook_enable_left = 0;
 
 extern VALUE rb_cRallHook;
 
-VALUE
-rb_call_copy(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
-) {
-    NODE  *body;		/* OK */
-    int    noex;
-    ID     id = mid;
-    struct cache_entry *ent;
-
-    if (!klass) {
-	rb_raise(rb_eNotImpError, "method `%s' called on terminated object (0x%lx)",
-		 rb_id2name(mid), recv);
-    }
-    /* is it in the method cache? */
-/*    ent = cache + EXPR1(klass, mid);
-    if (ent->mid == mid && ent->klass == klass) {
-	if (!ent->method)
-	    goto nomethod;
-	klass = ent->origin;
-	id    = ent->mid0;
-	noex  = ent->noex;
-	body  = ent->method;
-    }
-    else
-    */ if ((body = _rb_get_method_body(&klass, &id, &noex)) == 0) {
-      nomethod:
-	if (scope == 3) {
-	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
-	}
-	return _method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
-    }
-
-    if (mid != missing && scope == 0) {
-	/* receiver specified form for private method */
-	if (noex & NOEX_PRIVATE)
-	    return _method_missing(recv, mid, argc, argv, CSTAT_PRIV);
-
-	/* self must be kind of a specified form for protected method */
-	if (noex & NOEX_PROTECTED) {
-	    VALUE defined_class = klass;
-
-	    if (self == Qundef) self = (*_ruby_frame)->self;
-	    if (TYPE(defined_class) == T_ICLASS) {
-		defined_class = RBASIC(defined_class)->klass;
-	    }
-	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class)))
-		return _method_missing(recv, mid, argc, argv, CSTAT_PROT);
-	}
-    }
-
-    return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
-}
-
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
 //	hook_enable_left = 0;

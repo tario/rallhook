@@ -43,17 +43,12 @@ VALUE unhook(VALUE self) {
 	return Qnil;
 }
 
+RBCALL rb_call_copy;
 
-VALUE hook(VALUE self, VALUE hook_proc) {
-	rb_hook_proc = hook_proc;
-	hook_enabled = 1;
 
-	// insert inconditional jmp from rb_call to rb_call_copy
-	typedef unsigned char uchar;
+void inconditional_jump(void* where, void* to) {
 
-	uchar* p = (uchar*)rb_call_original;
-	//x86_64 inconditional jump
-	unprotect(p);
+	unsigned char* p = (unsigned char*)where;
 
 	p[0] = 0x48; // movl XXX, %rax
 	p[1] = 0xb8;
@@ -63,7 +58,39 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	p[10] = 0xff; // jmp %rax
 	p[11] = 0xe0;
 
-	*address = &rb_call_fake;
+	*address = to;
+}
+
+VALUE hook(VALUE self, VALUE hook_proc) {
+	rb_hook_proc = hook_proc;
+	hook_enabled = 1;
+
+	// insert inconditional jmp from rb_call to rb_call_copy
+	typedef unsigned char uchar;
+
+	uchar* p_copy = (uchar*)malloc(0x1000);
+	uchar* p = (uchar*)rb_call_original;
+
+	unprotect(p_copy);
+	unprotect(p);
+
+	rb_call_copy = (RBCALL)p_copy;
+
+	int replaced = 0;
+	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
+//		replaced = 1;
+		memcpy(p_copy, rb_call_original, 13);
+
+		inconditional_jump(p_copy+13, p+13);
+	}
+
+	if (!replaced) {
+		rb_bug("libruby incompatible with rallhook");
+	}
+
+
+	inconditional_jump(p, &rb_call_fake);
+
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);

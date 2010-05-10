@@ -27,16 +27,16 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 void
 rb_call_fake_init();
 
-
-VALUE
-rb_call_copy(
+typedef VALUE (*RBCALL) (
     VALUE klass, VALUE recv,
     ID    mid,
     int argc,			/* OK */
     const VALUE *argv,		/* OK */
     int scope,
     VALUE self
-);
+) ;
+
+extern RBCALL rb_call_copy;
 
 VALUE
 rb_call_fake(
