@@ -38,6 +38,6 @@ const char* current_libruby() {
 	VALUE rb_mCymbol = rb_eval_string("Cymbol");
 	VALUE rb_strSharedName = rb_funcall(rb_mCymbol,rb_intern("ruby_shared_name"), 0);
 
-	return rb_string_value_ptr(rb_strSharedName);
+	return rb_string_value_ptr(&rb_strSharedName);
 }
 
