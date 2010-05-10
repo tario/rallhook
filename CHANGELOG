@@ -1,3 +1,9 @@
+0.2.1:	Fixed issue #3: corrupted block arguments in hooking ( http://github.com/tario/rallhook/issues/issue/3 )
+
+		Added testcase to test the issue #3
+
+		Added some automatic tests of integrity of the modified interpreter
+
 0.2.0:	Fixed RAII issues in RallHook::hook method
 
 		Changed version of package to 0.2.0 to avoid "malformed" version number
