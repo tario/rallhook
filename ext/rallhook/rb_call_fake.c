@@ -45,15 +45,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #endif
 
 
-ID missing, id_call;
+ID id_call;
 VALUE rb_hook_proc;
 
-
-typedef VALUE (*METHODMISSING)(VALUE obj,
-    ID    id,
-    int   argc,
-    const VALUE *argv,
-    int   call_status);
 
 typedef VALUE (*RBCALL0) (
     VALUE klass, VALUE recv,
@@ -73,7 +67,6 @@ typedef NODE* (*RBGETMETHODBODY) (
 
 
 void* rb_call_original;
-METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
 struct FRAME **_ruby_frame;
 RBGETMETHODBODY _rb_get_method_body;
@@ -142,8 +135,6 @@ rb_call_fake(
 			rb_ary_store (args, i, argv[i] );
 		}
 
-	    if (recv == Qundef) recv = (*_ruby_frame)->self;
-
 		VALUE argv_[6];
 		argv_[0] = klass;
 		argv_[1] = recv;
@@ -158,7 +149,6 @@ rb_call_fake(
 
 void
 rb_call_fake_init() {
-	missing = rb_intern("method_missing");
 
 	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
@@ -168,19 +158,11 @@ rb_call_fake_init() {
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
 	rb_call_original = ruby_resolv(base, "rb_call");
-	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
 	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
 
 	id_call = rb_intern("call");
-
-
-//	printf("rb_call: %p\n", rb_call_original);
-//	printf("method_missing: %p\n", _method_missing);
-//	printf("rb_call0: %p\n", _rb_call0);
-//	printf("ruby_frame addr: %p\n", _ruby_frame);
-
 
 }
 
