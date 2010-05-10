@@ -20,7 +20,15 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
+#include <ruby_version.h>
+
+#ifdef RUBY1_8
+#include <node.h>
+#endif
+
+#ifdef RUBY1_9
 #include <ruby/node.h>
+#endif
 
 VALUE rb_cNode;
 ID intern_owner;

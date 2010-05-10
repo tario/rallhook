@@ -20,7 +20,16 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include <ruby/node.h> // from ruby
+#include <ruby_version.h>
+
+#ifdef RUBY1_8
+#include <node.h>
+#endif
+
+#ifdef RUBY1_9
+#include <ruby/node.h>
+#endif
+
 //#include <ruby/env.h> // from ruby
 #include <dlfcn.h>
 #include <stdarg.h>
