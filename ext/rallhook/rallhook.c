@@ -20,12 +20,19 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
+#include "ruby_version.h"
 #include "ruby_symbols.h"
-#include "rb_call_fake.h"
 #include "method_node.h"
 #include <sys/mman.h>
 #include <tag_container.h>
-#include "ruby_version.h"
+
+#ifdef RUBY1_8
+#include "rb_call_fake.h"
+#endif
+#ifdef RUBY1_9
+#include "rb_call_fake1_9.h"
+#endif
+
 
 VALUE rb_cRallHook;
 ID id_call_;
