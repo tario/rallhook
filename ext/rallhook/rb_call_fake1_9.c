@@ -143,7 +143,6 @@ typedef NODE* (*RBGETMETHODBODY) (
 
 void* rb_call0_original;
 METHODMISSING _method_missing;
-RBCALL0 _rb_call0;
 RBGETMETHODBODY _rb_get_method_body;
 VMCALL0 _vm_call0;
 STACKCHECK _stack_check;
@@ -327,7 +326,6 @@ rb_call_fake1_9_init() {
 
 	rb_call0_original = ruby_resolv(base, "rb_call0");
 	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
-	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
 	_vm_call0 = (VMCALL0)ruby_resolv(base,"vm_call0");
 	_stack_check = (STACKCHECK)ruby_resolv(base,"stack_check");
