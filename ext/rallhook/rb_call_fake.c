@@ -67,9 +67,6 @@ typedef NODE* (*RBGETMETHODBODY) (
 
 
 void* rb_call_original;
-RBCALL0 _rb_call0;
-struct FRAME **_ruby_frame;
-RBGETMETHODBODY _rb_get_method_body;
 
 // extern, exported variables
 int hook_enabled = 0;
@@ -79,7 +76,6 @@ extern VALUE rb_cRallHook;
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
-//	hook_enable_left = 0;
 }
 
 VALUE rb_call_wrapper(VALUE ary){
@@ -158,14 +154,6 @@ rb_call_fake_init() {
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
 	rb_call_original = ruby_resolv(base, "rb_call");
-	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
-	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
-	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
-
 	id_call = rb_intern("call");
 
 }
-
-
-
-
