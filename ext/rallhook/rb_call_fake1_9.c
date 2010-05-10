@@ -183,12 +183,12 @@ rb_call0_copy(VALUE klass, VALUE recv, ID mid, int argc, const VALUE *argv,
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
-//	hook_enable_left = 0;
+	return Qnil;
 }
 
 VALUE rb_call_wrapper(VALUE ary){
 		VALUE* argv = (VALUE*)ary;
-		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+		return rb_call0_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
 }
 
 VALUE
