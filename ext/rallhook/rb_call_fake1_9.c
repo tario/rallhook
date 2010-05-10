@@ -45,6 +45,12 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define CSTAT_VCALL 4
 #define CSTAT_SUPER 8
 
+// from vm_core.h
+
+RUBY_EXTERN rb_thread_t *ruby_current_thread;
+#define GET_THREAD() ruby_current_thread
+#define UNLIKELY(x) (x)
+
 
 // same defs as eval.c
 #ifdef HAVE_STDARG_PROTOTYPES
@@ -59,6 +65,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 ID missing, id_call;
 VALUE rb_hook_proc;
 
+typedef void (*STACKCHECK)(void) ;
 
 typedef VALUE (*METHODMISSING)(VALUE obj,
     ID    id,
@@ -98,6 +105,7 @@ METHODMISSING _method_missing;
 RBCALL0 _rb_call0;
 RBGETMETHODBODY _rb_get_method_body;
 VMCALL0 _vm_call0;
+STACKCHECK _stack_check;
 
 // extern, exported variables
 int hook_enabled = 0;
@@ -177,7 +185,7 @@ rb_call0_copy(VALUE klass, VALUE recv, ID mid, int argc, const VALUE *argv,
 	}
     }
 
-    stack_check();
+    _stack_check();
     return _vm_call0(th, klass, recv, mid, id, argc, argv, body, noex & NOEX_NOSUPER);
 }
 
@@ -281,6 +289,7 @@ rb_call_fake1_9_init() {
 	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
 	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
 	_vm_call0 = (VMCALL0)ruby_resolv(base,"vm_call0");
+	_stack_check = (STACKCHECK)ruby_resolv(base,"stack_check");
 
 	id_call = rb_intern("call");
 
