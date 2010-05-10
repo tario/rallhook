@@ -23,5 +23,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define __RUBY_SYMBOLS_H
 
 void* ruby_resolv(unsigned char* p_base, const char* symbol_name);
+const char* current_libruby();
 
 #endif

@@ -216,9 +216,9 @@ rb_call_fake(
 
 void
 rb_call_fake_init() {
-	missing = rb_intern("method_missing");
 
-	const char* strlibruby = "/usr/lib/libruby1.8.so.1.8.7";
+	missing = rb_intern("method_missing");
+	const char* strlibruby = current_libruby();
 
 	void* handle = dlopen(strlibruby,0x101);
 
