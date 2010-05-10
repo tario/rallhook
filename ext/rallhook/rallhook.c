@@ -78,7 +78,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	int replaced = 0;
 	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
-//		replaced = 1;
+		replaced = 1;
 		memcpy(p_copy, rb_call_original, 13);
 
 		inconditional_jump(p_copy+13, p+13);
