@@ -75,19 +75,22 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 VALUE from(VALUE self, VALUE num) {
 	hook_enable_left = FIX2INT(num)+1;
+	return self;
 }
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
-	rb_yield_splat(arguments);
+	return rb_yield_splat(arguments);
 }
 
 VALUE restore_hook_status( VALUE unused) {
 	hook_enabled = 1;
+	return Qil;
 }
 
 VALUE restore_unhook_status( VALUE unused) {
 	hook_enabled = 0;
+	return Qnil;
 }
 
 
@@ -148,7 +151,7 @@ rb_f_send_copy(argc, argv, recv)
 	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
 }
 
-
+// TODO: find a way to avoid the warning "the non-void function reach the end of.."
 VALUE get_rb_yield_0_avalue() {
 	__asm__("mov %r8, %rax");
 }
@@ -160,7 +163,7 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 	}
 
 	hook_enabled = 1;
-	rb_yield_splat(arguments);
+	return rb_yield_splat(arguments);
 }
 
 VALUE rehook_reyield( VALUE arguments, VALUE args) {
