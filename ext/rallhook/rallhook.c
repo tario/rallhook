@@ -85,7 +85,7 @@ VALUE reunhook_reyield_ensure( VALUE arguments) {
 
 VALUE restore_hook_status( VALUE unused) {
 	hook_enabled = 1;
-	return Qil;
+	return Qnil;
 }
 
 VALUE restore_unhook_status( VALUE unused) {
