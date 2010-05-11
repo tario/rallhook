@@ -41,7 +41,7 @@ void* hook_rb_call(void* fake_function) {
 	int replaced = 0;
 
 	if (rb_call_original == 0) {
-		void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
+		void* handle = dlopen(current_libruby(),0x101);
 		char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
 		Dl_info info;
 		dladdr(rb_funcall, &info);
