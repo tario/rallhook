@@ -8,6 +8,8 @@ ruby_version = Config::CONFIG["ruby_version"]
 ruby_version = ruby_version.split(".")[0..1].join(".")
 end
 
+$LIBS = $LIBS + " -ldistorm64"
+
 if ruby_version == "1.8"
 	$CFLAGS = $CFLAGS + " -DRUBY1_8"
 elsif ruby_version == "1.9"
@@ -19,4 +21,4 @@ end
 
 create_makefile('rallhook')
 
-    
+
