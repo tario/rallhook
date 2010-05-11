@@ -139,7 +139,13 @@ rb_f_send_copy(argc, argv, recv)
 
 
 VALUE get_rb_yield_0_avalue() {
-	__asm__("mov %r8, %rax");
+	#if __x86_64__
+		__asm__("mov %r8, %rax"); // Intel x86_64 (64 bits)
+	#elif __i386__
+		__asm__("mov %BADREG_RESOLV, %eax"); // Intel i386 (32 bits)
+	#else
+		#error "unknow architecture"
+	#endif
 }
 
 
