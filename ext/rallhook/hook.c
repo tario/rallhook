@@ -29,6 +29,7 @@ void unprotect(void* ptr) {
 
 void inconditional_jump(void* where, void* to) {
 
+#if __x86_64__
 	unsigned char* p = (unsigned char*)where;
 
 	p[0] = 0x48; // movl XXX, %rax
@@ -40,6 +41,16 @@ void inconditional_jump(void* where, void* to) {
 	p[11] = 0xe0;
 
 	*address = to;
+#elif __i386__
+	unsigned char* p = (unsigned char*)where;
+
+	p[0] = 0x68; // pushl
+	void** address = (void**)(p+1);
+	*address = to;
+	p[5] = 0xc3; // ret
+#else
+	#error "unknow architecture"
+#endif
 }
 
 
@@ -61,5 +72,11 @@ void* put_jmp_hook(void* function_address, void* fake_function, int instructions
 }
 
 int get_jmp_size() {
+	#if __x86_64__
 	return 12;
+	#elif __i386__
+	return 6;
+	#else
+		#error "unknow architecture"
+	#endif
 }
