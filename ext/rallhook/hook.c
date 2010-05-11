@@ -61,5 +61,5 @@ void* put_jmp_hook(void* function_address, void* fake_function, int instructions
 }
 
 int get_jmp_size() {
-	return 13;
+	return 12;
 }
