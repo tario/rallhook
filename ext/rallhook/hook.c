@@ -77,6 +77,6 @@ int get_jmp_size() {
 	#elif __i386__
 	return 6;
 	#else
-		#error "unknow architecture"
+		#error "unknown architecture"
 	#endif
 }
