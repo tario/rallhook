@@ -149,7 +149,7 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 	}
 
 	hook_enabled = 1;
-	rb_yield_splat(arguments);
+	return rb_yield_splat(arguments);
 }
 
 VALUE rehook_reyield( VALUE arguments, VALUE args) {
