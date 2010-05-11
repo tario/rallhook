@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "hook_rb_call.h"
 #include "hook.h"
 #include "ruby_symbols.h"
+#include "ruby_version.h"
 
 #define __USE_GNU
 #include <dlfcn.h>
@@ -48,10 +49,27 @@ void* hook_rb_call(void* fake_function) {
 
 		unsigned char* base = (unsigned char*)info.dli_fbase;
 
+		#ifdef RUBY1_8
 		rb_call_original = ruby_resolv(base, "rb_call");
+		#endif
+
+		// in the ruby 1.9 source, the rb_call0 acts as rb_call (and vm_call0 acts as rb_call0)
+		#ifdef RUBY1_9
+		rb_call_original = ruby_resolv(base, "rb_call0");
+		#endif
+
+		if (rb_call_original == 0) {
+			return 0;
+		}
+
 	}
 
 	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
+		replaced = 1;
+		return put_jmp_hook(rb_call_original, fake_function, 13);
+	}
+
+	if (memcmp(rb_call_original, "\x48\x89\x6c\x24\xd8\x4c\x89\x74\x24\xf0\x48\x89\xd5" ,13)==0) {
 		replaced = 1;
 		return put_jmp_hook(rb_call_original, fake_function, 13);
 	}
