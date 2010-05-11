@@ -67,14 +67,19 @@ VALUE from(VALUE self, VALUE num) {
 	return self;
 }
 
+VALUE get_rb_yield_0_avalue();
+
 VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
+#ifdef RUBY1_8
+	// only work and is needed in ruby1.8
+	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
+		arguments = rb_ary_new3(1,arguments);
+	}
+#endif
 
 #ifdef RUBY1_9
-	VALUE tmp = rb_check_array_type(arguments);
-    if (NIL_P(tmp)) {
-		arguments = rb_ary_new3(1,arguments);
-    }
+	arguments = rb_ary_new3(1,arguments);
 #endif
 
 	return rb_yield_splat(arguments);
@@ -161,17 +166,19 @@ VALUE get_rb_yield_0_avalue() {
 
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
+
+#ifdef RUBY1_8
+	// only work and is needed in ruby1.8
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
 		arguments = rb_ary_new3(1,arguments);
 	}
+#endif
 
 #ifdef RUBY1_9
-	VALUE tmp = rb_check_array_type(arguments);
-    if (NIL_P(tmp)) {
-		arguments = rb_ary_new3(1,arguments);
-    }
-
-
+//	VALUE tmp = rb_check_array_type(arguments);
+//    if (NIL_P(tmp)) {
+	arguments = rb_ary_new3(1,arguments);
+//    }
 #endif
 
 	hook_enabled = 1;
