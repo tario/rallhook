@@ -20,50 +20,25 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include <node.h> // from ruby
+
+#ifdef RUBY1_8
+#include <node.h>
 #include <env.h> // from ruby
+#endif
+
+#ifdef RUBY1_9
+#include <ruby/node.h>
+#include <ruby/env.h> // from ruby
+#endif
+
 #include <dlfcn.h>
 #include <stdarg.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
 #include "tag_container.h"
 
-// same constant as eval.c
-#define CSTAT_PRIV  1
-#define CSTAT_PROT  2
-#define CSTAT_VCALL 4
-#define CSTAT_SUPER 8
-
-
-// same defs as eval.c
-#ifdef HAVE_STDARG_PROTOTYPES
-#include <stdarg.h>
-#define va_init_list(a,b) va_start(a,b)
-#else
-#include <varargs.h>
-#define va_init_list(a,b) va_start(a)
-#endif
-
-
 ID id_call;
 VALUE rb_hook_proc;
-
-
-typedef VALUE (*RBCALL0) (
-    VALUE klass, VALUE recv,
-    ID    id,
-    ID    oid,
-    int argc,			/* OK */
-    VALUE *argv,		/* OK */
-    NODE * volatile body,
-    int flags);
-
-typedef NODE* (*RBGETMETHODBODY) (
-    VALUE *klassp,
-    ID *idp,
-    int *noexp
-    );
-
 
 // extern, exported variables
 int hook_enabled = 0;
