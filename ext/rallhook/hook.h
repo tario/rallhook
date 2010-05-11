@@ -18,40 +18,10 @@ you should have received a copy of the gnu general public license
 along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef __HOOK_H
+#define __HOOK_H
 
-#ifndef __RB_CALL_FAKE_H
-#define __RB_CALL_FAKE_H
-
-#include <ruby.h>
-#include "ruby_version.h"
-
-void
-rb_call_fake_init();
-
-typedef VALUE (*RBCALL) (
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
-) ;
-
-extern RBCALL rb_call_copy;
-
-VALUE
-rb_call_fake(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
-);
-
-extern void* rb_call_original;
-extern int hook_enabled;
-extern int hook_enable_left;
-extern VALUE rb_hook_proc;
+void* put_jmp_hook(void* function_address, void* fake_function, int instructions_size);
+int get_jmp_size();
 
 #endif

@@ -20,69 +20,39 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include "ruby_version.h"
 #include "ruby_symbols.h"
-#include "method_node.h"
-#include <sys/mman.h>
-#include <tag_container.h>
-
-#ifdef RUBY1_8
 #include "rb_call_fake.h"
-#endif
-#ifdef RUBY1_9
-#include "rb_call_fake1_9.h"
-#endif
-
+#include "hook_rb_call.h"
+#include "method_node.h"
+#include <tag_container.h>
 
 VALUE rb_cRallHook;
 ID id_call_;
 
-void unprotect(void* ptr) {
-	unsigned long int mask = 0xFFFFFFFFFFF00000;
-	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x100000, PROT_READ | PROT_WRITE | PROT_EXEC);
-}
-
-
 VALUE unhook(VALUE self) {
-
-//	rb_hook_proc = Qnil;
 	hook_enabled = 0;
-
 	return Qnil;
 }
 
+RBCALL rb_call_copy;
+
+
+int code_changed = 0;
 
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
 	hook_enabled = 1;
 
-	// insert inconditional jmp from rb_call to rb_call_copy
-	typedef unsigned char uchar;
+	if (!code_changed) {
+		// insert inconditional jmp from rb_call to rb_call_copy
+		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
 
-#ifdef RUBY1_8
-	uchar* p = (uchar*)rb_call_original;
-#endif
-#ifdef RUBY1_9
-	uchar* p = (uchar*)rb_call0_original;
-#endif
+		if (!rb_call_copy) {
+			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
+		}
 
-	//x86_64 inconditional jump
-	unprotect(p);
-
-	p[0] = 0x48; // movl XXX, %rax
-	p[1] = 0xb8;
-
-	void** address = (void**)(p+2);
-
-	p[10] = 0xff; // jmp %rax
-	p[11] = 0xe0;
-
-#ifdef RUBY1_8
-	*address = &rb_call_fake;
-#endif
-#ifdef RUBY1_9
-	*address = &rb_call0_fake;
-#endif
+		code_changed = 1;
+	}
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
@@ -94,22 +64,19 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 VALUE from(VALUE self, VALUE num) {
 	hook_enable_left = FIX2INT(num)+1;
-	return self;
 }
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
-	return rb_yield_splat(arguments);
+	rb_yield_splat(arguments);
 }
 
 VALUE restore_hook_status( VALUE unused) {
 	hook_enabled = 1;
-	return Qnil;
 }
 
 VALUE restore_unhook_status( VALUE unused) {
 	hook_enabled = 0;
-	return Qnil;
 }
 
 
@@ -170,7 +137,7 @@ rb_f_send_copy(argc, argv, recv)
 	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
 }
 
-// TODO: find a way to avoid the warning "the non-void function reach the end of.."
+
 VALUE get_rb_yield_0_avalue() {
 	__asm__("mov %r8, %rax");
 }
@@ -217,13 +184,7 @@ void Init_rallhook() {
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
-#ifdef RUBY1_8
 	rb_call_fake_init();
-#endif
-#ifdef RUBY1_9
-	rb_call_fake1_9_init();
-#endif
-
 	init_node();
 	init_tag_container();
 
