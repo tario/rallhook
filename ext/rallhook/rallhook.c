@@ -22,44 +22,20 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
+#include "hook.h"
 #include "method_node.h"
-#include <sys/mman.h>
 #include <tag_container.h>
 
 VALUE rb_cRallHook;
 ID id_call_;
 
-void unprotect(void* ptr) {
-	unsigned long int mask = 0xFFFFFFFFFFF00000;
-	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x100000, PROT_READ | PROT_WRITE | PROT_EXEC);
-}
-
-
 VALUE unhook(VALUE self) {
-
-//	rb_hook_proc = Qnil;
 	hook_enabled = 0;
-
 	return Qnil;
 }
 
 RBCALL rb_call_copy;
 
-
-void inconditional_jump(void* where, void* to) {
-
-	unsigned char* p = (unsigned char*)where;
-
-	p[0] = 0x48; // movl XXX, %rax
-	p[1] = 0xb8;
-
-	void** address = (void**)(p+2);
-
-	p[10] = 0xff; // jmp %rax
-	p[11] = 0xe0;
-
-	*address = to;
-}
 
 int code_changed = 0;
 
@@ -68,35 +44,18 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	hook_enabled = 1;
 
 	if (!code_changed) {
-
-
 		// insert inconditional jmp from rb_call to rb_call_copy
-		typedef unsigned char uchar;
-
-		uchar* p_copy = (uchar*)malloc(0x1000);
-		uchar* p = (uchar*)rb_call_original;
-
-		unprotect(p_copy);
-		unprotect(p);
-
-		rb_call_copy = (RBCALL)p_copy;
-
 		int replaced = 0;
 		if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
 			replaced = 1;
-			memcpy(p_copy, rb_call_original, 13);
-
+			rb_call_copy = (RBCALL)put_jmp_hook(rb_call_original, rb_call_fake, 13);
 		}
 
 		if (!replaced) {
 			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
 		}
 
-
-		inconditional_jump(p, &rb_call_fake);
-		inconditional_jump(p_copy+13, p+13);
 		code_changed = 1;
-
 	}
 
 	if (rb_block_given_p() ) {
