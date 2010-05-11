@@ -65,9 +65,6 @@ typedef NODE* (*RBGETMETHODBODY) (
     );
 
 
-
-void* rb_call_original;
-
 // extern, exported variables
 int hook_enabled = 0;
 int hook_enable_left = 0;
@@ -146,14 +143,6 @@ rb_call_fake(
 void
 rb_call_fake_init() {
 
-	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
-	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-	Dl_info info;
-	dladdr(rb_funcall, &info);
-
-	unsigned char* base = (unsigned char*)info.dli_fbase;
-
-	rb_call_original = ruby_resolv(base, "rb_call");
 	id_call = rb_intern("call");
 
 }

@@ -22,7 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
-#include "hook.h"
+#include "hook_rb_call.h"
 #include "method_node.h"
 #include <tag_container.h>
 
@@ -45,13 +45,9 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	if (!code_changed) {
 		// insert inconditional jmp from rb_call to rb_call_copy
-		int replaced = 0;
-		if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
-			replaced = 1;
-			rb_call_copy = (RBCALL)put_jmp_hook(rb_call_original, rb_call_fake, 13);
-		}
+		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
 
-		if (!replaced) {
+		if (!rb_call_copy) {
 			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
 		}
 
