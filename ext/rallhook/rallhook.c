@@ -64,19 +64,30 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 VALUE from(VALUE self, VALUE num) {
 	hook_enable_left = FIX2INT(num)+1;
+	return self;
 }
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
-	rb_yield_splat(arguments);
+
+#ifdef RUBY1_9
+	VALUE tmp = rb_check_array_type(arguments);
+    if (NIL_P(tmp)) {
+		arguments = rb_ary_new3(1,arguments);
+    }
+#endif
+
+	return rb_yield_splat(arguments);
 }
 
 VALUE restore_hook_status( VALUE unused) {
 	hook_enabled = 1;
+	return Qnil;
 }
 
 VALUE restore_unhook_status( VALUE unused) {
 	hook_enabled = 0;
+	return Qnil;
 }
 
 
@@ -153,6 +164,15 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
 		arguments = rb_ary_new3(1,arguments);
 	}
+
+#ifdef RUBY1_9
+	VALUE tmp = rb_check_array_type(arguments);
+    if (NIL_P(tmp)) {
+		arguments = rb_ary_new3(1,arguments);
+    }
+
+
+#endif
 
 	hook_enabled = 1;
 	return rb_yield_splat(arguments);
