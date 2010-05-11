@@ -23,20 +23,44 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "hook.h"
 #include "ruby_symbols.h"
 #include "ruby_version.h"
+#include "distorm.h"
 
 #define __USE_GNU
 #include <dlfcn.h>
 
-typedef struct
-{
-  __const char *dli_fname;	/* File name of defining object.  */
-  void *dli_fbase;		/* Load address of that object.  */
-  __const char *dli_sname;	/* Name of nearest symbol.  */
-  void *dli_saddr;		/* Exact value of nearest symbol.  */
-} Dl_info;
-
-
 void* rb_call_original = 0;
+
+int get_instructions_size(void* code, int size) {
+	_DecodedInst decodedInstructions[32];
+
+	_OffsetType offset = 0;
+
+	int decodedInstructionsCount;
+
+	#ifdef __x86_64__
+		_DecodeType dt = Decode32Bits;
+	#elif __i386__
+		_DecodeType dt = Decode64Bits;
+	#else
+		#error "unknown architecture"
+	#endif
+
+	distorm_decode(offset, code, size, dt, decodedInstructions, 32, &decodedInstructionsCount);
+
+	int i;
+	int totalsize = 0;
+	int minsize = get_jmp_size();
+	for (i = 0; i < decodedInstructionsCount; i++) {
+		totalsize = totalsize + decodedInstructions[i].size;
+		if (totalsize >= minsize) {
+			return totalsize;
+		}
+	}
+
+	return totalsize;
+
+}
+
 
 void* hook_rb_call(void* fake_function) {
 	int replaced = 0;
