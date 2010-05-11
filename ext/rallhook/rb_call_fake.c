@@ -28,6 +28,15 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include "tag_container.h"
 
+typedef struct
+{
+  __const char *dli_fname;	/* File name of defining object.  */
+  void *dli_fbase;		/* Load address of that object.  */
+  __const char *dli_sname;	/* Name of nearest symbol.  */
+  void *dli_saddr;		/* Exact value of nearest symbol.  */
+} Dl_info;
+
+
 // same constant as eval.c
 #define CSTAT_PRIV  1
 #define CSTAT_PROT  2
