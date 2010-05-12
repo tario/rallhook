@@ -28,7 +28,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #ifdef RUBY1_9
 #include <ruby/node.h>
-#include <ruby/env.h> // from ruby
 #endif
 
 #include <dlfcn.h>
