@@ -88,17 +88,16 @@ void* hook_rb_call(void* fake_function) {
 
 	}
 
-	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
-		replaced = 1;
-		return put_jmp_hook(rb_call_original, fake_function, 13);
-	}
+/*	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
+		replaced = 1;*/
+//	}
 
-	if (memcmp(rb_call_original, "\x48\x89\x6c\x24\xd8\x4c\x89\x74\x24\xf0\x48\x89\xd5" ,13)==0) {
-		replaced = 1;
-		return put_jmp_hook(rb_call_original, fake_function, 13);
-	}
+/*	if (memcmp(rb_call_original, "\x48\x89\x6c\x24\xd8\x4c\x89\x74\x24\xf0\x48\x89\xd5" ,13)==0) {
+		replaced = 1;*/
+//	}
 
-	return 0;
+	int inst_size = get_instructions_size(rb_call_original, 256);
+	return put_jmp_hook(rb_call_original, fake_function, inst_size);
 
 }
 
