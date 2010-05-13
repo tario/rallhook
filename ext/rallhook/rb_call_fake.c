@@ -79,7 +79,7 @@ vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
-		return vm_call_method_fake(th,cfp,num,blockptr,flag,id,mn,recv,klass);
+		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
 		VALUE sym;
 
