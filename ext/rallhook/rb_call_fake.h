@@ -62,7 +62,7 @@ typedef struct {
 typedef VALUE (*VMCALLMETHOD) (
 	rb_thread_t * const th, rb_control_frame_t * const cfp,
     const int num, rb_block_t * const blockptr, const VALUE flag,
-    const ID id, const NODE * mn, const VALUE recv, VALUE klass
+    const ID id, void * mn, const VALUE recv, VALUE klass
 ) ;
 #endif
 
@@ -85,7 +85,7 @@ rb_call_fake(
 VALUE
 vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 	       const int num, rb_block_t * const blockptr, const VALUE flag,
-	       const ID id, const NODE * mn, const VALUE recv, VALUE klass);
+	       const ID id, void * mn, const VALUE recv, VALUE klass);
 
 extern void* rb_call_original;
 extern int hook_enabled;

@@ -59,7 +59,7 @@ VALUE rb_call_wrapper(VALUE ary){
 VALUE
 vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 	       const int num, rb_block_t * const blockptr, const VALUE flag,
-	       const ID id, const NODE * mn, const VALUE recv_, VALUE klass)
+	       const ID id, void * mn, const VALUE recv_, VALUE klass)
 {
 	int must_hook = hook_enabled;
 	volatile VALUE recv = recv_;

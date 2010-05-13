@@ -29,6 +29,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <dlfcn.h>
 
 void* rb_call_original = 0;
+void* vm_call_method_original = 0;
 
 int get_instructions_size(void* code, int size) {
 	_DecodedInst decodedInstructions[32];
@@ -61,6 +62,27 @@ int get_instructions_size(void* code, int size) {
 
 }
 
+void* hook_vm_call_method(void *fake_function) {
+	if (vm_call_method_original == 0) {
+		void* handle = dlopen(current_libruby(),0x101);
+		char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+		Dl_info info;
+		dladdr(rb_funcall, &info);
+
+		unsigned char* base = (unsigned char*)info.dli_fbase;
+
+		rb_call_original = ruby_resolv(base, "vm_call_method");
+
+		if (vm_call_method_original == 0) {
+			return 0;
+		}
+
+	}
+
+	int inst_size = get_instructions_size(vm_call_method_original, 256);
+	return put_jmp_hook(vm_call_method_original, fake_function, inst_size);
+
+}
 
 void* hook_rb_call(void* fake_function) {
 	int replaced = 0;
