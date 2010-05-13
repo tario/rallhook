@@ -37,6 +37,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "tag_container.h"
 
 ID id_call;
+ID id_method_wrapper;
 VALUE rb_hook_proc;
 
 // extern, exported variables
@@ -69,7 +70,24 @@ typedef struct {
 } vm_call_method_parameters_t;
 
 VALUE vm_call_method_wrapper(VALUE ary ) {
+
 		vm_call_method_parameters_t* params = (vm_call_method_parameters_t*)ary;
+
+		// redirigir la llamada del metodo a otro objeto
+		VALUE obj = rb_funcall(
+			rb_cRallHook,
+			id_method_wrapper,
+			3,
+			params->recv,
+			params->klass,
+			LONG2FIX(params->id)
+			);
+
+		params->recv = obj;
+		params->klass = CLASS_OF(obj);
+		params->mn = rb_method_node( params->klass, params->recv);
+		params->id = id_call;
+
 		return vm_call_method_copy(
 				params->th,
 				params->cfp,
@@ -108,34 +126,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	} else {
 		hook_enabled = 0;
 
-/*		VALUE sym;
-
-		// avoid to send symbols without name (crash the interpreter)
-		if (rb_id2name(id) == NULL){
-			sym = Qnil;
-		} else {
-			sym = ID2SYM(id);
-		}
-
-		int argc = num;
-
-		VALUE *argv = ALLOCA_N(VALUE, num);
-		MEMCPY(argv, cfp->sp - num, VALUE, num);
-		cfp->sp += - num - 1;
-
-		VALUE args = rb_ary_new2(argc);
-		int i;
-		for (i = 0; i < argc; i ++) {
-			rb_ary_store (args, i, argv[i] );
-		}
-
-		VALUE argv_[6];
-		argv_[0] = klass;
-		argv_[1] = recv;
-		argv_[2] = sym;
-		argv_[3] = args;
-		argv_[4] = LONG2FIX(id);
-	*/
 		vm_call_method_parameters_t params;
 
 		params.th = th;
@@ -225,5 +215,5 @@ void
 rb_call_fake_init() {
 
 	id_call = rb_intern("call");
-
+	id_method_wrapper = rb_intern("method_wrapper");
 }
