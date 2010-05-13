@@ -41,27 +41,29 @@ typedef VALUE (*RBCALL) (
 
 
 #ifdef RUBY1_9
-typedef void rb_block_t;
-typedef void rb_iseq_t;
+
+typedef void rb_block_t_;
+typedef void rb_iseq_t_;
+typedef void rb_thread_t_;
 // from vm_core.h
 typedef struct {
-    VALUE *pc;			/* cfp[0] */
-    VALUE *sp;			/* cfp[1] */
-    VALUE *bp;			/* cfp[2] */
-    rb_iseq_t *iseq;		/* cfp[3] */
-    VALUE flag;			/* cfp[4] */
-    VALUE self;			/* cfp[5] / block[0] */
-    VALUE *lfp;			/* cfp[6] / block[1] */
-    VALUE *dfp;			/* cfp[7] / block[2] */
-    rb_iseq_t *block_iseq;	/* cfp[8] / block[3] */
-    VALUE proc;			/* cfp[9] / block[4] */
-    ID method_id;               /* cfp[10] saved in special case */
-    VALUE method_class;         /* cfp[11] saved in special case */
-} rb_control_frame_t;
+    VALUE *pc;
+    VALUE *sp;
+    VALUE *bp;
+    rb_iseq_t_ *iseq;
+    VALUE flag;		
+    VALUE self;		
+    VALUE *lfp;		
+    VALUE *dfp;		
+    rb_iseq_t_ *block_iseq;
+    VALUE proc;		
+    ID method_id;       
+    VALUE method_class; 
+} rb_control_frame_t_;
 
 typedef VALUE (*VMCALLMETHOD) (
-	rb_thread_t * const th, rb_control_frame_t * const cfp,
-    const int num, rb_block_t * const blockptr, const VALUE flag,
+	rb_thread_t_ * th, rb_control_frame_t_ *cfp,
+    const int num, rb_block_t_ * blockptr, const VALUE flag,
     const ID id, void * mn, const VALUE recv, VALUE klass
 ) ;
 #endif
@@ -70,6 +72,10 @@ extern RBCALL rb_call_copy;
 
 #ifdef RUBY1_9
 extern VMCALLMETHOD vm_call_method_copy;
+VALUE
+vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
+	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
+	       const ID id, void * mn, const VALUE recv_, VALUE klass);
 #endif
 
 VALUE
@@ -82,10 +88,6 @@ rb_call_fake(
     VALUE self
 );
 
-VALUE
-vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
-	       const int num, rb_block_t * const blockptr, const VALUE flag,
-	       const ID id, void * mn, const VALUE recv, VALUE klass);
 
 extern void* rb_call_original;
 extern int hook_enabled;
