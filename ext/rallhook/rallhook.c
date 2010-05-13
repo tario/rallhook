@@ -79,7 +79,9 @@ VALUE from(VALUE self, VALUE num) {
 	return self;
 }
 
+#ifdef RUBY1_8
 VALUE get_rb_yield_0_avalue();
+#endif
 
 VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
@@ -165,6 +167,7 @@ rb_f_send_copy(argc, argv, recv)
 	return rb_ensure(ensured_recall, (VALUE)args, restore_unhook_status, Qnil);
 }
 
+#ifdef RUBY1_8
 
 VALUE get_rb_yield_0_avalue() {
 	#if __x86_64__
@@ -176,6 +179,7 @@ VALUE get_rb_yield_0_avalue() {
 	#endif
 }
 
+#endif
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
 
