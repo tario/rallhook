@@ -75,7 +75,6 @@ vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 		}
 	}
 
-	must_hook = 0;
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
