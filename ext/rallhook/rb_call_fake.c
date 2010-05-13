@@ -80,6 +80,8 @@ vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 
 		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
+		hook_enabled = 0;
+
 		VALUE sym;
 
 		// avoid to send symbols without name (crash the interpreter)
@@ -93,6 +95,7 @@ vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
 
 		VALUE *argv = ALLOCA_N(VALUE, num);
 		MEMCPY(argv, cfp->sp - num, VALUE, num);
+		cfp->sp += - num - 1;
 
 		VALUE args = rb_ary_new2(argc);
 		int i;
