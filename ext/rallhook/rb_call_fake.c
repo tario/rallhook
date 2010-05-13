@@ -56,6 +56,32 @@ VALUE rb_call_wrapper(VALUE ary){
 
 #ifdef RUBY1_9
 
+typedef struct {
+	rb_thread_t_* th;
+	rb_control_frame_t_* cfp;
+	int num;
+	rb_block_t_* blockptr;
+	VALUE flag;
+	ID id;
+	void *mn;
+	VALUE recv;
+	VALUE klass;
+} vm_call_method_parameters_t;
+
+VALUE vm_call_method_wrapper(VALUE ary ) {
+		vm_call_method_parameters_t* params = (vm_call_method_parameters_t*)ary;
+		return vm_call_method_copy(
+				params->th,
+				params->cfp,
+				params->num,
+				params->blockptr,
+				params->flag,
+				params->id,
+				params->mn,
+				params->recv,
+				params->klass);
+}
+
 VALUE
 vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
@@ -82,7 +108,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	} else {
 		hook_enabled = 0;
 
-		VALUE sym;
+/*		VALUE sym;
 
 		// avoid to send symbols without name (crash the interpreter)
 		if (rb_id2name(id) == NULL){
@@ -109,8 +135,25 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		argv_[2] = sym;
 		argv_[3] = args;
 		argv_[4] = LONG2FIX(id);
+	*/
+		vm_call_method_parameters_t params;
 
-		return rb_ensure(rb_call_wrapper,(VALUE)argv_,restore_hook_status_ensure,Qnil);
+		params.th = th;
+		params.cfp = cfp;
+		params.num = num;
+		params.blockptr = blockptr;
+		params.flag = flag;
+		params.id = id;
+		params.mn = mn;
+		params.recv = recv_;
+		params.klass = klass;
+
+
+//vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
+	//       const int num, rb_block_t_ * const blockptr, const VALUE flag,
+	  //     const ID id, void * mn, const VALUE recv_, VALUE klass)
+
+		return rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
 
 	}
 }
