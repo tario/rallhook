@@ -225,6 +225,7 @@ void Init_rallhook() {
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
+	init_hook_rb_call();
 	rb_call_fake_init();
 	init_node();
 	init_tag_container();

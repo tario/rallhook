@@ -64,62 +64,40 @@ int get_instructions_size(void* code, int size) {
 
 void* hook_vm_call_method(void *fake_function) {
 	if (vm_call_method_original == 0) {
-		void* handle = dlopen(current_libruby(),0x101);
-		char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-		Dl_info info;
-		dladdr(rb_funcall, &info);
-
-		unsigned char* base = (unsigned char*)info.dli_fbase;
-
-		rb_call_original = ruby_resolv(base, "vm_call_method");
-
-		if (vm_call_method_original == 0) {
-			return 0;
-		}
-
+		return 0;
 	}
-
 	int inst_size = get_instructions_size(vm_call_method_original, 256);
 	return put_jmp_hook(vm_call_method_original, fake_function, inst_size);
 
 }
 
 void* hook_rb_call(void* fake_function) {
-	int replaced = 0;
-
 	if (rb_call_original == 0) {
-		void* handle = dlopen(current_libruby(),0x101);
-		char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-		Dl_info info;
-		dladdr(rb_funcall, &info);
-
-		unsigned char* base = (unsigned char*)info.dli_fbase;
-
-		#ifdef RUBY1_8
-		rb_call_original = ruby_resolv(base, "rb_call");
-		#endif
-
-		// in the ruby 1.9 source, the rb_call0 acts as rb_call (and vm_call0 acts as rb_call0)
-		#ifdef RUBY1_9
-		rb_call_original = ruby_resolv(base, "rb_call0");
-		#endif
-
-		if (rb_call_original == 0) {
-			return 0;
-		}
-
+		return 0;
 	}
-
-/*	if (memcmp(rb_call_original, "\x48\x89\x5c\x24\xd0\x4c\x89\x64\x24\xe0\x48\x89\xd3" ,13)==0) {
-		replaced = 1;*/
-//	}
-
-/*	if (memcmp(rb_call_original, "\x48\x89\x6c\x24\xd8\x4c\x89\x74\x24\xf0\x48\x89\xd5" ,13)==0) {
-		replaced = 1;*/
-//	}
-
 	int inst_size = get_instructions_size(rb_call_original, 256);
 	return put_jmp_hook(rb_call_original, fake_function, inst_size);
+
+}
+
+void init_hook_rb_call() {
+	void* handle = dlopen(current_libruby(),0x101);
+	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+	Dl_info info;
+	dladdr(rb_funcall, &info);
+
+	unsigned char* base = (unsigned char*)info.dli_fbase;
+
+	rb_call_original = ruby_resolv(base, "vm_call_method");
+
+	#ifdef RUBY1_8
+	rb_call_original = ruby_resolv(base, "rb_call");
+	#endif
+
+	// in the ruby 1.9 source, the rb_call0 acts as rb_call (and vm_call0 acts as rb_call0)
+	#ifdef RUBY1_9
+	rb_call_original = ruby_resolv(base, "rb_call0");
+	#endif
 
 }
 

@@ -28,4 +28,6 @@ void* hook_rb_call(void* fake_function);
 void* hook_vm_call_method(void *fake_function);
 #endif
 
+void init_hook_rb_call();
+
 #endif
