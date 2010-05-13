@@ -8,7 +8,7 @@ ruby_version = Config::CONFIG["ruby_version"]
 ruby_version = ruby_version.split(".")[0..1].join(".")
 end
 
-$LIBS = $LIBS + " -ldistorm64"
+$LIBS = $LIBS + " -ldistorm3"
 
 if ruby_version == "1.8"
 	$CFLAGS = $CFLAGS + " -DRUBY1_8"
