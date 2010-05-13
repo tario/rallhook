@@ -54,6 +54,68 @@ VALUE rb_call_wrapper(VALUE ary){
 		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
 }
 
+#ifdef RUBY1_9
+
+VALUE
+vm_call_method_fake(rb_thread_t * const th, rb_control_frame_t * const cfp,
+	       const int num, rb_block_t * const blockptr, const VALUE flag,
+	       const ID id, const NODE * mn, const VALUE recv_, VALUE klass)
+{
+	int must_hook = hook_enabled;
+	volatile VALUE recv = recv_;
+
+	if (is_tag(recv) ) {
+		volatile VALUE orig_recv = recv;
+		volatile VALUE klass_;
+		recv = tag_container_get_self(orig_recv);
+		klass_ = tag_container_get_tag(orig_recv);
+
+		if (klass_ != Qnil ) {
+			klass = klass_;
+		}
+	}
+
+	must_hook = 0;
+	if (must_hook == 0 || hook_enable_left > 0 ) {
+		if (hook_enable_left > 0) hook_enable_left--;
+
+		return vm_call_method_fake(th,cfp,num,blockptr,flag,id,mn,recv,klass);
+	} else {
+		VALUE sym;
+
+		// avoid to send symbols without name (crash the interpreter)
+		if (rb_id2name(id) == NULL){
+			sym = Qnil;
+		} else {
+			sym = ID2SYM(id);
+		}
+
+		int argc = num;
+
+		VALUE *argv = ALLOCA_N(VALUE, num);
+		MEMCPY(argv, cfp->sp - num, VALUE, num);
+
+		VALUE args = rb_ary_new2(argc);
+		int i;
+		for (i = 0; i < argc; i ++) {
+			rb_ary_store (args, i, argv[i] );
+		}
+
+		VALUE argv_[6];
+		argv_[0] = klass;
+		argv_[1] = recv;
+		argv_[2] = sym;
+		argv_[3] = args;
+		argv_[4] = LONG2FIX(id);
+
+		return rb_ensure(rb_call_wrapper,(VALUE)argv_,restore_hook_status_ensure,Qnil);
+
+	}
+}
+
+#endif
+
+
 VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,

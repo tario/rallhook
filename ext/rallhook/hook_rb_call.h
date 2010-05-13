@@ -24,4 +24,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void* hook_rb_call(void* fake_function);
 
+#ifdef RUBY1_9
+void* hook_vm_call_method(void *fake_function);
+#endif
+
 #endif

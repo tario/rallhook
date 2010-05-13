@@ -36,6 +36,10 @@ VALUE unhook(VALUE self) {
 
 RBCALL rb_call_copy;
 
+#ifdef RUBY1_9
+VMCALLMETHOD vm_call_method_copy;
+#endif
+
 
 int code_changed = 0;
 
