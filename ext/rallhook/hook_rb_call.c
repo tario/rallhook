@@ -88,7 +88,7 @@ void init_hook_rb_call() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	rb_call_original = ruby_resolv(base, "vm_call_method");
+	vm_call_method_original = ruby_resolv(base, "vm_call_method");
 
 	#ifdef RUBY1_8
 	rb_call_original = ruby_resolv(base, "rb_call");
