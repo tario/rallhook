@@ -37,7 +37,7 @@ VALUE method_wrapper_get_recv(VALUE methodw) {
 }
 
 VALUE method_wrapper_get_method_id(VALUE methodw) {
-	return rb_ivar_get(methodw,"@recv");
+	return rb_ivar_get(methodw,"@method_id");
 }
 
 VALUE method_wrapper_set_klass(VALUE methodw, VALUE klass) {
