@@ -88,14 +88,13 @@ void init_hook_rb_call() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	vm_call_method_original = ruby_resolv(base, "vm_call_method");
-
 	#ifdef RUBY1_8
 	rb_call_original = ruby_resolv(base, "rb_call");
 	#endif
 
 	// in the ruby 1.9 source, the rb_call0 acts as rb_call (and vm_call0 acts as rb_call0)
 	#ifdef RUBY1_9
+	vm_call_method_original = ruby_resolv(base, "vm_call_method");
 	rb_call_original = ruby_resolv(base, "rb_call0");
 	#endif
 
