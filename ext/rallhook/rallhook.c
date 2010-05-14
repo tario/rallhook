@@ -196,9 +196,6 @@ VALUE get_rb_yield_0_avalue() {
 
 VALUE rehook_reyield_ensure( VALUE arguments) {
 
-	VALUE str = rb_inspect( arguments );
-	printf("_arguments: %s\n",rb_string_value_ptr( &str ));
-
 	// only work and is needed in ruby1.8
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
 		arguments = rb_ary_new3(1,arguments);
