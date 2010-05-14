@@ -215,12 +215,12 @@ VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, 
 	}
 }
 
-VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE method_id) {
+VALUE rallhook_new_method_wrapper(VALUE self, VALUE recv, VALUE klass, VALUE method_id) {
 	VALUE mw = new_method_wrapper();
 
 	method_wrapper_set_klass(mw, klass);
 	method_wrapper_set_recv(mw, recv);
-	method_wrapper_set_method_id(mw, method_id);
+	method_wrapper_set_method_id_(mw, method_id);
 
 	return mw;
 }
@@ -228,11 +228,11 @@ VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE met
 
 VALUE method_wrapper_call(VALUE self, VALUE args) {
 
-	ID id = FIX2LONG( method_wrapper_get_method_id(self) );
 	VALUE klass = method_wrapper_get_klass(self);
 	VALUE recv = method_wrapper_get_recv(self);
 	VALUE sym;
-	VALUE mid = id;
+	VALUE method_id = method_wrapper_get_method_id(self);
+	ID mid = FIX2LONG( method_id );
 
 	if (rb_id2name(mid) == NULL){
 		sym = Qnil;
@@ -240,11 +240,12 @@ VALUE method_wrapper_call(VALUE self, VALUE args) {
 		sym = ID2SYM(mid);
 	}
 
-	if (rb_block_given_p() ) {
-		VALUE argv[6] = {klass, recv, sym, args, mid};
+	if (rb_block_given_p()) {
+		VALUE argv[6] = {klass, recv, sym, args, method_id};
 		return rb_block_call(rb_hook_proc, id_call_, 5, argv, rehook_reyield, Qnil );
 	} else {
-		return rb_funcall(rb_hook_proc, id_call_, 5, klass, recv, sym, args, mid );
+
+		return rb_funcall(rb_hook_proc, id_call_ ,5, klass, recv, sym, args, method_id);
 	}
 }
 
