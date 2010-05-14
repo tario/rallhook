@@ -215,6 +215,16 @@ VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, 
 	}
 }
 
+VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE method_id) {
+	mw = new_method_wrapper();
+
+	method_wrapper_set_klass(mw, klass);
+	method_wrapper_set_recv(mw, recv);
+	method_wrapper_set_method_id(mw, method_id);
+
+	return mw;
+}
+
 
 
 void Init_rallhook() {
@@ -231,6 +241,7 @@ void Init_rallhook() {
 	rb_define_method(rb_cRallHook, "from", (RBHOOK*)(from), 1);
 
 	rb_define_singleton_method(rb_cRallHook, "call", (RBHOOK*)(rallhook_call), 5);
+	rb_define_singleton_method(rb_cRallHook, "method_wrapper", rallhook_new_method_wrapper, 3);
 
 	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
 
