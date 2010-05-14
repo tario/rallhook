@@ -273,7 +273,7 @@ void Init_rallhook() {
 	init_tag_container();
 	init_method_wrapper();
 
-	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -1);
+	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -2);
 
 	id_call_ = rb_intern("call");
 /*
