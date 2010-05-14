@@ -85,8 +85,11 @@ VALUE vm_call_method_wrapper(VALUE ary ) {
 
 		params->recv = obj;
 		params->klass = CLASS_OF(obj);
-		params->mn = rb_method_node( params->klass, params->recv);
+		params->mn = rb_method_node( params->klass, id_call);
+		if (params->mn == 0) rb_bug("Null method node for method %s", rb_id2name(id_call) );
+
 		params->id = id_call;
+
 
 		return vm_call_method_copy(
 				params->th,
