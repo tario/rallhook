@@ -24,6 +24,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include "hook_rb_call.h"
 #include "method_node.h"
+#include "method_wrapper.h"
 #include <tag_container.h>
 
 VALUE rb_cRallHook;
@@ -237,6 +238,7 @@ void Init_rallhook() {
 	rb_call_fake_init();
 	init_node();
 	init_tag_container();
+	init_method_wrapper();
 
 	id_call_ = rb_intern("call");
 /*
