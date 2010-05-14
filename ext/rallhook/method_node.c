@@ -36,7 +36,7 @@ ID intern_name;
 ID intern_sym;
 
 ///  from eval.c
-
+#ifdef RUBY1_8
 struct METHOD {
     VALUE klass, rklass;
 
@@ -45,7 +45,20 @@ struct METHOD {
     int safe_level;
     NODE *body;
 };
+#endif
 
+#ifdef RUBY1_9
+// from proc.c
+struct METHOD {
+    VALUE oclass;		/* class that holds the method */
+    VALUE rclass;		/* class of the receiver */
+    VALUE recv;
+    ID id, oid;
+    NODE *body;
+};
+#endif
+
+#define nd_file(node) node->nd_file
 
 VALUE rb_method_body(VALUE self) {
 
@@ -70,11 +83,11 @@ VALUE rb_node_file(VALUE self) {
     NODE* _node;
     Data_Get_Struct(self,NODE,_node);
 
-    if (_node->nd_file  == NULL ) {
+    if (nd_file(_node)  == NULL ) {
 	    return rb_str_new2("");
     }
 
-    return rb_str_new2(_node->nd_file );
+    return rb_str_new2(nd_file(_node) );
 }
 
 VALUE rb_node_method_body(VALUE self, VALUE klass, VALUE method_id) {
