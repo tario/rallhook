@@ -23,6 +23,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "hook.h"
 #include "ruby_symbols.h"
 #include "ruby_version.h"
+#include "distorm.h"
 
 #define __USE_GNU
 #include <dlfcn.h>
