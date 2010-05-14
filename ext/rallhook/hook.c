@@ -96,7 +96,7 @@ void* put_jmp_hook(void* function_address, void* fake_function, int instructions
 	unprotect(p_copy);
 	unprotect(p);
 
-	memcpy(p_copy, p, 13);
+	memcpy(p_copy, p, instructions_size);
 
 	inconditional_jump(p, fake_function);
 	inconditional_jump(p_copy+instructions_size, p+instructions_size);
