@@ -216,7 +216,7 @@ VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, 
 }
 
 VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE method_id) {
-	mw = new_method_wrapper();
+	VALUE mw = new_method_wrapper();
 
 	method_wrapper_set_klass(mw, klass);
 	method_wrapper_set_recv(mw, recv);
@@ -226,6 +226,22 @@ VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE met
 }
 
 
+VALUE method_wrapper_call(VALUE self, VALUE args) {
+
+	ID id = FIX2LONG( method_wrapper_get_method_id(self) );
+	VALUE klass = method_wrapper_get_method_klass(self);
+	VALUE recv = method_wrapper_get_recv(self);
+	VALUE sym = rb_id2sym(id);
+	VALUE mid = id;
+
+	if (rb_block_given_p() ) {
+		VALUE argv[6] = {klass, recv, sym, args, mid};
+		return rb_block_call(rb_hook_proc, id_call_, 5, argv, rehook_reyield, Qnil );
+	} else {
+		return rb_funcall(rb_hook_proc, id_call_, 5, klass, recv, sym, args, mid );
+	}
+
+}
 
 void Init_rallhook() {
 
@@ -250,6 +266,8 @@ void Init_rallhook() {
 	init_node();
 	init_tag_container();
 	init_method_wrapper();
+
+	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -1);
 
 	id_call_ = rb_intern("call");
 /*
