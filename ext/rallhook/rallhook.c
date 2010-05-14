@@ -290,6 +290,7 @@ void Init_rallhook() {
 	init_node();
 	init_tag_container();
 	init_method_wrapper();
+	init_rb_yield_fake();
 
 	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -2);
 

@@ -19,36 +19,35 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "hook_rb_call.h"
+#include <ruby.h>
+#include "rb_yield_fake.h"
 #include "hook.h"
 #include "ruby_symbols.h"
-#include "ruby_version.h"
+#include "distorm.h"
 
 #define __USE_GNU
 #include <dlfcn.h>
 
-void* rb_call_original = 0;
-void* vm_call_method_original = 0;
+typedef VALUE (*RBYIELD0)(VALUE val, VALUE self, VALUE klass, int flags, int avalue);
 
-void* hook_vm_call_method(void *fake_function) {
-	if (vm_call_method_original == 0) {
-		return 0;
-	}
-	int inst_size = get_instructions_size(vm_call_method_original, 256);
-	return put_jmp_hook(vm_call_method_original, fake_function, inst_size);
+RBYIELD0 rb_yield_0_copy;
+void* rb_yield_0_original;
+
+static VALUE
+rb_yield_0_fake(val, self, klass, flags, avalue)
+    VALUE val, self, klass;	/* OK */
+    int flags, avalue;
+{
+	return rb_yield_0_copy(val,self,klass,flags,avalue);
+}
+
+void* hook_rb_yield_0(void* fake_function) {
+	int inst_size = get_instructions_size(rb_yield_0_original, 256);
+	return put_jmp_hook(rb_yield_0_original, fake_function, inst_size);
 
 }
 
-void* hook_rb_call(void* fake_function) {
-	if (rb_call_original == 0) {
-		return 0;
-	}
-	int inst_size = get_instructions_size(rb_call_original, 256);
-	return put_jmp_hook(rb_call_original, fake_function, inst_size);
-
-}
-
-void init_hook_rb_call() {
+void init_rb_yield_fake() {
 	void* handle = dlopen(current_libruby(),0x101);
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
 	Dl_info info;
@@ -56,15 +55,7 @@ void init_hook_rb_call() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	#ifdef RUBY1_8
-	rb_call_original = ruby_resolv(base, "rb_call");
-	#endif
-
-	// in the ruby 1.9 source, the rb_call0 acts as rb_call (and vm_call0 acts as rb_call0)
-	#ifdef RUBY1_9
-	vm_call_method_original = ruby_resolv(base, "vm_call_method");
-	rb_call_original = ruby_resolv(base, "rb_call0");
-	#endif
-
+	rb_yield_0_original = resolv(base, "rb_yield_0" );
+	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
 }
 

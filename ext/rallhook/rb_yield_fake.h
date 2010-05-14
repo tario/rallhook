@@ -18,12 +18,11 @@ you should have received a copy of the gnu general public license
 along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef __HOOK_H
-#define __HOOK_H
+#ifndef __RB_YIELD_FAKE_H
+#define __RB_YIELD_FAKE_H
 
-void* put_jmp_hook(void* function_address, void* fake_function, int instructions_size);
-int get_jmp_size();
-
-extern int get_instructions_size(void* code, int size);
+void init_rb_yield_fake();
 
 #endif
+
+
