@@ -57,7 +57,7 @@ void init_rb_yield_fake() {
 
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	rb_yield_0_original = resolv(base, "rb_yield_0" );
+	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
 #endif
 
