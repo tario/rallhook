@@ -84,21 +84,6 @@ VALUE from(VALUE self, VALUE num) {
 VALUE get_rb_yield_0_avalue();
 #endif
 
-VALUE reunhook_reyield_ensure( VALUE arguments) {
-	hook_enabled = 0;
-#ifdef RUBY1_8
-	// only work and is needed in ruby1.8
-	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
-		arguments = rb_ary_new3(1,arguments);
-	}
-#endif
-
-#ifdef RUBY1_9
-	arguments = rb_ary_new3(1,arguments);
-#endif
-
-	return rb_yield_splat(arguments);
-}
 
 VALUE restore_hook_status( VALUE unused) {
 	hook_enabled = 1;
@@ -111,9 +96,34 @@ VALUE restore_unhook_status( VALUE unused) {
 }
 
 
+#ifdef RUBY1_8
+
+VALUE reunhook_reyield_ensure( VALUE arguments) {
+	hook_enabled = 0;
+	// only work and is needed in ruby1.8
+	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
+		arguments = rb_ary_new3(1,arguments);
+	}
+	return rb_yield_splat(arguments);
+}
+
+
 VALUE reunhook_reyield( VALUE arguments, VALUE args) {
 	return rb_ensure(reunhook_reyield_ensure, arguments, restore_hook_status, Qnil);
 }
+#endif
+
+#ifdef RUBY1_9
+VALUE reunhook_reyield_ensure( VALUE arguments) {
+	hook_enabled = 0;
+	return rb_yield_splat(arguments);
+}
+
+
+VALUE reunhook_reyield( VALUE arguments, VALUE args, int argc, VALUE* argv) {
+	return rb_ensure(reunhook_reyield_ensure, rb_ary_new4(argc, argv), restore_hook_status, Qnil);
+}
+#endif
 
 VALUE ensured_recall( VALUE arguments ) {
 	VALUE* vect = (VALUE*)arguments;
@@ -182,21 +192,17 @@ VALUE get_rb_yield_0_avalue() {
 
 #endif
 
+#ifdef RUBY1_8
+
 VALUE rehook_reyield_ensure( VALUE arguments) {
 
-#ifdef RUBY1_8
+	VALUE str = rb_inspect( arguments );
+	printf("_arguments: %s\n",rb_string_value_ptr( &str ));
+
 	// only work and is needed in ruby1.8
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
 		arguments = rb_ary_new3(1,arguments);
 	}
-#endif
-
-#ifdef RUBY1_9
-//	VALUE tmp = rb_check_array_type(arguments);
-//    if (NIL_P(tmp)) {
-	arguments = rb_ary_new3(1,arguments);
-//    }
-#endif
 
 	hook_enabled = 1;
 	return rb_yield_splat(arguments);
@@ -205,6 +211,21 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 VALUE rehook_reyield( VALUE arguments, VALUE args) {
 	return rb_ensure(rehook_reyield_ensure, arguments, restore_unhook_status, Qnil);
 }
+
+#endif
+
+#ifdef RUBY1_9
+
+VALUE rehook_reyield_ensure( VALUE arguments) {
+	hook_enabled = 1;
+	return rb_yield_splat(arguments);
+}
+
+VALUE rehook_reyield( VALUE arguments, VALUE args, int argc, VALUE* argv) {
+	return rb_ensure(rehook_reyield_ensure, rb_ary_new4(argc,argv), restore_unhook_status, Qnil);
+}
+
+#endif
 
 VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, VALUE mid){
 	if (rb_block_given_p() ) {
