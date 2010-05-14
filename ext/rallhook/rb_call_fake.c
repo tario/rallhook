@@ -38,7 +38,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 ID id_call;
 ID id_method_wrapper;
-VALUE rb_hook_proc;
+VALUE rb_hook_proc = Qnil;
 
 // extern, exported variables
 int hook_enabled = 0;
