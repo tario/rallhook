@@ -48,6 +48,8 @@ void* hook_rb_yield_0(void* fake_function) {
 }
 
 void init_rb_yield_fake() {
+
+#ifdef RUBY1_8
 	void* handle = dlopen(current_libruby(),0x101);
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
 	Dl_info info;
@@ -57,5 +59,7 @@ void init_rb_yield_fake() {
 
 	rb_yield_0_original = resolv(base, "rb_yield_0" );
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
+#endif
+
 }
 
