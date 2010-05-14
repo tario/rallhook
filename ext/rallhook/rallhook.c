@@ -229,10 +229,16 @@ VALUE rallhook_new_method_wrapper(VALUE self, VALUE klass, VALUE recv, VALUE met
 VALUE method_wrapper_call(VALUE self, VALUE args) {
 
 	ID id = FIX2LONG( method_wrapper_get_method_id(self) );
-	VALUE klass = method_wrapper_get_method_klass(self);
+	VALUE klass = method_wrapper_get_klass(self);
 	VALUE recv = method_wrapper_get_recv(self);
-	VALUE sym = rb_id2sym(id);
+	VALUE sym;
 	VALUE mid = id;
+
+	if (rb_id2name(mid) == NULL){
+		sym = Qnil;
+	} else {
+		sym = ID2SYM(mid);
+	}
 
 	if (rb_block_given_p() ) {
 		VALUE argv[6] = {klass, recv, sym, args, mid};
@@ -240,7 +246,6 @@ VALUE method_wrapper_call(VALUE self, VALUE args) {
 	} else {
 		return rb_funcall(rb_hook_proc, id_call_, 5, klass, recv, sym, args, mid );
 	}
-
 }
 
 void Init_rallhook() {
