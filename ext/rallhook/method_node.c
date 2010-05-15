@@ -171,9 +171,6 @@ void  init_node() {
 	rb_define_method(rb_cNode, "line", rb_node_line, 0);
 	rb_define_method(rb_cNode, "file", rb_node_file, 0);
 
-	rb_define_singleton_method(rb_cNode, "method_node", rb_node_method_body, 2);
-	rb_define_singleton_method(rb_cClass, "method_node", rb_class_method_body, 1);
-
 	intern_owner = rb_intern("owner");
 	intern_name = rb_intern("name");
 	intern_sym = rb_intern("to_sym");
