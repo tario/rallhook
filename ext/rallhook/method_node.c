@@ -199,7 +199,5 @@ void  init_node() {
 	mnew_ = (MNEW)( (unsigned long long)mnew_ & 0xffffffff );
 	mnew_ = (MNEW)( (unsigned long long)mnew_ | ( (unsigned long long)base__ & 0xffffffff00000000 ) );
 
-	printf("mnew: %p\n", mnew_);
-
 	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
 }
