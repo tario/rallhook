@@ -20,6 +20,16 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
+
+#ifdef RUBY1_8
+#include <node.h>
+#include <env.h> // from ruby
+#endif
+
+#ifdef RUBY1_9
+#include <ruby/node.h>
+#endif
+
 #include "rb_yield_fake.h"
 #include "hook.h"
 #include "ruby_symbols.h"
@@ -27,6 +37,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #define __USE_GNU
 #include <dlfcn.h>
+
+int last_avalue = 0;
 
 typedef VALUE (*RBYIELD0)(VALUE val, VALUE self, VALUE klass, int flags, int avalue);
 
@@ -38,6 +50,7 @@ rb_yield_0_fake(val, self, klass, flags, avalue)
     VALUE val, self, klass;	/* OK */
     int flags, avalue;
 {
+	last_avalue = avalue;
 	return rb_yield_0_copy(val,self,klass,flags,avalue);
 }
 

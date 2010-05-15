@@ -26,6 +26,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "method_node.h"
 #include "method_wrapper.h"
 #include <tag_container.h>
+#include "rb_yield_fake.h"
 
 VALUE rb_cRallHook;
 ID id_call_;
@@ -181,13 +182,7 @@ rb_f_send_copy(argc, argv, recv)
 #ifdef RUBY1_8
 
 VALUE get_rb_yield_0_avalue() {
-	#if __x86_64__
-		__asm__("mov %r8, %rax"); // Intel x86_64 (64 bits)
-	#elif __i386__
-		__asm__("mov %BADREG_RESOLV, %eax"); // Intel i386 (32 bits)
-	#else
-		#error "unknow architecture"
-	#endif
+	return last_avalue;
 }
 
 #endif

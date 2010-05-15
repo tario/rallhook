@@ -23,6 +23,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void init_rb_yield_fake();
 
+extern int last_avalue;
+
 #endif
 
 
