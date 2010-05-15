@@ -53,9 +53,11 @@ struct METHOD {
     NODE *body;
 };
 
-typedef VALUE (*MNEW)(VALUE klass, VALUE obj, ID id, VALUE mclass, int scope);
+typedef VALUE (*MNEW)(VALUE klass, VALUE obj, ID id, VALUE mclass);
 MNEW mnew_;
 unsigned char* base__;
+
+#define nd_file(n) n->nd_file
 
 #endif
 
@@ -193,7 +195,11 @@ void  init_node() {
 	dladdr(rb_funcall, &info);
 
 	base__ = (unsigned char*)info.dli_fbase;
+	mnew_ = (MNEW)ruby_resolv(base__, "mnew");
+	mnew_ = (MNEW)( (unsigned long long)mnew_ & 0xffffffff );
+	mnew_ = (MNEW)( (unsigned long long)mnew_ | ( (unsigned long long)base__ & 0xffffffff00000000 ) );
 
-	mnew_ = ruby_resolv(base__, "mnew");
+	printf("mnew: %p\n", mnew_);
+
 	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
 }
