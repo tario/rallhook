@@ -29,7 +29,13 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #ifdef RUBY1_9
 #include <ruby/node.h>
 #define RUBY_VM_METHOD_NODE NODE_METHOD
+#include "ruby_symbols.h"
 #endif
+
+#include "distorm.h"
+
+#include <dlfcn.h>
+
 
 VALUE rb_cNode;
 ID intern_owner;
@@ -65,9 +71,12 @@ typedef struct rb_iseq_struct__ {
 } rb_iseq_t__;
 
 
+typedef VALUE (*MNEW)(VALUE klass, VALUE obj, ID id, VALUE mclass, int scope);
+MNEW mnew_;
+unsigned char* base__;
+
 #endif
 
-#define nd_file(node) node->nd_file
 
 VALUE rb_method_body(VALUE self) {
 
@@ -122,46 +131,11 @@ VALUE rb_node_file(VALUE self) {
 
 }
 
-VALUE rb_node_method_body(VALUE self, VALUE klass, VALUE method_id) {
-
-    NODE* _node;
-    ID mid;
-
-	if (rb_obj_is_kind_of(method_id,rb_cSymbol) ) {
-		mid = rb_to_id(method_id);
-	} else {
-		mid = FIX2LONG(method_id);
-	}
-	_node = rb_method_node(klass, mid);
-
-	if (_node == NULL) {
-		return Qnil;
-	}
-
-	return Data_Wrap_Struct(rb_cNode, 0, 0, _node);
-
+VALUE
+rb_obj_method_(VALUE obj, VALUE vid)
+{
+    return mnew_(CLASS_OF(obj), obj, rb_to_id(vid), rb_cMethod, Qfalse);
 }
-
-VALUE rb_class_method_body(VALUE self, VALUE method_id) {
-
-    NODE* _node;
-    ID mid;
-
-	if (rb_obj_is_kind_of(method_id,rb_cSymbol) ) {
-		mid = rb_to_id(method_id);
-	} else {
-		mid = FIX2LONG(method_id);
-	}
-
-	_node = rb_method_node(self, mid);
-
-	if (_node == NULL) {
-		return Qnil;
-	}
-
-	return Data_Wrap_Struct(rb_cNode, 0, 0, _node);
-}
-
 
 void  init_node() {
 	rb_define_method(rb_cMethod, "body", rb_method_body,0);
@@ -175,4 +149,13 @@ void  init_node() {
 	intern_name = rb_intern("name");
 	intern_sym = rb_intern("to_sym");
 
+	void* handle = dlopen(current_libruby(),0x101);
+	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+	Dl_info info;
+	dladdr(rb_funcall, &info);
+
+	base__ = (unsigned char*)info.dli_fbase;
+
+	mnew_ = ruby_resolv(base__, "mnew");
+	rb_define_method(rb_cObject, "method", rb_obj_method_, 1);
 }
