@@ -91,7 +91,7 @@ VALUE rb_node_line(VALUE self) {
     #endif
 
     #ifdef RUBY1_9
-    return 0;
+    return INT2FIX(0);
     #endif
 }
 
