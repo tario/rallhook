@@ -128,14 +128,14 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
 		hook_enabled = 0;
-		rb_iseq_t_ *iseq = cfp->iseq;
+/*		rb_iseq_t_ *iseq = cfp->iseq;
 
 		int line_no = vm_get_sourceline(cfp);
 		char* file = RSTRING_PTR(iseq->filename);
 		printf("%s:%d:in `%s'\n",
 				 file, line_no, RSTRING_PTR(iseq->name));
 
-
+*/
 
 
 		vm_call_method_parameters_t params;

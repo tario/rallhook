@@ -43,13 +43,7 @@ typedef VALUE (*RBCALL) (
 #ifdef RUBY1_9
 
 typedef void rb_block_t_;
-
-typedef struct rb_iseq_struct {
-    VALUE type;          // instruction sequence type
-    VALUE name;	         // String: iseq name
-    VALUE filename;      // file information where this sequence from
-} rb_iseq_t_;
-
+typedef void rb_iseq_t_;
 typedef void rb_thread_t_;
 // from vm_core.h
 typedef struct {

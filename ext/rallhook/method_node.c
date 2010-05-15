@@ -28,6 +28,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #ifdef RUBY1_9
 #include <ruby/node.h>
+#define RUBY_VM_METHOD_NODE NODE_METHOD
 #endif
 
 VALUE rb_cNode;
@@ -56,6 +57,14 @@ struct METHOD {
     ID id, oid;
     NODE *body;
 };
+
+typedef struct rb_iseq_struct__ {
+    VALUE type;          // instruction sequence type
+    VALUE name;	         // String: iseq name
+    VALUE filename;      // file information where this sequence from
+} rb_iseq_t__;
+
+
 #endif
 
 #define nd_file(node) node->nd_file
@@ -76,18 +85,41 @@ VALUE rb_method_body(VALUE self) {
 VALUE rb_node_line(VALUE self) {
     NODE* _node;
     Data_Get_Struct(self,NODE,_node);
+
+    #ifdef RUBY1_8
     return INT2FIX(nd_line(_node));
+    #endif
+
+    #ifdef RUBY1_9
+    return 0;
+    #endif
 }
 
 VALUE rb_node_file(VALUE self) {
     NODE* _node;
     Data_Get_Struct(self,NODE,_node);
 
+	#ifdef RUBY1_8
     if (nd_file(_node)  == NULL ) {
 	    return rb_str_new2("");
     }
-
     return rb_str_new2(nd_file(_node) );
+    #endif
+
+    #ifdef RUBY1_9
+
+	if (nd_type(_node) == RUBY_VM_METHOD_NODE) {
+		VALUE iseqval = (VALUE)_node->nd_body;
+		rb_iseq_t__* ptr;
+		Data_Get_Struct(iseqval, rb_iseq_t__, ptr);
+
+		return ptr->filename;
+	}
+
+	return rb_str_new2("");
+
+	#endif
+
 }
 
 VALUE rb_node_method_body(VALUE self, VALUE klass, VALUE method_id) {
