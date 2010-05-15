@@ -128,15 +128,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
 		hook_enabled = 0;
-/*		rb_iseq_t_ *iseq = cfp->iseq;
-
-		int line_no = vm_get_sourceline(cfp);
-		char* file = RSTRING_PTR(iseq->filename);
-		printf("%s:%d:in `%s'\n",
-				 file, line_no, RSTRING_PTR(iseq->name));
-
-*/
-
 
 		vm_call_method_parameters_t params;
 
@@ -149,11 +140,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		params.mn = mn;
 		params.recv = recv_;
 		params.klass = klass;
-
-
-//vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
-	//       const int num, rb_block_t_ * const blockptr, const VALUE flag,
-	  //     const ID id, void * mn, const VALUE recv_, VALUE klass)
 
 		return rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
 
@@ -191,8 +177,6 @@ rb_call_fake(
 
 		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
 	} else {
-
-//	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
 
 		hook_enabled = 0;
 
