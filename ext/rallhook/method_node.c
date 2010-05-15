@@ -52,6 +52,11 @@ struct METHOD {
     int safe_level;
     NODE *body;
 };
+
+typedef VALUE (*MNEW)(VALUE klass, VALUE obj, ID id, VALUE mclass, int scope);
+MNEW mnew_;
+unsigned char* base__;
+
 #endif
 
 #ifdef RUBY1_9
@@ -132,9 +137,42 @@ VALUE rb_node_file(VALUE self) {
 }
 
 VALUE
-rb_obj_method_(VALUE obj, VALUE vid)
-{
-    return mnew_(CLASS_OF(obj), obj, rb_to_id(vid), rb_cMethod, Qfalse);
+rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
+    ID mid;
+    VALUE klass;
+	VALUE method_id;
+
+    if (argc == 0) {
+		rb_raise(rb_eArgError, "no method name/id given");
+    }
+
+    if (argc > 2) {
+		rb_raise(rb_eArgError, "too many arguments given");
+    }
+
+    if (argc == 1) {
+    	method_id = argv[0];
+    	klass = CLASS_OF(obj);
+    }
+
+    if (argc == 2) {
+    	klass = argv[0];
+    	method_id = argv[1];
+    }
+
+	if (rb_obj_is_kind_of(method_id,rb_cSymbol) ) {
+		mid = rb_to_id(method_id);
+	} else {
+		mid = FIX2LONG(method_id);
+	}
+
+#ifdef RUBY1_8
+    return mnew_(klass, obj, rb_to_id(method_id), rb_cMethod);
+#endif
+#ifdef RUBY1_9
+    return mnew_(klass, obj, rb_to_id(method_id), rb_cMethod, Qfalse);
+#endif
+
 }
 
 void  init_node() {
@@ -157,5 +195,5 @@ void  init_node() {
 	base__ = (unsigned char*)info.dli_fbase;
 
 	mnew_ = ruby_resolv(base__, "mnew");
-	rb_define_method(rb_cObject, "method", rb_obj_method_, 1);
+	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
 }
