@@ -5,4 +5,4 @@ ie: hooked_send from within hooked execution allow to escape the hook and invoqu
 * Security testcases (hook bypass checks,  security tests)
 * Delete distorm dependency
 * Delete libruby debuginfo dependency
-
+* Make rallhook functionality transparent (backtraces, exceptions, etc ...)
