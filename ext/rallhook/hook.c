@@ -23,6 +23,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <sys/mman.h>
 #include "distorm.h"
 #include "string.h"
+#include "errno.h"
 
 int get_instructions_size(void* code, int size) {
 	_DecodedInst decodedInstructions[32];
@@ -57,8 +58,12 @@ int get_instructions_size(void* code, int size) {
 
 
 void unprotect(void* ptr) {
-	unsigned long int mask = 0xFFFFFFFFFFF00000;
-	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x100000, PROT_READ | PROT_WRITE | PROT_EXEC);
+	unsigned long int mask = 0xFFFFFFFFFFFF000;
+	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x1000, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+	if (ret == -1) {
+		rb_bug("mprotect failed: %s", strerror(errno));
+	}
 }
 
 void inconditional_jump(void* where, void* to) {
