@@ -58,3 +58,4 @@ void init_tag_container() {
 	internal_new = rb_intern("new");
 
 }
+
