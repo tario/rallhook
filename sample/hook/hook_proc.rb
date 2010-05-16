@@ -1,9 +1,6 @@
 require "rallhook"
 
 class HookProc
-	
-	attr_accessor :rallhook
-	
 	def call (klass,self_,m,args, method_id)
 	
 		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}|#{klass} args: #{args.inspect}\n"
