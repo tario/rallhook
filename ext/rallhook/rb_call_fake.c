@@ -48,6 +48,7 @@ extern VALUE rb_cRallHook;
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
+	return Qnil;
 }
 
 VALUE rb_call_wrapper(VALUE ary){
