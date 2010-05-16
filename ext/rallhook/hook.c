@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "hook.h"
 #include <sys/mman.h>
 #include "distorm.h"
+#include "string.h"
 
 int get_instructions_size(void* code, int size) {
 	_DecodedInst decodedInstructions[32];
