@@ -25,7 +25,10 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "ruby_version.h"
 #include "distorm.h"
 
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
+
 #include <dlfcn.h>
 
 void* rb_call_original = 0;
