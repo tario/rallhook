@@ -29,9 +29,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #ifdef RUBY1_9
 #include <ruby/node.h>
 #define RUBY_VM_METHOD_NODE NODE_METHOD
-#include "ruby_symbols.h"
 #endif
 
+#include "ruby_symbols.h"
 #include "distorm.h"
 
 #include <dlfcn.h>
@@ -195,9 +195,7 @@ void  init_node() {
 	dladdr(rb_funcall, &info);
 
 	base__ = (unsigned char*)info.dli_fbase;
-	mnew_ = (MNEW)ruby_resolv(base__, "mnew");
-	mnew_ = (MNEW)( (unsigned long long)mnew_ & 0xffffffff );
-	mnew_ = (MNEW)( (unsigned long long)mnew_ | ( (unsigned long long)base__ & 0xffffffff00000000 ) );
+	mnew_ = ruby_resolv((unsigned char*)base__, "mnew");
 
 	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
 }
