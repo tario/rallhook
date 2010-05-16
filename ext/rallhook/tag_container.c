@@ -23,19 +23,21 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 VALUE rb_cTagContainer;
 ID internal_new;
 
+ID id_self_, id_tag;
+
 VALUE tag_container(VALUE self, VALUE tag) {
 	VALUE ret = rb_funcall(rb_cTagContainer, internal_new, 0);
 
-	rb_ivar_set( ret, "@self_", self);
-	rb_ivar_set( ret, "@tag", tag);
+	rb_ivar_set( ret, id_self_, self);
+	rb_ivar_set( ret, id_tag, tag);
 
 	return ret;
 }
 VALUE tag_container_get_self(VALUE tag) {
-	return rb_ivar_get( tag, "@self_");
+	return rb_ivar_get( tag, id_self_);
 }
 VALUE tag_container_get_tag(VALUE tag) {
-	return rb_ivar_get( tag, "@tag");
+	return rb_ivar_get( tag, id_tag);
 }
 
 int is_tag(VALUE tag) {
@@ -51,6 +53,8 @@ void init_tag_container() {
 	rb_define_method( rb_cTagContainer, "self_", tag_container_get_self, 0);
 	rb_define_method( rb_cTagContainer, "tag", tag_container_get_tag, 0);
 
+	id_self_ = rb_intern("@self_");
+	id_tag = rb_intern("@tag");
 	internal_new = rb_intern("new");
 
 }
