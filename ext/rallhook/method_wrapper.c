@@ -25,40 +25,46 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 VALUE rb_cMethodWrapper;
 static ID id_new;
 
+static ID id_klass, id_recv, id_method_id;
+
 VALUE new_method_wrapper() {
 	return rb_funcall(rb_cMethodWrapper, id_new, 0);
 }
 
 VALUE method_wrapper_get_klass(VALUE methodw) {
-	return rb_ivar_get(methodw,"@klass");
+	return rb_ivar_get(methodw, id_klass);
 }
 VALUE method_wrapper_get_recv(VALUE methodw) {
-	return rb_ivar_get(methodw,"@recv");
+	return rb_ivar_get(methodw, id_recv);
 }
 
 VALUE method_wrapper_get_method_id(VALUE methodw) {
-	return rb_ivar_get(methodw,"@method_id");
+	return rb_ivar_get(methodw, id_method_id);
 }
 
 VALUE method_wrapper_set_klass(VALUE methodw, VALUE klass) {
-	rb_ivar_set(methodw,"@klass", klass);
+	rb_ivar_set(methodw, id_klass, klass);
 	return Qnil;
 }
 VALUE method_wrapper_set_recv(VALUE methodw, VALUE recv) {
-	rb_ivar_set(methodw,"@recv", recv);
+	rb_ivar_set(methodw, id_recv, recv);
 	return Qnil;
 }
 void method_wrapper_set_method_id(VALUE methodw, ID method_id) {
-	rb_ivar_set(methodw,"@method_id", LONG2FIX(method_id));
+	rb_ivar_set(methodw,id_method_id, LONG2FIX(method_id));
 }
 
 VALUE method_wrapper_set_method_id_(VALUE methodw, VALUE method_id) {
-	rb_ivar_set(methodw,"@method_id", method_id);
+	rb_ivar_set(methodw,id_method_id, method_id);
 	return Qnil;
 }
 
 void init_method_wrapper() {
 	id_new = rb_intern("new");
+
+	id_klass = rb_intern("@klass");
+	id_recv = rb_intern("@recv");
+	id_method_id = rb_intern("@method_id");
 
 	rb_cMethodWrapper = rb_define_class("MethodWrapper", rb_cObject);
 	rb_define_method(rb_cMethodWrapper, "klass", method_wrapper_get_klass, 0);
