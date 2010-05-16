@@ -269,16 +269,15 @@ void Init_rallhook() {
 
 	rb_eval_string(initcode);
 
-	typedef VALUE (*RBHOOK)(VALUE self, ...);
 	rb_cRallHook = rb_define_class("RallHook", rb_cObject);
-	rb_define_method(rb_cRallHook, "hook", (RBHOOK*)(hook), 1);
-	rb_define_method(rb_cRallHook, "unhook", (RBHOOK*)(unhook), 0);
-	rb_define_method(rb_cRallHook, "from", (RBHOOK*)(from), 1);
+	rb_define_method(rb_cRallHook, "hook", hook, 1);
+	rb_define_method(rb_cRallHook, "unhook", unhook, 0);
+	rb_define_method(rb_cRallHook, "from", from, 1);
 
-	rb_define_singleton_method(rb_cRallHook, "call", (RBHOOK*)(rallhook_call), 5);
+	rb_define_singleton_method(rb_cRallHook, "call", rallhook_call, 5);
 	rb_define_singleton_method(rb_cRallHook, "method_wrapper", rallhook_new_method_wrapper, 3);
 
-	rb_define_method(rb_cObject, "hooked_send", (RBHOOK*)(rb_f_send_copy), -1);
+	rb_define_method(rb_cObject, "hooked_send", rb_f_send_copy, -1);
 
 	init_hook_rb_call();
 	rb_call_fake_init();
