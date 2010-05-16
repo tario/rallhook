@@ -88,4 +88,31 @@ method call to_s:3137 over 3:Fixnum args: []
 3method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: ["\n"]
 
 
+=== Method Instrospection new features example
+
+---- source1.rb ----
+class X
+	def foo
+	end
+end
+
+---- source2.rb ----
+class Y < X
+	def foo
+	end
+end
+
+---- main.rb ----
+require "rallhook"
+require "source1.rb"
+require "source2.rb"
+
+x = X.new
+y = Y.new
+
+print x.method(:foo).body.file,"\n" # source1.rb
+print y.method(:foo).body.file,"\n" # source2.rb
+
+print y.method(X,:foo).body.file,"\n" # source1.rb
+print y.method(Y,:foo).body.file,"\n" # source2.rb
 
