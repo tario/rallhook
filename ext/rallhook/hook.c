@@ -24,13 +24,14 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "distorm.h"
 #include "string.h"
 #include "errno.h"
+#include "ruby.h"
 
 int get_instructions_size(void* code, int size) {
 	_DecodedInst decodedInstructions[32];
 
 	_OffsetType offset = 0;
 
-	int decodedInstructionsCount;
+	unsigned int decodedInstructionsCount;
 
 	#ifdef __x86_64__
 		_DecodeType dt = Decode32Bits;

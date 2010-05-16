@@ -284,7 +284,10 @@ void Init_rallhook() {
 	init_node();
 	init_tag_container();
 	init_method_wrapper();
+
+#ifdef RUBY1_8
 	init_rb_yield_fake();
+#endif
 
 	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -2);
 

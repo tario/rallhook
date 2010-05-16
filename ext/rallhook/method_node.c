@@ -144,7 +144,7 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
     VALUE klass;
 	VALUE method_id;
 
-    if (argc == 0) {
+    if (argc <= 0) {
 		rb_raise(rb_eArgError, "no method name/id given");
     }
 

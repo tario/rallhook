@@ -41,8 +41,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <dlfcn.h>
 
-int last_avalue = 0;
+#ifdef RUBY1_8
 
+int last_avalue = 0;
 typedef VALUE (*RBYIELD0)(VALUE val, VALUE self, VALUE klass, int flags, int avalue);
 
 RBYIELD0 rb_yield_0_copy;
@@ -65,7 +66,6 @@ void* hook_rb_yield_0(void* fake_function) {
 
 void init_rb_yield_fake() {
 
-#ifdef RUBY1_8
 	void* handle = dlopen(current_libruby(),0x101);
 	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
 	Dl_info info;
@@ -75,7 +75,8 @@ void init_rb_yield_fake() {
 
 	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
-#endif
 
 }
+
+#endif
 

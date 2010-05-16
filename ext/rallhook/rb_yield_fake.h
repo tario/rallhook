@@ -21,9 +21,10 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #ifndef __RB_YIELD_FAKE_H
 #define __RB_YIELD_FAKE_H
 
+#ifdef RUBY1_8
 void init_rb_yield_fake();
-
 extern int last_avalue;
+#endif
 
 #endif
 
