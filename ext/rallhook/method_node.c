@@ -55,9 +55,6 @@ struct METHOD {
     int safe_level;
     NODE *body;
 };
-
-typedef VALUE (*MNEW)(VALUE klass, VALUE obj, ID id, VALUE mclass);
-MNEW mnew_;
 unsigned char* base__;
 
 #define nd_file(n) n->nd_file
@@ -141,6 +138,52 @@ VALUE rb_node_file(VALUE self) {
 
 }
 
+#ifdef RUBY1_8
+
+static VALUE
+my_mnew(klass, obj, id, mklass)
+    VALUE klass, obj, mklass;
+    ID id;
+{
+    VALUE method;
+    NODE *body;
+    struct METHOD *data;
+    VALUE rklass = klass;
+    ID oid = id;
+
+  again:
+    if ((body = rb_method_node(klass, id)) == 0) {
+	print_undef(rklass, oid);
+    }
+
+    if (nd_type(body) == NODE_ZSUPER) {
+	klass = RCLASS(klass)->super;
+	goto again;
+    }
+
+    while (rklass != klass &&
+	   (FL_TEST(rklass, FL_SINGLETON) || TYPE(rklass) == T_ICLASS)) {
+	rklass = RCLASS(rklass)->super;
+    }
+
+	// FIXME :     method = Data_Make_Struct(mklass, struct METHOD, bm_mark, free, data);
+    method = Data_Make_Struct(mklass, struct METHOD, 0, free, data);
+    data->klass = klass;
+    data->recv = obj;
+    data->id = id;
+    data->body = body;
+    data->rklass = rklass;
+    data->oid = oid;
+    data->safe_level = 4;
+    OBJ_INFECT(method, klass);
+
+    return method;
+
+}
+
+#endif
+
+
 VALUE
 rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
     ID mid;
@@ -172,7 +215,7 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
 	}
 
 #ifdef RUBY1_8
-    return mnew_(klass, obj, rb_to_id(method_id), rb_cMethod);
+    return my_mnew(klass, obj, rb_to_id(method_id), rb_cMethod);
 #endif
 #ifdef RUBY1_9
     return mnew_(klass, obj, rb_to_id(method_id), rb_cMethod, Qfalse);
@@ -197,8 +240,10 @@ void  init_node() {
 	Dl_info info;
 	dladdr(rb_funcall, &info);
 
+#ifdef RUBY1_9
 	base__ = (unsigned char*)info.dli_fbase;
 	mnew_ = ruby_resolv((unsigned char*)base__, "mnew");
+#endif
 
 	rb_define_method(rb_cObject, "_method", rb_obj_method_, -1);
 }
