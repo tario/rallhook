@@ -73,14 +73,27 @@ VALUE restore_hook_status_ensure(VALUE ary) {
 	return Qnil;
 }
 
+
+VALUE rb_call_copy_i(
+    VALUE klass, VALUE recv,
+    ID    mid,
+    int argc,			/* OK */
+    const VALUE *argv,		/* OK */
+    int scope,
+    VALUE self
+) {
+	if (is_fastcall) {
+//	return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+		return Qnil;
+	} else {
+	return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
+	}
+}
+
+
 VALUE rb_call_wrapper(VALUE ary){
 	VALUE* argv = (VALUE*)ary;
-
-	if (is_fastcall) {
-	return ((RBCALL_FASTCALL)rb_call_copy)(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
-	} else {
-	return ((RBCALL)rb_call_copy)(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
-	}
+	return rb_call_copy_i(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
 }
 
 #ifdef RUBY1_9
@@ -253,12 +266,7 @@ rb_call_fake(
 
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
-
-		if (is_fastcall) {
-		return ((RBCALL_FASTCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
-		} else {
-		return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
-		}
+		rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
 		hook_enabled = 0;
