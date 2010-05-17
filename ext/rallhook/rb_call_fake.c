@@ -49,6 +49,9 @@ extern VALUE rb_cRallHook;
 
 #ifdef __i386__
 
+VALUE read_eax( ) {
+}
+
 VALUE read_edx( ) {
 __asm__("mov %edx, %eax");
 }
@@ -184,8 +187,9 @@ rb_call_fake(
     _WORD arg7 // VALUE self
 ) {
 
-	_WORD ecx = read_ecx();
-	_WORD edx = read_edx();
+	_WORD eax = read_eax(); // klass in fastcall
+	_WORD edx = read_edx(); // recv in fastcall
+	_WORD ecx = read_ecx(); // ID in fastcall
 
 	VALUE klass;
 	VALUE recv;
@@ -197,6 +201,7 @@ rb_call_fake(
 
 #ifdef __i386__
 	if (is_calibrate) {
+
 		if ((VALUE)arg2 == calibrate_recv && (VALUE)arg1 == calibrate_klass) {
 			is_fastcall = 0;
 		} else {
@@ -214,15 +219,15 @@ rb_call_fake(
 		argc = (int)arg4;
 		argv = (VALUE*)arg5;
 		scope = (int)arg6;
-		arg7 = (VALUE)arg7;
+		self = (VALUE)arg7;
 	} else {
-		klass = (VALUE)ecx;
+		klass = (VALUE)eax;
 		recv = (VALUE)edx;
-		mid = (ID)arg1;
-		argc = (int)arg2;
-		argv = (VALUE*)arg3;
-		scope = (int)arg4;
-		arg7 = (VALUE)arg5;
+		mid = (VALUE)ecx;
+		argc = (int)arg1;
+		argv = (VALUE*)arg2;
+		scope = (int)arg3;
+		self = (VALUE)arg4;
 	}
 #else
 	klass = (VALUE)arg1;
