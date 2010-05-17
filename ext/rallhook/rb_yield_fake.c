@@ -59,6 +59,8 @@ static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
     VALUE val, self, klass;	/* OK */
     int flags, avalue; 
 {
+	last_avalue = avalue;
+
 #ifdef __i386__
 	if (yield_0_fastcall) {
 
@@ -113,7 +115,6 @@ rb_yield_0_fake(val, self, klass, flags, avalue)
 	}
 #endif
 
-	last_avalue = avalue;
 #ifdef __i386__
 	if (yield_0_fastcall) {
 		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)val,(int)self);
