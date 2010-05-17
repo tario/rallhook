@@ -82,7 +82,7 @@ VALUE rb_call_copy_i(
     int scope,
     VALUE self
 ) {
-
+#ifdef __i386__
 	if (is_fastcall) {
 		__asm__("push %ebp\n");
 		__asm__("push %esi\n");
@@ -107,10 +107,13 @@ VALUE rb_call_copy_i(
 		__asm__("pop %ebp\n");
 		return read_eax();
 
-//	return ((RBCALL_FASTCALL)rb_call_copy)(argc,argv,scope,self);
 	} else {
+#endif
 	return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
+#ifdef __i386__
 	}
+#endif
+
 }
 
 
@@ -223,9 +226,11 @@ rb_call_fake(
     _WORD arg7 // VALUE self
 ) {
 
+#ifdef __i386__
 	_WORD eax = read_eax(); // klass in fastcall
 	_WORD edx = read_edx(); // recv in fastcall
 	_WORD ecx = read_ecx(); // ID in fastcall
+#endif
 
 	VALUE klass;
 	VALUE recv;
