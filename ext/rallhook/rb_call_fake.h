@@ -25,14 +25,12 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "ruby_version.h"
 
-#define FASTCALL  __attribute__((fastcall))
+#define FASTCALL
 
 void
 rb_call_fake_init();
 
 typedef VALUE (*RBCALL_FASTCALL) (
-    VALUE klass, VALUE recv,
-    ID    mid,
     int argc,			/* OK */
     const VALUE *argv,		/* OK */
     int scope,

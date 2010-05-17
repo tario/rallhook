@@ -82,9 +82,18 @@ VALUE rb_call_copy_i(
     int scope,
     VALUE self
 ) {
+
 	if (is_fastcall) {
-//	return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
-		return Qnil;
+		__asm__("mov 0x8(%ebp), %eax\n");
+		__asm__("mov 0xc(%ebp), %edx\n");
+		__asm__("mov 0x10(%ebp), %ecx\n");
+		__asm__("push 0x20(%ebp)\n");
+		__asm__("push 0x1c(%ebp)\n");
+		__asm__("push 0x18(%ebp)\n");
+		__asm__("push 0x14(%ebp)\n");
+		__asm__("call *rb_call_copy\n");
+
+//	return ((RBCALL_FASTCALL)rb_call_copy)(argc,argv,scope,self);
 	} else {
 	return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
 	}
