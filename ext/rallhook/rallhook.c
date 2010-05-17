@@ -138,7 +138,6 @@ VALUE reunhook_reyield( VALUE arguments, VALUE args, int argc, VALUE* argv) {
 
 VALUE rb_reunhook_proc_call( VALUE arguments ) {
 	VALUE* vect = (VALUE*)arguments;
-	VALUE klass = vect[0];
 	VALUE recv = vect[1];
 	ID mid = (ID)vect[2];
 	int argc = (int)vect[3];
@@ -150,7 +149,6 @@ VALUE rb_reunhook_proc_call( VALUE arguments ) {
 
 VALUE ensured_recall( VALUE arguments ) {
 	VALUE* vect = (VALUE*)arguments;
-	VALUE klass = vect[0];
 	VALUE recv = vect[1];
 	ID mid = (ID)vect[2];
 	int argc = (int)vect[3];

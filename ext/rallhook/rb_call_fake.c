@@ -217,7 +217,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 VALUE
 rb_call_fake(
-    _WORD arg1, // VALUE klass, 
+    _WORD arg1, // VALUE klass,
     _WORD arg2, // VALUE recv,
     _WORD arg3, // ID    mid,
     _WORD arg4, // int argc,			/* OK */
@@ -277,7 +277,7 @@ rb_call_fake(
 	argc = (int)arg4;
 	argv = (VALUE*)arg5;
 	scope = (int)arg6;
-	arg7 = (VALUE)arg7;
+	self = (VALUE)arg7;
 #endif
 	int must_hook = hook_enabled;
 
