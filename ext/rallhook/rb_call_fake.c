@@ -287,7 +287,7 @@ rb_call_fake(
 		}
 	}
 
-	if (must_hook == 0 || hook_enable_left > 0 || 1 ) {
+	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 	} else {
