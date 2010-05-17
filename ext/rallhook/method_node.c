@@ -200,5 +200,5 @@ void  init_node() {
 	base__ = (unsigned char*)info.dli_fbase;
 	mnew_ = ruby_resolv((unsigned char*)base__, "mnew");
 
-	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
+	rb_define_method(rb_cObject, "_method", rb_obj_method_, -1);
 }
