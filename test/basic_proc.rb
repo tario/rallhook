@@ -24,4 +24,14 @@ module BasicHookProcTest
       yield
     end
   end
+
+  def oracle_hook_assert_equal
+    result = nil
+    hook do
+      result = yield
+    end
+
+    assert_equal result, yield
+  end
+  alias oracle_hook_assert oracle_hook_assert_equal
 end

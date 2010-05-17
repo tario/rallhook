@@ -18,11 +18,14 @@ you should have received a copy of the gnu general public license
 along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef __RB_YIELD_FAKE_H
+#define __RB_YIELD_FAKE_H
 
-#ifndef __RUBY_SYMBOLS_H
-#define __RUBY_SYMBOLS_H
-
-void* ruby_resolv(unsigned char* p_base, const char* symbol_name);
-const char* current_libruby();
+#ifdef RUBY1_8
+void init_rb_yield_fake();
+extern int last_avalue;
+#endif
 
 #endif
+
+

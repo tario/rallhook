@@ -19,10 +19,15 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef __RUBY_SYMBOLS_H
-#define __RUBY_SYMBOLS_H
+#ifndef __HOOK_RB_CALL
+#define __HOOK_RB_CALL
 
-void* ruby_resolv(unsigned char* p_base, const char* symbol_name);
-const char* current_libruby();
+void* hook_rb_call(void* fake_function);
+
+#ifdef RUBY1_9
+void* hook_vm_call_method(void *fake_function);
+#endif
+
+void init_hook_rb_call();
 
 #endif

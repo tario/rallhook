@@ -31,3 +31,4 @@ int is_tag(VALUE tag);
 void init_tag_container();
 
 #endif
+

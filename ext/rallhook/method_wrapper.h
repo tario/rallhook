@@ -18,11 +18,25 @@ you should have received a copy of the gnu general public license
 along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef __METHOD_WRAPPER_H
+#define __METHOD_WRAPPER_H
 
-#ifndef __RUBY_SYMBOLS_H
-#define __RUBY_SYMBOLS_H
+#include <ruby.h>
 
-void* ruby_resolv(unsigned char* p_base, const char* symbol_name);
-const char* current_libruby();
+VALUE new_method_wrapper();
+
+VALUE method_wrapper_set_klass(VALUE methodw, VALUE klass);
+VALUE method_wrapper_set_recv(VALUE methodw, VALUE recv);
+void method_wrapper_set_method_id(VALUE methodw, ID method_id);
+
+VALUE method_wrapper_get_klass(VALUE methodw);
+VALUE method_wrapper_get_recv(VALUE methodw);
+VALUE method_wrapper_get_method_id(VALUE methodw);
+
+VALUE method_wrapper_set_method_id_(VALUE methodw, VALUE method_id);
+
+void init_method_wrapper();
+
+extern VALUE rb_cMethodWrapper;
 
 #endif

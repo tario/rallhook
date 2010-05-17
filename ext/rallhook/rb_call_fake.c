@@ -20,149 +20,61 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include <node.h> // from ruby
+
+#ifdef RUBY1_8
+#include <node.h>
 #include <env.h> // from ruby
+#endif
+
+#ifdef RUBY1_9
+#include <ruby/node.h>
+#endif
+
 #include <dlfcn.h>
 #include <stdarg.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
 #include "tag_container.h"
 
-typedef struct
-{
-  __const char *dli_fname;	/* File name of defining object.  */
-  void *dli_fbase;		/* Load address of that object.  */
-  __const char *dli_sname;	/* Name of nearest symbol.  */
-  void *dli_saddr;		/* Exact value of nearest symbol.  */
-} Dl_info;
-
-
-// same constant as eval.c
-#define CSTAT_PRIV  1
-#define CSTAT_PROT  2
-#define CSTAT_VCALL 4
-#define CSTAT_SUPER 8
-
-
-// same defs as eval.c
-#ifdef HAVE_STDARG_PROTOTYPES
-#include <stdarg.h>
-#define va_init_list(a,b) va_start(a,b)
-#else
-#include <varargs.h>
-#define va_init_list(a,b) va_start(a)
-#endif
-
-
-ID missing, id_call;
-VALUE rb_hook_proc;
-
-
-typedef VALUE (*METHODMISSING)(VALUE obj,
-    ID    id,
-    int   argc,
-    const VALUE *argv,
-    int   call_status);
-
-typedef VALUE (*RBCALL0) (
-    VALUE klass, VALUE recv,
-    ID    id,
-    ID    oid,
-    int argc,			/* OK */
-    VALUE *argv,		/* OK */
-    NODE * volatile body,
-    int flags);
-
-typedef NODE* (*RBGETMETHODBODY) (
-    VALUE *klassp,
-    ID *idp,
-    int *noexp
-    );
-
-
-
-void* rb_call_original;
-METHODMISSING _method_missing;
-RBCALL0 _rb_call0;
-struct FRAME **_ruby_frame;
-RBGETMETHODBODY _rb_get_method_body;
+ID id_call;
+ID id_method_wrapper;
+VALUE rb_hook_proc = Qnil;
 
 // extern, exported variables
 int hook_enabled = 0;
 int hook_enable_left = 0;
-
+void* rb_call_copy;
 extern VALUE rb_cRallHook;
 
-VALUE
-rb_call_copy(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
-) {
-    NODE  *body;		/* OK */
-    int    noex;
-    ID     id = mid;
-    struct cache_entry *ent;
 
-    if (!klass) {
-	rb_raise(rb_eNotImpError, "method `%s' called on terminated object (0x%lx)",
-		 rb_id2name(mid), recv);
-    }
-    /* is it in the method cache? */
-/*    ent = cache + EXPR1(klass, mid);
-    if (ent->mid == mid && ent->klass == klass) {
-	if (!ent->method)
-	    goto nomethod;
-	klass = ent->origin;
-	id    = ent->mid0;
-	noex  = ent->noex;
-	body  = ent->method;
-    }
-    else
-    */ if ((body = _rb_get_method_body(&klass, &id, &noex)) == 0) {
-      nomethod:
-	if (scope == 3) {
-	    return _method_missing(recv, mid, argc, argv, CSTAT_SUPER);
-	}
-	return _method_missing(recv, mid, argc, argv, scope==2?CSTAT_VCALL:0);
-    }
+#ifdef __i386__
 
-    if (mid != missing && scope == 0) {
-	/* receiver specified form for private method */
-	if (noex & NOEX_PRIVATE)
-	    return _method_missing(recv, mid, argc, argv, CSTAT_PRIV);
-
-	/* self must be kind of a specified form for protected method */
-	if (noex & NOEX_PROTECTED) {
-	    VALUE defined_class = klass;
-
-	    if (self == Qundef) self = (*_ruby_frame)->self;
-	    if (TYPE(defined_class) == T_ICLASS) {
-		defined_class = RBASIC(defined_class)->klass;
-	    }
-	    if (!rb_obj_is_kind_of(self, rb_class_real(defined_class)))
-		return _method_missing(recv, mid, argc, argv, CSTAT_PROT);
-	}
-    }
-
-    return _rb_call0(klass, recv, mid, id, argc, argv, body, noex);
+VALUE read_eax( ) {
 }
+
+VALUE read_edx( ) {
+__asm__("mov %edx, %eax");
+}
+
+VALUE read_ecx( ) {
+__asm__("mov %ecx, %eax");
+}
+
+int is_fastcall = 1;
+int is_calibrate = 0;
+VALUE calibrate_klass;
+VALUE calibrate_recv;
+
+#endif
+
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
-//	hook_enable_left = 0;
+	return Qnil;
 }
 
-VALUE rb_call_wrapper(VALUE ary){
-		VALUE* argv = (VALUE*)ary;
-		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
-}
 
-VALUE
-rb_call_fake(
+VALUE rb_call_copy_i(
     VALUE klass, VALUE recv,
     ID    mid,
     int argc,			/* OK */
@@ -170,8 +82,101 @@ rb_call_fake(
     int scope,
     VALUE self
 ) {
+#ifdef __i386__
+	if (is_fastcall) {
+		__asm__("push %ebp\n");
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x8(%ebp), %eax\n");
+		__asm__("mov 0xc(%ebp), %edx\n");
+		__asm__("mov 0x10(%ebp), %ecx\n");
+		__asm__("push 0x20(%ebp)\n");
+		__asm__("push 0x1c(%ebp)\n");
+		__asm__("push 0x18(%ebp)\n");
+		__asm__("push 0x14(%ebp)\n");
+		__asm__("call *rb_call_copy\n");
+		__asm__("add $0x10, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
 
+	} else {
+#endif
+	return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
+#ifdef __i386__
+	}
+#endif
+
+}
+
+
+VALUE rb_call_wrapper(VALUE ary){
+	VALUE* argv = (VALUE*)ary;
+	return rb_call_copy_i(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+}
+
+#ifdef RUBY1_9
+
+typedef struct {
+	rb_thread_t_* th;
+	rb_control_frame_t_* cfp;
+	int num;
+	rb_block_t_* blockptr;
+	VALUE flag;
+	ID id;
+	void *mn;
+	VALUE recv;
+	VALUE klass;
+} vm_call_method_parameters_t;
+
+VALUE vm_call_method_wrapper(VALUE ary ) {
+
+		vm_call_method_parameters_t* params = (vm_call_method_parameters_t*)ary;
+
+		// redirigir la llamada del metodo a otro objeto
+		VALUE obj = rb_funcall(
+			rb_cRallHook,
+			id_method_wrapper,
+			3,
+			params->recv,
+			params->klass,
+			LONG2FIX(params->id)
+			);
+
+		params->recv = obj;
+		params->klass = CLASS_OF(obj);
+		params->mn = rb_method_node( params->klass, id_call);
+		if (params->mn == 0) rb_bug("Null method node for method %s", rb_id2name(id_call) );
+
+		params->id = id_call;
+
+
+		return vm_call_method_copy(
+				params->th,
+				params->cfp,
+				params->num,
+				params->blockptr,
+				params->flag,
+				params->id,
+				params->mn,
+				params->recv,
+				params->klass);
+}
+
+VALUE
+vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
+	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
+	       const ID id, void * mn, const VALUE recv_, VALUE klass)
+{
 	int must_hook = hook_enabled;
+	volatile VALUE recv = recv_;
 
 	if (is_tag(recv) ) {
 		volatile VALUE orig_recv = recv;
@@ -187,10 +192,110 @@ rb_call_fake(
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
-		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
+		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
+		hook_enabled = 0;
 
-//	    printf("called %s for %d, scope: %i klass: %i\n", rb_id2name(mid), recv, scope, klass);
+		vm_call_method_parameters_t params;
+
+		params.th = th;
+		params.cfp = cfp;
+		params.num = num;
+		params.blockptr = blockptr;
+		params.flag = flag;
+		params.id = id;
+		params.mn = mn;
+		params.recv = recv_;
+		params.klass = klass;
+
+		return rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+
+	}
+}
+
+#endif
+
+VALUE
+rb_call_fake(
+    _WORD arg1, // VALUE klass, 
+    _WORD arg2, // VALUE recv,
+    _WORD arg3, // ID    mid,
+    _WORD arg4, // int argc,			/* OK */
+    _WORD arg5, // const VALUE *argv,		/* OK */
+    _WORD arg6, // int scope,
+    _WORD arg7 // VALUE self
+) {
+
+#ifdef __i386__
+	_WORD eax = read_eax(); // klass in fastcall
+	_WORD edx = read_edx(); // recv in fastcall
+	_WORD ecx = read_ecx(); // ID in fastcall
+#endif
+
+	VALUE klass;
+	VALUE recv;
+	ID    mid;
+	int argc;			/* OK */
+	const VALUE *argv;
+	int scope;
+	VALUE self;
+
+#ifdef __i386__
+	if (is_calibrate) {
+
+		if ((VALUE)arg2 == calibrate_recv && (VALUE)arg1 == calibrate_klass) {
+			is_fastcall = 0;
+		} else {
+			is_fastcall = 1;
+		}
+
+		is_calibrate = 0;
+		return Qnil;
+	}
+
+	if (is_fastcall == 0) {
+		klass = (VALUE)arg1;
+		recv = (VALUE)arg2;
+		mid = (ID)arg3;
+		argc = (int)arg4;
+		argv = (VALUE*)arg5;
+		scope = (int)arg6;
+		self = (VALUE)arg7;
+	} else {
+		klass = (VALUE)eax;
+		recv = (VALUE)edx;
+		mid = (VALUE)ecx;
+		argc = (int)arg1;
+		argv = (VALUE*)arg2;
+		scope = (int)arg3;
+		self = (VALUE)arg4;
+	}
+#else
+	klass = (VALUE)arg1;
+	recv = (VALUE)arg2;
+	mid = (ID)arg3;
+	argc = (int)arg4;
+	argv = (VALUE*)arg5;
+	scope = (int)arg6;
+	arg7 = (VALUE)arg7;
+#endif
+	int must_hook = hook_enabled;
+
+	if (is_tag(recv) ) {
+		volatile VALUE orig_recv = recv;
+		volatile VALUE klass_;
+		recv = tag_container_get_self(orig_recv);
+		klass_ = tag_container_get_tag(orig_recv);
+
+		if (klass_ != Qnil ) {
+			klass = klass_;
+		}
+	}
+
+	if (must_hook == 0 || hook_enable_left > 0 ) {
+		if (hook_enable_left > 0) hook_enable_left--;
+		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+	} else {
 
 		hook_enabled = 0;
 
@@ -209,8 +314,6 @@ rb_call_fake(
 			rb_ary_store (args, i, argv[i] );
 		}
 
-	    if (recv == Qundef) recv = (*_ruby_frame)->self;
-
 		VALUE argv_[6];
 		argv_[0] = klass;
 		argv_[1] = recv;
@@ -225,32 +328,7 @@ rb_call_fake(
 
 void
 rb_call_fake_init() {
-	missing = rb_intern("method_missing");
-
-	void* handle = dlopen("/usr/lib/libruby1.8.so.1.8.7",0x101);
-	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-	Dl_info info;
-	dladdr(rb_funcall, &info);
-
-	unsigned char* base = (unsigned char*)info.dli_fbase;
-
-	rb_call_original = ruby_resolv(base, "rb_call");
-	_method_missing = (METHODMISSING)ruby_resolv(base, "method_missing");
-	_rb_call0 = (RBCALL0)ruby_resolv(base,"rb_call0");
-	_ruby_frame = (struct FRAME **)ruby_resolv(base,"ruby_frame");
-	_rb_get_method_body = (RBGETMETHODBODY)ruby_resolv(base,"rb_get_method_body");
 
 	id_call = rb_intern("call");
-
-
-//	printf("rb_call: %p\n", rb_call_original);
-//	printf("method_missing: %p\n", _method_missing);
-//	printf("rb_call0: %p\n", _rb_call0);
-//	printf("ruby_frame addr: %p\n", _ruby_frame);
-
-
+	id_method_wrapper = rb_intern("method_wrapper");
 }
-
-
-
-

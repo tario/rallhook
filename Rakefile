@@ -24,15 +24,15 @@ desc 'Run tests'
 task :default => [ :test ]
 
 task :build do
-  system("cd ext/rallhook; make")
+  system("cd ext/rallhook; ruby extconf.rb; make")
 end
 
 task :clean do
-  system("cd ext/rallhook; make clean")
+  system("cd ext/rallhook; ruby extconf.rb; make clean")
 end
 
 task :install do
-  system("cd ext/rallhook; make install")
+  system("cd ext/rallhook; ruby extconf.rb; make install")
 end
 
 

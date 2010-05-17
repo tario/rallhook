@@ -18,11 +18,12 @@ you should have received a copy of the gnu general public license
 along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef __HOOK_H
+#define __HOOK_H
 
-#ifndef __RUBY_SYMBOLS_H
-#define __RUBY_SYMBOLS_H
+void* put_jmp_hook(void* function_address, void* fake_function, int instructions_size);
+int get_jmp_size();
 
-void* ruby_resolv(unsigned char* p_base, const char* symbol_name);
-const char* current_libruby();
+extern int get_instructions_size(void* code, int size);
 
 #endif

@@ -6,7 +6,10 @@ This package contains rallhook, a ruby C extension to intercept ruby methods cal
 
 === Prerequisites
 
-* ruby-cymbol >= 0.1.0 (found at  http://github.com/tario/ruby-cymbol)
+* ruby-cymbol >= 0.1.0 (found at http://github.com/tario/ruby-cymbol)
+* ruby debug info ( apt-get install libruby1.8-dbg libruby1.9-dbg on debian system)
+* objdump
+* distorm ( found at https://code.google.com/p/distorm/ )
 
 
 === Gem installation
@@ -16,7 +19,7 @@ This package contains rallhook, a ruby C extension to intercept ruby methods cal
 
 gem install rallhook-X.X.X.gem
 
-=== Ext installation
+=== Ext compile and installation
 
 * Go to the gem install directory (Usually /var/lib/gems/1.8/gems/rallhook-X.X.X )
 * Run:
@@ -29,20 +32,20 @@ sudo rake install
 
 ---- test.rb ----
 class HookReceiver
-	
+
 	attr_accessor :rallhook
-	
+
 	def call (klass,self_,m,args, method_id)
-	
+
 		# print to the standar output details about the method called
 		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} args: #{args.inspect}\n"
-		
+
 		ret = nil
-		
+
 		# the hooked_send method is the same send method but doing hook at calling at unhook in yield calling
-		# also, the hooked_send method allow method_id as method specification 
+		# also, the hooked_send method allow method_id as method specification
 		# (some "internal" methods come with no method name, but all the methods come with method_id )
-		
+
 		if block_given?
 			ret = self_.hooked_send(klass, method_id,*args) do |*args_|
 				yield(*args_)
@@ -50,7 +53,7 @@ class HookReceiver
 		else
 			ret = self_.hooked_send(klass,method_id,*args)
 		end
-		
+
 		ret
 	end
 end
@@ -59,7 +62,7 @@ hook_recv = HookReceiver.new
 hook_recv.rallhook = RallHook.new
 
 hook_recv.rallhook.hook hook_recv do
-# all ruby calls in this block are intercepted by hook_recv::call 
+# all ruby calls in this block are intercepted by hook_recv::call
 
 [1,2,3].each do |x|
 print x,"\n"
@@ -85,4 +88,31 @@ method call to_s:3137 over 3:Fixnum args: []
 3method call write:7649 over #<IO:0x7fd7f7849ac8>:IO args: ["\n"]
 
 
+=== Method Instrospection new features example
+
+---- source1.rb ----
+class X
+	def foo
+	end
+end
+
+---- source2.rb ----
+class Y < X
+	def foo
+	end
+end
+
+---- main.rb ----
+require "rallhook"
+require "source1.rb"
+require "source2.rb"
+
+x = X.new
+y = Y.new
+
+print x.method(:foo).body.file,"\n" # source1.rb
+print y.method(:foo).body.file,"\n" # source2.rb
+
+print y.method(X,:foo).body.file,"\n" # source1.rb
+print y.method(Y,:foo).body.file,"\n" # source2.rb
 
