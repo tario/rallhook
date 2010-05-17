@@ -134,6 +134,18 @@ VALUE reunhook_reyield( VALUE arguments, VALUE args, int argc, VALUE* argv) {
 }
 #endif
 
+VALUE rb_reunhook_proc_call( VALUE arguments ) {
+	VALUE* vect = (VALUE*)arguments;
+	VALUE klass = vect[0];
+	VALUE recv = vect[1];
+	ID mid = (ID)vect[2];
+	int argc = (int)vect[3];
+	VALUE* argv = (VALUE*)vect[4];
+
+	return rb_funcall2(recv, mid, argc, argv );
+}
+
+
 VALUE ensured_recall( VALUE arguments ) {
 	VALUE* vect = (VALUE*)arguments;
 	VALUE klass = vect[0];
@@ -143,7 +155,7 @@ VALUE ensured_recall( VALUE arguments ) {
 	VALUE* argv = (VALUE*)vect[4];
 
 	if (rb_block_given_p() ) {
-		return rb_block_call(recv, mid, argc, argv, reunhook_reyield, Qnil );
+		return rb_iterate(rb_reunhook_proc_call, (VALUE)vect, reunhook_reyield, Qnil );
 	} else {
 		return rb_funcall2(recv,mid,argc,argv);
 	}
@@ -227,10 +239,15 @@ VALUE rehook_reyield( VALUE arguments, VALUE args, int argc, VALUE* argv) {
 
 #endif
 
+VALUE rb_rehook_proc_call( VALUE arg ) {
+	VALUE* argv = (VALUE*)arg;
+	return rb_funcall2(rb_hook_proc, id_call_, 5, argv );
+}
+
 VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, VALUE mid){
 	if (rb_block_given_p() ) {
 		VALUE argv[6] = {klass, recv, sym, args, mid};
-		return rb_block_call(rb_hook_proc, id_call_, 5, argv, rehook_reyield, Qnil );
+		return rb_iterate(rb_rehook_proc_call, (VALUE)argv, rehook_reyield, Qnil );
 	} else {
 		return rb_funcall(rb_hook_proc, id_call_, 5, klass, recv, sym, args, mid );
 	}
