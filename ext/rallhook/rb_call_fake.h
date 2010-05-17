@@ -25,8 +25,19 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "ruby_version.h"
 
+#define FASTCALL  __attribute__((fastcall))
+
 void
 rb_call_fake_init();
+
+typedef VALUE (*RBCALL_FASTCALL) (
+    VALUE klass, VALUE recv,
+    ID    mid,
+    int argc,			/* OK */
+    const VALUE *argv,		/* OK */
+    int scope,
+    VALUE self
+) FASTCALL;
 
 typedef VALUE (*RBCALL) (
     VALUE klass, VALUE recv,
@@ -35,7 +46,7 @@ typedef VALUE (*RBCALL) (
     const VALUE *argv,		/* OK */
     int scope,
     VALUE self
-) ;
+);
 
 //typedef void rb_control_frame_t;
 
@@ -68,7 +79,7 @@ typedef VALUE (*VMCALLMETHOD) (
 ) ;
 #endif
 
-extern RBCALL rb_call_copy;
+extern void* rb_call_copy;
 
 #ifdef RUBY1_9
 extern VMCALLMETHOD vm_call_method_copy;

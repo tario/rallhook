@@ -36,8 +36,6 @@ VALUE unhook(VALUE self) {
 	return Qnil;
 }
 
-RBCALL rb_call_copy;
-
 #ifdef RUBY1_9
 VMCALLMETHOD vm_call_method_copy;
 #endif

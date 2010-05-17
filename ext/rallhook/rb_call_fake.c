@@ -43,8 +43,27 @@ VALUE rb_hook_proc = Qnil;
 // extern, exported variables
 int hook_enabled = 0;
 int hook_enable_left = 0;
-
+void* rb_call_copy;
 extern VALUE rb_cRallHook;
+
+
+#ifdef __i386__
+
+VALUE read_edx( ) {
+__asm__("mov %edx, %eax");
+}
+
+VALUE read_ecx( ) {
+__asm__("mov %ecx, %eax");
+}
+
+int is_fastcall = 0;
+int is_calibrate = 0;
+VALUE calibrate_klass;
+VALUE calibrate_recv;
+
+#endif
+
 
 VALUE restore_hook_status_ensure(VALUE ary) {
 	hook_enabled = 1;
@@ -52,8 +71,13 @@ VALUE restore_hook_status_ensure(VALUE ary) {
 }
 
 VALUE rb_call_wrapper(VALUE ary){
-		VALUE* argv = (VALUE*)ary;
-		return rb_call_copy(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+	VALUE* argv = (VALUE*)ary;
+
+	if (is_fastcall) {
+	return ((RBCALL_FASTCALL)rb_call_copy)(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+	} else {
+	return ((RBCALL)rb_call_copy)(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+	}
 }
 
 #ifdef RUBY1_9
@@ -149,23 +173,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 #endif
 
-#ifdef __i386__
-
-VALUE read_edx( ) {
-__asm__("mov %edx, %eax");
-}
-
-VALUE read_ecx( ) {
-__asm__("mov %ecx, %eax");
-}
-
-int is_fastcall = 0;
-int is_calibrate = 0;
-VALUE calibrate_klass;
-VALUE calibrate_recv;
-
-#endif
-
 VALUE
 rb_call_fake(
     _WORD arg1, // VALUE klass, 
@@ -242,7 +249,11 @@ rb_call_fake(
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
-		return rb_call_copy(klass,recv,mid,argc,argv,scope,self);
+		if (is_fastcall) {
+		return ((RBCALL_FASTCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
+		} else {
+		return ((RBCALL)rb_call_copy)(klass,recv,mid,argc,argv,scope,self);
+		}
 	} else {
 
 		hook_enabled = 0;
