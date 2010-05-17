@@ -49,15 +49,19 @@ typedef VALUE (*RBYIELD0)(VALUE val, VALUE self, VALUE klass, int flags, int ava
 RBYIELD0 rb_yield_0_copy;
 void* rb_yield_0_original;
 
+#ifdef __i386__
 VALUE expected_val;
 int calibrate_convention_yield_0 = 0;
 int yield_0_fastcall = 0;
+#endif
 
 static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
     VALUE val, self, klass;	/* OK */
     int flags, avalue; 
 {
+#ifdef __i386__
 	if (yield_0_fastcall) {
+
 		__asm__("push %ebp\n");
 		__asm__("push %esi\n");
 		__asm__("push %edi\n");
@@ -79,8 +83,11 @@ static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
 		__asm__("pop %ebp\n");
 		return read_eax();
 	} else {
+#endif
 		return rb_yield_0_copy(val,self,klass,flags,avalue);
+#ifdef __i386__
 	}
+#endif
 
 }
 
@@ -90,6 +97,11 @@ rb_yield_0_fake(val, self, klass, flags, avalue)
     int flags, avalue;
 {
 #ifdef __i386__
+	#define _WORD int
+	_WORD eax = read_eax(); // val in fastcall
+	_WORD edx = read_edx(); // klass in fastcall
+	_WORD ecx = read_ecx(); // flags in fastcall
+
 	if ( calibrate_convention_yield_0 ) {
 		if (val == expected_val ) {
 			yield_0_fastcall = 0;
@@ -102,7 +114,15 @@ rb_yield_0_fake(val, self, klass, flags, avalue)
 #endif
 
 	last_avalue = avalue;
-	return rb_yield_0_i(val,self,klass,flags,avalue);
+#ifdef __i386__
+	if (yield_0_fastcall) {
+		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)val,(int)self);
+	} else {
+#endif
+		return rb_yield_0_i(val,self,klass,flags,avalue);
+#ifdef __i386__
+	}
+#endif
 
 }
 
@@ -112,6 +132,7 @@ void* hook_rb_yield_0(void* fake_function) {
 
 }
 
+#ifdef __i386__
 VALUE handling(VALUE exp, VALUE unused) {
 return Qnil;
 }
@@ -124,6 +145,7 @@ rb_yield_splat(expected_val);
 
 return Qnil;
 }
+#endif
 
 void init_rb_yield_fake() {
 
@@ -137,7 +159,9 @@ void init_rb_yield_fake() {
 	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
 
+#ifdef __i386__
 	rb_rescue( convention_detection_rescue_, Qnil, handling, Qnil);
+#endif
 
 }
 
