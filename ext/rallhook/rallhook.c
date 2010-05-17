@@ -189,7 +189,7 @@ rb_f_send_copy(argc, argv, recv)
 		mid = FIX2LONG(vid);
 	}
 
-	if (rb_block_given_p() ) {
+	if (klass != CLASS_OF(recv)) {
 		recv = tag_container(recv,klass);
 	}
 
