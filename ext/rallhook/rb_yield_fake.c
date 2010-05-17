@@ -49,19 +49,80 @@ typedef VALUE (*RBYIELD0)(VALUE val, VALUE self, VALUE klass, int flags, int ava
 RBYIELD0 rb_yield_0_copy;
 void* rb_yield_0_original;
 
+VALUE expected_val;
+int calibrate_convention_yield_0 = 0;
+int yield_0_fastcall = 0;
+
+static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
+    VALUE val, self, klass;	/* OK */
+    int flags, avalue; 
+{
+	if (yield_0_fastcall) {
+		__asm__("push %ebp\n");
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x8(%ebp), %eax\n");
+		__asm__("mov 0xc(%ebp), %edx\n");
+		__asm__("mov 0x10(%ebp), %ecx\n");
+		__asm__("push 0x18(%ebp)\n");
+		__asm__("push 0x14(%ebp)\n");
+		__asm__("call *rb_yield_0_copy\n");
+		__asm__("add $0x8, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
+	} else {
+		return rb_yield_0_copy(val,self,klass,flags,avalue);
+	}
+
+}
+
 static VALUE
 rb_yield_0_fake(val, self, klass, flags, avalue)
     VALUE val, self, klass;	/* OK */
     int flags, avalue;
 {
+#ifdef __i386__
+	if ( calibrate_convention_yield_0 ) {
+		if (val == expected_val ) {
+			yield_0_fastcall = 0;
+		} else {
+			yield_0_fastcall = 1;
+		}
+		calibrate_convention_yield_0 = 0;
+		return Qnil;
+	}
+#endif
+
 	last_avalue = avalue;
-	return rb_yield_0_copy(val,self,klass,flags,avalue);
+	return rb_yield_0_i(val,self,klass,flags,avalue);
+
 }
 
 void* hook_rb_yield_0(void* fake_function) {
 	int inst_size = get_instructions_size(rb_yield_0_original, 256);
 	return put_jmp_hook(rb_yield_0_original, fake_function, inst_size);
 
+}
+
+VALUE handling(VALUE exp, VALUE unused) {
+return Qnil;
+}
+
+VALUE convention_detection_rescue_(VALUE unused ) {
+
+calibrate_convention_yield_0 = 1;
+expected_val = rb_ary_new3(1,LONG2FIX(333));
+rb_yield_splat(expected_val);
+
+return Qnil;
 }
 
 void init_rb_yield_fake() {
@@ -75,6 +136,8 @@ void init_rb_yield_fake() {
 
 	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
+
+	rb_rescue( convention_detection_rescue_, Qnil, handling, Qnil);
 
 }
 
