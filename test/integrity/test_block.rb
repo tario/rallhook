@@ -22,7 +22,7 @@ class TestBlock < Test::Unit::TestCase
 
   def _test_block_passing(*test_args)
     # oracle testing, the result with hook and without hook must be the same
-    assert_equal hook{f0(test_args)}, f0(test_args)
+    oracle_hook_assert do f0(test_args) end
   end
 
   def test_block
