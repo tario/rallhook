@@ -84,6 +84,8 @@ VALUE rb_call_copy_i(
 ) {
 
 	if (is_fastcall) {
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
 		__asm__("mov 0x8(%ebp), %eax\n");
 		__asm__("mov 0xc(%ebp), %edx\n");
 		__asm__("mov 0x10(%ebp), %ecx\n");
@@ -92,6 +94,9 @@ VALUE rb_call_copy_i(
 		__asm__("push 0x18(%ebp)\n");
 		__asm__("push 0x14(%ebp)\n");
 		__asm__("call *rb_call_copy\n");
+		__asm__("add $0x10, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
 
 //	return ((RBCALL_FASTCALL)rb_call_copy)(argc,argv,scope,self);
 	} else {
