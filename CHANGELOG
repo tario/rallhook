@@ -1,6 +1,10 @@
-0.3.0:	Compatibility with ruby1.9 on x86_64 (tested with ruby 1.9.0 r17482 in ubuntu 9.04)
+0.3.0:	Compatibility with ruby1.8 on i386 (tested with ruby 1.8.6 patchlevel 111 in ubuntu 8.04)		
+
+		Compatibility with ruby1.9 on i386 (tested with ruby 1.9.0 in ubuntu 8.04)		
 
 		Compatiblity with ruby1.8 on x86_64 (tested with ruby 1.8.7 patchlevel  72 in ubuntu 9.04)
+
+		Compatibility with ruby1.9 on x86_64 (tested with ruby 1.9.0 r17482 in ubuntu 9.04)
 		
 		New method introspection features (see README for examples)
 		
