@@ -52,6 +52,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
 
 		// calibrate protocol of rb_call
+#ifdef __i386__
 		is_calibrate = 1;
 
 		VALUE test_value = LONG2FIX(0);
@@ -60,6 +61,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		calibrate_klass = CLASS_OF(test_value);
 
 		rb_funcall(test_value, rb_intern("to_s"), 0);
+#endif
 
 		if (!rb_call_copy) {
 			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
