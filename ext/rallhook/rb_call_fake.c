@@ -149,17 +149,83 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 #endif
 
+#ifdef __i386__
+
+VALUE read_edx( ) {
+__asm__("mov %edx, %eax");
+}
+
+VALUE read_ecx( ) {
+__asm__("mov %ecx, %eax");
+}
+
+int is_fastcall = 0;
+int is_calibrate = 0;
+VALUE calibrate_klass;
+VALUE calibrate_recv;
+
+#endif
 
 VALUE
 rb_call_fake(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
+    _WORD arg1, // VALUE klass, 
+    _WORD arg2, // VALUE recv,
+    _WORD arg3, // ID    mid,
+    _WORD arg4, // int argc,			/* OK */
+    _WORD arg5, // const VALUE *argv,		/* OK */
+    _WORD arg6, // int scope,
+    _WORD arg7 // VALUE self
 ) {
 
+	_WORD ecx = read_ecx();
+	_WORD edx = read_edx();
+
+	VALUE klass;
+	VALUE recv;
+	ID    mid;
+	int argc;			/* OK */
+	const VALUE *argv;
+	int scope;
+	VALUE self;
+
+#ifdef __i386__
+	if (is_calibrate) {
+		if ((VALUE)arg2 == calibrate_recv && (VALUE)arg1 == calibrate_klass) {
+			is_fastcall = 0;
+		} else {
+			is_fastcall = 1;
+		}
+
+		is_calibrate = 0;
+		return Qnil;
+	}
+
+	if (is_fastcall == 0) {
+		klass = (VALUE)arg1;
+		recv = (VALUE)arg2;
+		mid = (ID)arg3;
+		argc = (int)arg4;
+		argv = (VALUE*)arg5;
+		scope = (int)arg6;
+		arg7 = (VALUE)arg7;
+	} else {
+		klass = (VALUE)ecx;
+		recv = (VALUE)edx;
+		mid = (ID)arg1;
+		argc = (int)arg2;
+		argv = (VALUE*)arg3;
+		scope = (int)arg4;
+		arg7 = (VALUE)arg5;
+	}
+#else
+	klass = (VALUE)arg1;
+	recv = (VALUE)arg2;
+	mid = (ID)arg3;
+	argc = (int)arg4;
+	argv = (VALUE*)arg5;
+	scope = (int)arg6;
+	arg7 = (VALUE)arg7;
+#endif
 	int must_hook = hook_enabled;
 
 	if (is_tag(recv) ) {

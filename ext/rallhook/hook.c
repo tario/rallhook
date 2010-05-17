@@ -61,17 +61,21 @@ int get_instructions_size(void* code, int size) {
 void unprotect(void* ptr) {
 #if __x86_64__
 	unsigned long int mask = 0xFFFFFFFFFFFF000;
-#elif __i386__
-	unsigned long int mask = 0xFFFF000;
-#else
-	#error "unknow architecture"
-#endif
-
 	int ret = mprotect( (void*) ( ( (unsigned long int)ptr ) & mask ), 0x1000, PROT_READ | PROT_WRITE | PROT_EXEC);
 
 	if (ret == -1) {
 		rb_bug("mprotect failed: %s", strerror(errno));
 	}
+#elif __i386__
+	unsigned int mask = 0xFFFFFFFFFFFF000;
+	int ret = mprotect( (void*) ( ( (unsigned int)ptr ) & mask ), 0x1000, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+	if (ret == -1) {
+		rb_bug("mprotect failed: %s", strerror(errno));
+	}
+#else
+	#error "unknow architecture"
+#endif
 }
 
 void inconditional_jump(void* where, void* to) {

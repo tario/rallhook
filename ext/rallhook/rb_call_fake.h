@@ -78,14 +78,23 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const ID id, void * mn, const VALUE recv_, VALUE klass);
 #endif
 
+#ifdef __i386__
+#define _WORD int
+#else
+#define _WORD long int
+#endif
+
+
 VALUE
 rb_call_fake(
-    VALUE klass, VALUE recv,
-    ID    mid,
-    int argc,			/* OK */
-    const VALUE *argv,		/* OK */
-    int scope,
-    VALUE self
+    _WORD arg1, // VALUE klass, 
+    _WORD arg2, // VALUE recv,
+    _WORD arg3, // ID    mid,
+    _WORD arg4, // int argc,			/* OK */
+    _WORD arg5, // const VALUE *argv,		/* OK */
+    _WORD arg6, // int scope,
+    _WORD arg7 // VALUE self
+
 );
 
 
@@ -93,5 +102,13 @@ extern void* rb_call_original;
 extern int hook_enabled;
 extern int hook_enable_left;
 extern VALUE rb_hook_proc;
+
+#ifdef __i386__
+extern int is_calibrate;
+extern VALUE calibrate_klass;
+extern VALUE calibrate_recv;
+#endif
+
+
 
 #endif

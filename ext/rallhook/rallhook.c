@@ -53,6 +53,16 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		// insert inconditional jmp from rb_call to rb_call_copy
 		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
 
+		// calibrate protocol of rb_call
+		is_calibrate = 1;
+
+		VALUE test_value = LONG2FIX(0);
+
+		calibrate_recv = test_value;
+		calibrate_klass = CLASS_OF(test_value);
+
+		rb_funcall(test_value, rb_intern("to_s"), 0);
+
 		if (!rb_call_copy) {
 			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
 		}
