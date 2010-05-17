@@ -60,7 +60,7 @@ VALUE read_ecx( ) {
 __asm__("mov %ecx, %eax");
 }
 
-int is_fastcall = 0;
+int is_fastcall = 1;
 int is_calibrate = 0;
 VALUE calibrate_klass;
 VALUE calibrate_recv;
@@ -84,6 +84,10 @@ VALUE rb_call_copy_i(
 ) {
 
 	if (is_fastcall) {
+		__asm__("push %ebp\n");
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
 		__asm__("push %edx\n");
 		__asm__("push %ecx\n");
 		__asm__("mov 0x8(%ebp), %eax\n");
@@ -97,6 +101,11 @@ VALUE rb_call_copy_i(
 		__asm__("add $0x10, %esp\n");
 		__asm__("pop %ecx\n");
 		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
 
 //	return ((RBCALL_FASTCALL)rb_call_copy)(argc,argv,scope,self);
 	} else {
@@ -278,9 +287,9 @@ rb_call_fake(
 		}
 	}
 
-	if (must_hook == 0 || hook_enable_left > 0 ) {
+	if (must_hook == 0 || hook_enable_left > 0 || 1 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
-		rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
 		hook_enabled = 0;
