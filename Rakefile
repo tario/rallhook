@@ -16,7 +16,8 @@ spec = Gem::Specification.new do |s|
   s.add_dependency "ruby-cymbol", ">= 0.1.0"
   s.extra_rdoc_files = [ 'README' ]
 #  s.rdoc_options << '--main' << 'README'
-  s.files = Dir.glob("{examples,lib,test,ext}/**/*") +
+  s.extensions = FileList["ext/**/extconf.rb"].to_a
+  s.files = Dir.glob("{sample,lib,test,ext}/**/*") +
     [ 'AUTHORS', 'CHANGELOG', 'README', 'Rakefile', 'TODO' ]
 end
 
