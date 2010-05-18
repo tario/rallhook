@@ -287,7 +287,7 @@ VALUE method_wrapper_call(VALUE self, VALUE args) {
 	}
 }
 
-void Init_rallhook() {
+void Init_rallhook_base() {
 
 	const char* initcode = 	"require 'rubygems'\n"
 						"require 'ruby-cymbol'\n";

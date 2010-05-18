@@ -1,5 +1,5 @@
 require 'mkmf'
-dir_config('rallhook')
+dir_config('rallhook_base')
 CONFIG['CC'] = 'gcc'
 
 ruby_version = ARGV[0]
@@ -19,6 +19,6 @@ else
 	print "try passing the rubyversion by argument (1.8 or 1.9)\n"
 end
 
-create_makefile('rallhook')
+create_makefile('rallhook_base')
 
 
