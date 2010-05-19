@@ -2,11 +2,8 @@ require 'mkmf'
 dir_config('rallhook_base')
 CONFIG['CC'] = 'gcc'
 
-ruby_version = ARGV[0]
-unless ruby_version
 ruby_version = Config::CONFIG["ruby_version"]
 ruby_version = ruby_version.split(".")[0..1].join(".")
-end
 
 $LIBS = $LIBS + " -ldistorm3"
 
