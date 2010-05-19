@@ -1,3 +1,4 @@
+require "rubygems"
 require "rallhook"
 require "hook_proc"
 
