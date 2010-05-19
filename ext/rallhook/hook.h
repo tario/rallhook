@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #define __HOOK_H
 
 void* put_jmp_hook(void* function_address, void* fake_function, int instructions_size);
+void* put_jmp_hook_with_regs(void* function_address, void* fake_function, int instructions_size);
 int get_jmp_size();
 
 extern int get_instructions_size(void* code, int size);

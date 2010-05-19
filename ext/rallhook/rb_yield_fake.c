@@ -94,19 +94,20 @@ static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
 }
 
 static VALUE
-rb_yield_0_fake(val, self, klass, flags, avalue)
+rb_yield_0_fake(eax, edx, ecx, eip, val, self, klass, flags, avalue)
+#ifdef __i386__
+     #define _WORD int
+    _WORD eax, edx, ecx, eip;
+#endif
     VALUE val, self, klass;	/* OK */
     int flags, avalue;
 {
 #ifdef __i386__
-	#define _WORD int
-	_WORD eax = read_eax(); // val in fastcall
-	_WORD edx = read_edx(); // klass in fastcall
-	_WORD ecx = read_ecx(); // flags in fastcall
-
 	if ( calibrate_convention_yield_0 ) {
 		if (val == expected_val ) {
 			yield_0_fastcall = 0;
+		} else if ( (VALUE)eax == expected_val ){
+			yield_0_fastcall = 1;
 		} else {
 			yield_0_fastcall = 1;
 		}
@@ -129,7 +130,7 @@ rb_yield_0_fake(val, self, klass, flags, avalue)
 
 void* hook_rb_yield_0(void* fake_function) {
 	int inst_size = get_instructions_size(rb_yield_0_original, 256);
-	return put_jmp_hook(rb_yield_0_original, fake_function, inst_size);
+	return put_jmp_hook_with_regs(rb_yield_0_original, fake_function, inst_size);
 
 }
 
