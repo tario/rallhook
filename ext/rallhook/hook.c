@@ -117,18 +117,19 @@ void* put_jmp_hook_with_regs(void* function_address, void* fake_function, int in
 
 	memcpy(p_copy, p, instructions_size);
 
-	p_regs[0] = 0x51; // push ecx
-	p_regs[1] = 0x52; // push edx
-	p_regs[2] = 0x50; // push eax
-	p_regs[3] = 0xb8; // movl %eax, ???????
-	p_regs[8] = 0xff; // call *%eax
-	p_regs[9] = 0xd0; // 
-	p_regs[0xa] = 0x83; // add $0xc, %esp
-	p_regs[0xb] = 0xc4; // 
-	p_regs[0xc] = 0x0c; // 
-	p_regs[0xd] = 0xc3; // ret 
+	p_regs[0] = 0x54; // push esp
+	p_regs[1] = 0x51; // push ecx
+	p_regs[2] = 0x52; // push edx
+	p_regs[3] = 0x50; // push eax
+	p_regs[4] = 0xb8; // movl %eax, ???????
+	p_regs[9] = 0xff; // call *%eax
+	p_regs[10] = 0xd0; // 
+	p_regs[11] = 0x83; // add $0x10, %esp
+	p_regs[12] = 0xc4; // 
+	p_regs[13] = 0x10; // 
+	p_regs[14] = 0xc3; // ret 
 
-	*((void**)(p_regs+4))=fake_function;
+	*((void**)(p_regs+5))=fake_function;
 
 	inconditional_jump(p, p_regs);
 	inconditional_jump(p_copy+instructions_size, p+instructions_size);
