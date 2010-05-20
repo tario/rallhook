@@ -101,6 +101,7 @@ static VALUE
 rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 {
 	// , val, self, klass, flags, avalue
+	esp++;
 	if ( calibrate_convention_yield_0 ) {
 		if (esp[0] == expected_val ) {
 			yield_0_fastcall = 0;
