@@ -55,13 +55,10 @@ int calibrate_convention_yield_0 = 0;
 int yield_0_fastcall = 0;
 #endif
 
-static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue) __attribute__((cdecl));
-
-
 int write_eax(int value) {
 }
 
-static VALUE __attribute__((cdecl)) rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue)
+static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue)
 {
 	last_avalue = avalue;
 
