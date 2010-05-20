@@ -93,18 +93,16 @@ static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
 
 }
 
-static VALUE
-rb_yield_0_fake(eax, edx, ecx, eip, val, self, klass, flags, avalue)
 #ifdef __i386__
      #define _WORD int
     _WORD eax, edx, ecx, eip;
-#endif
-    VALUE val, self, klass;	/* OK */
-    int flags, avalue;
+
+static VALUE
+rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 {
-#ifdef __i386__
+	// , val, self, klass, flags, avalue
 	if ( calibrate_convention_yield_0 ) {
-		if (val == expected_val ) {
+		if (esp[0] == expected_val ) {
 			yield_0_fastcall = 0;
 		} else if ( (VALUE)eax == expected_val ){
 			yield_0_fastcall = 1;
@@ -114,19 +112,15 @@ rb_yield_0_fake(eax, edx, ecx, eip, val, self, klass, flags, avalue)
 		calibrate_convention_yield_0 = 0;
 		return Qnil;
 	}
-#endif
 
-#ifdef __i386__
 	if (yield_0_fastcall) {
-		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)val,(int)self);
+		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)esp[0],(int)esp[0]);
 	} else {
-#endif
-		return rb_yield_0_i(val,self,klass,flags,avalue);
-#ifdef __i386__
+		return rb_yield_0_i((VALUE)esp[0],(VALUE)esp[1],(VALUE)esp[2],(int)esp[3],(int)esp[4]);
 	}
-#endif
 
 }
+#endif
 
 void* hook_rb_yield_0(void* fake_function) {
 	int inst_size = get_instructions_size(rb_yield_0_original, 256);
@@ -159,7 +153,9 @@ void init_rb_yield_fake() {
 	unsigned char* base = (unsigned char*)info.dli_fbase;
 
 	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
-	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake);
+#ifdef __i386__
+	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake_regs);
+#endif
 
 #ifdef __i386__
 	rb_rescue( convention_detection_rescue_, Qnil, handling, Qnil);
