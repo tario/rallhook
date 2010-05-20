@@ -127,6 +127,16 @@ rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 }
 #endif
 
+#ifdef __x86_64__
+static VALUE
+rb_yield_0_fake(VALUE val,VALUE self,VALUE klass,int flags,int avalue) {
+	last_avalue = avalue;
+	return rb_yield_0_copy(val,self,klass,flags,avalue);
+}
+
+#endif
+
+
 void* hook_rb_yield_0(void* fake_function) {
 	int inst_size = get_instructions_size(rb_yield_0_original, 256);
 	return put_jmp_hook_with_regs(rb_yield_0_original, fake_function, inst_size);
@@ -160,6 +170,9 @@ void init_rb_yield_fake() {
 	rb_yield_0_original = ruby_resolv(base, "rb_yield_0" );
 #ifdef __i386__
 	rb_yield_0_copy = (RBYIELD0)hook_rb_yield_0(rb_yield_0_fake_regs);
+#elif __x86_64__
+	int inst_size = get_instructions_size(rb_yield_0_original, 256);
+	rb_yield_0_copy = (RBYIELD0)put_jmp_hook(rb_yield_0_original, rb_yield_0_fake, inst_size);
 #endif
 
 #ifdef __i386__
