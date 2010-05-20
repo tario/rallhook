@@ -60,6 +60,9 @@ VALUE read_ecx( ) {
 __asm__("mov %ecx, %eax");
 }
 
+int write_eax(int value) {
+}
+
 int is_fastcall = 1;
 int is_calibrate = 0;
 VALUE calibrate_klass;
@@ -84,21 +87,25 @@ VALUE rb_call_copy_i(
 ) {
 #ifdef __i386__
 	if (is_fastcall) {
-		__asm__("push %ebp\n");
+
+		int array[] = { (int)klass, (int)recv, mid  argc, (int)argv, scope, (int)self };
+		write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
 		__asm__("push %esi\n");
 		__asm__("push %edi\n");
 		__asm__("push %ebx\n");
 		__asm__("push %edx\n");
 		__asm__("push %ecx\n");
-		__asm__("mov 0x8(%ebp), %eax\n");
-		__asm__("mov 0xc(%ebp), %edx\n");
-		__asm__("mov 0x10(%ebp), %ecx\n");
-		__asm__("push 0x20(%ebp)\n");
-		__asm__("push 0x1c(%ebp)\n");
-		__asm__("push 0x18(%ebp)\n");
-		__asm__("push 0x14(%ebp)\n");
+		__asm__("mov 0x4(%eax), %edx\n");
+		__asm__("mov 0x8(%eax), %ecx\n");
+		__asm__("push 0x18(%eax)\n");
+		__asm__("push 0x04(%eax)\n");
+		__asm__("push 0x10(%eax)\n");
+		__asm__("push 0x0c(%eax)\n");
+		__asm__("mov (%eax), %eax\n");
 		__asm__("call *rb_call_copy\n");
-		__asm__("add $0x10, %esp\n");
+		__asm__("add $0x8, %esp\n");
 		__asm__("pop %ecx\n");
 		__asm__("pop %edx\n");
 		__asm__("pop %ebx\n");
