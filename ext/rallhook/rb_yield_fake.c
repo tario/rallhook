@@ -55,26 +55,33 @@ int calibrate_convention_yield_0 = 0;
 int yield_0_fastcall = 0;
 #endif
 
-static VALUE rb_yield_0_i(val, self, klass, flags, avalue)
-    VALUE val, self, klass;	/* OK */
-    int flags, avalue; 
+static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue) __attribute__((cdecl));
+
+
+int write_eax(int value) {
+}
+
+static VALUE __attribute__((cdecl)) rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue)
 {
 	last_avalue = avalue;
 
 #ifdef __i386__
 	if (yield_0_fastcall) {
 
-		__asm__("push %ebp\n");
+		int array[6] = {val, self, klass, flags, avalue };
+		write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
 		__asm__("push %esi\n");
 		__asm__("push %edi\n");
 		__asm__("push %ebx\n");
 		__asm__("push %edx\n");
 		__asm__("push %ecx\n");
-		__asm__("mov 0x8(%ebp), %eax\n");
-		__asm__("mov 0xc(%ebp), %edx\n");
-		__asm__("mov 0x10(%ebp), %ecx\n");
-		__asm__("push 0x18(%ebp)\n");
-		__asm__("push 0x14(%ebp)\n");
+		__asm__("mov 0x4(%eax), %edx\n"); // self
+		__asm__("mov 0x8(%eax), %ecx\n"); // klass
+		__asm__("push 0x10(%eax)\n"); //avalue
+		__asm__("push 0x0c(%eax)\n"); //flags
+		__asm__("mov (%eax), %eax\n"); // val
 		__asm__("call *rb_yield_0_copy\n");
 		__asm__("add $0x8, %esp\n");
 		__asm__("pop %ecx\n");
