@@ -19,13 +19,6 @@ This package contains rallhook, a ruby C extension to intercept ruby methods cal
 
 gem install rallhook-X.X.X.gem
 
-=== Ext compile and installation
-
-* Go to the gem install directory (Usually /var/lib/gems/1.8/gems/rallhook-X.X.X )
-* Run:
-
-sudo rake install
-
 == Usage
 
 === Basic Example
