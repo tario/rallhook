@@ -60,7 +60,7 @@ VALUE read_ecx( ) {
 __asm__("mov %ecx, %eax");
 }
 
-int write_eax(int value) {
+int rb_call_write_eax(int value) {
 }
 
 int is_fastcall = 1;
@@ -88,8 +88,8 @@ VALUE rb_call_copy_i(
 #ifdef __i386__
 	if (is_fastcall) {
 
-		int array[] = { (int)klass, (int)recv, mid  argc, (int)argv, scope, (int)self };
-		write_eax(array);
+		int array[7] = { (int)klass, (int)recv, mid, argc, (int)argv, scope, (int)self };
+		rb_call_write_eax(array);
 
 		__asm__("push %ebp\n");	// save all registers
 		__asm__("push %esi\n");
@@ -304,9 +304,9 @@ rb_call_fake_regs(
 	if (is_calibrate) {
 
 		if ((VALUE)edx == calibrate_recv && (VALUE)eax == calibrate_klass) {
-			is_fastcall = 0;
-		} else {
 			is_fastcall = 1;
+		} else {
+			is_fastcall = 0;
 		}
 
 		is_calibrate = 0;
