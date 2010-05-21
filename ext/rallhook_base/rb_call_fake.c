@@ -100,12 +100,12 @@ VALUE rb_call_copy_i(
 		__asm__("mov 0x4(%eax), %edx\n");
 		__asm__("mov 0x8(%eax), %ecx\n");
 		__asm__("push 0x18(%eax)\n");
-		__asm__("push 0x04(%eax)\n");
+		__asm__("push 0x14(%eax)\n");
 		__asm__("push 0x10(%eax)\n");
 		__asm__("push 0x0c(%eax)\n");
 		__asm__("mov (%eax), %eax\n");
 		__asm__("call *rb_call_copy\n");
-		__asm__("add $0x8, %esp\n");
+		__asm__("add $0x10, %esp\n");
 		__asm__("pop %ecx\n");
 		__asm__("pop %edx\n");
 		__asm__("pop %ebx\n");
