@@ -140,6 +140,19 @@ VALUE rb_node_file(VALUE self) {
 
 #ifdef RUBY1_8
 
+// from eval.c
+static void
+_print_undef(klass, id)
+    VALUE klass;
+    ID id;
+{
+    rb_name_error(id, "undefined method `%s' for %s `%s'",
+		  rb_id2name(id),
+		  (TYPE(klass) == T_MODULE) ? "module" : "class",
+		  rb_class2name(klass));
+}
+
+
 static VALUE
 my_mnew(klass, obj, id, mklass)
     VALUE klass, obj, mklass;
@@ -153,7 +166,7 @@ my_mnew(klass, obj, id, mklass)
 
   again:
     if ((body = rb_method_node(klass, id)) == 0) {
-	print_undef(rklass, oid);
+	_print_undef(rklass, oid);
     }
 
     if (nd_type(body) == NODE_ZSUPER) {
@@ -199,8 +212,11 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
     }
 
     if (argc == 1) {
-    	method_id = argv[0];
-    	klass = CLASS_OF(obj);
+
+    	return rb_call_super(argc, argv);
+
+//    	method_id = argv[0];
+  //  	klass = CLASS_OF(obj);
     }
 
     if (argc == 2) {
@@ -245,5 +261,5 @@ void  init_node() {
 	mnew_ = ruby_resolv((unsigned char*)base__, "mnew");
 #endif
 
-	rb_define_method(rb_cObject, "_method", rb_obj_method_, -1);
+	rb_define_method(rb_cObject, "method", rb_obj_method_, -1);
 }
