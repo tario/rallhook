@@ -24,19 +24,6 @@ end
 desc 'Run tests'
 task :default => [ :test ]
 
-task :build do
-  system("cd ext/rallhook; ruby extconf.rb; make")
-end
-
-task :clean do
-  system("cd ext/rallhook; ruby extconf.rb; make clean")
-end
-
-task :install do
-  system("cd ext/rallhook; ruby extconf.rb; make install")
-end
-
-
 Rake::TestTask.new('test') do |t|
   t.libs << 'test'
   t.pattern = '{test}/**/test_*.rb'
