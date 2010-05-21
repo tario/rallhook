@@ -222,23 +222,74 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 #endif
 
+#ifdef __x86_64__
+
 VALUE
 rb_call_fake(
-    _WORD arg1, // VALUE klass,
-    _WORD arg2, // VALUE recv,
-    _WORD arg3, // ID    mid,
-    _WORD arg4, // int argc,			/* OK */
-    _WORD arg5, // const VALUE *argv,		/* OK */
-    _WORD arg6, // int scope,
-    _WORD arg7 // VALUE self
+    VALUE klass, VALUE recv,
+    ID    mid,
+    int argc,			/* OK */
+    const VALUE *argv,		/* OK */
+    int scope,
+    VALUE self
 ) {
+	int must_hook = hook_enabled;
 
-#ifdef __i386__
-	_WORD eax = read_eax(); // klass in fastcall
-	_WORD edx = read_edx(); // recv in fastcall
-	_WORD ecx = read_ecx(); // ID in fastcall
+	if (is_tag(recv) ) {
+		volatile VALUE orig_recv = recv;
+		volatile VALUE klass_;
+		recv = tag_container_get_self(orig_recv);
+		klass_ = tag_container_get_tag(orig_recv);
+
+		if (klass_ != Qnil ) {
+			klass = klass_;
+		}
+	}
+
+	if (must_hook == 0 || hook_enable_left > 0 ) {
+		if (hook_enable_left > 0) hook_enable_left--;
+		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+	} else {
+
+		hook_enabled = 0;
+
+		VALUE sym;
+
+		// avoid to send symbols without name (crash the interpreter)
+		if (rb_id2name(mid) == NULL){
+			sym = Qnil;
+		} else {
+			sym = ID2SYM(mid);
+		}
+
+		VALUE args = rb_ary_new2(argc);
+		int i;
+		for (i = 0; i < argc; i ++) {
+			rb_ary_store (args, i, argv[i] );
+		}
+
+		VALUE argv_[6];
+		argv_[0] = klass;
+		argv_[1] = recv;
+		argv_[2] = sym;
+		argv_[3] = args;
+		argv_[4] = LONG2FIX(mid);
+
+		return rb_ensure(rb_call_wrapper,(VALUE)argv_,restore_hook_status_ensure,Qnil);
+
+	}
+
+}
+
 #endif
 
+
+#ifdef __i386__
+
+VALUE
+rb_call_fake_regs(
+	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
+) {
 	VALUE klass;
 	VALUE recv;
 	ID    mid;
@@ -247,10 +298,12 @@ rb_call_fake(
 	int scope;
 	VALUE self;
 
-#ifdef __i386__
+	esp++;
+
+
 	if (is_calibrate) {
 
-		if ((VALUE)arg2 == calibrate_recv && (VALUE)arg1 == calibrate_klass) {
+		if ((VALUE)edx == calibrate_recv && (VALUE)eax == calibrate_klass) {
 			is_fastcall = 0;
 		} else {
 			is_fastcall = 1;
@@ -261,31 +314,23 @@ rb_call_fake(
 	}
 
 	if (is_fastcall == 0) {
-		klass = (VALUE)arg1;
-		recv = (VALUE)arg2;
-		mid = (ID)arg3;
-		argc = (int)arg4;
-		argv = (VALUE*)arg5;
-		scope = (int)arg6;
-		self = (VALUE)arg7;
+		klass = (VALUE)esp[0];
+		recv = (VALUE)esp[1];
+		mid = (ID)esp[2];
+		argc = (int)esp[3];
+		argv = (VALUE*)esp[4];
+		scope = (int)esp[5];
+		self = (VALUE)esp[6];
 	} else {
 		klass = (VALUE)eax;
 		recv = (VALUE)edx;
 		mid = (VALUE)ecx;
-		argc = (int)arg1;
-		argv = (VALUE*)arg2;
-		scope = (int)arg3;
-		self = (VALUE)arg4;
+		argc = (int)esp[0];
+		argv = (VALUE*)esp[1];
+		scope = (int)esp[2];
+		self = (VALUE)esp[3];
 	}
-#else
-	klass = (VALUE)arg1;
-	recv = (VALUE)arg2;
-	mid = (ID)arg3;
-	argc = (int)arg4;
-	argv = (VALUE*)arg5;
-	scope = (int)arg6;
-	self = (VALUE)arg7;
-#endif
+
 	int must_hook = hook_enabled;
 
 	if (is_tag(recv) ) {
@@ -332,6 +377,8 @@ rb_call_fake(
 
 	}
 }
+
+#endif
 
 void
 rb_call_fake_init() {

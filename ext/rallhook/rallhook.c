@@ -49,10 +49,16 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	if (!code_changed) {
 		// insert inconditional jmp from rb_call to rb_call_copy
-		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
 
+		#ifdef __i386__
+		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake_regs);
+		#endif
+
+		#ifdef __x86_64__
+		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
+		#endif
 		// calibrate protocol of rb_call
-#ifdef __i386__
+		#ifdef __i386__
 		is_calibrate = 1;
 
 		VALUE test_value = LONG2FIX(0);
@@ -61,7 +67,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		calibrate_klass = CLASS_OF(test_value);
 
 		rb_funcall(test_value, rb_intern("to_s"), 0);
-#endif
+		#endif
 
 		if (!rb_call_copy) {
 			rb_raise( rb_eFatal, "libruby incompatible with rallhook");

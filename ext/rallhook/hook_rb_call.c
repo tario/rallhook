@@ -48,7 +48,14 @@ void* hook_rb_call(void* fake_function) {
 		return 0;
 	}
 	int inst_size = get_instructions_size(rb_call_original, 256);
+
+#ifdef __i386__
+	return put_jmp_hook_with_regs(rb_call_original, fake_function, inst_size);
+#endif
+
+#ifdef __x86_64__
 	return put_jmp_hook(rb_call_original, fake_function, inst_size);
+#endif
 
 }
 

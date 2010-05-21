@@ -96,15 +96,26 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 VALUE
 rb_call_fake(
-    _WORD arg1, // VALUE klass, 
-    _WORD arg2, // VALUE recv,
-    _WORD arg3, // ID    mid,
-    _WORD arg4, // int argc,			/* OK */
-    _WORD arg5, // const VALUE *argv,		/* OK */
-    _WORD arg6, // int scope,
-    _WORD arg7 // VALUE self
-
+    VALUE klass, VALUE recv,
+    ID    mid,
+    int argc,			/* OK */
+    const VALUE *argv,		/* OK */
+    int scope,
+    VALUE self
 );
+
+#ifdef __i386__
+
+#ifndef _WORD
+#define _WORD int
+#endif
+
+VALUE
+rb_call_fake_regs(
+	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
+);
+
+#endif
 
 
 extern void* rb_call_original;
