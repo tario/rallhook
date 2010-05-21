@@ -7,7 +7,8 @@ This package contains rallhook, a ruby C extension to intercept ruby methods cal
 === Prerequisites
 
 * ruby-cymbol >= 0.1.0 (found at http://github.com/tario/ruby-cymbol)
-* ruby debug info ( apt-get install libruby1.8-dbg libruby1.9-dbg on debian system)
+* ruby debug info ( apt-get install libruby1.8-dbg or libruby1.9-dbg on debian based systems)
+* ruby development package ( apt-get install ruby1.8-dev or ruby1.9-dev on debian based systems)
 * objdump
 * distorm ( found at https://code.google.com/p/distorm/ )
 
