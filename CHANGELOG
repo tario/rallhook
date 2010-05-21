@@ -1,3 +1,9 @@
+0.3.1	Fixed fastcall convention calls in i386, hooks and detection of calling convention
+
+		Fixed compatibility issues with ruby1.8 and ruby1.9 in i386
+
+		Rakefile configured to build extensions automatically at gem install
+
 0.3.0:	Compatibility with ruby1.8 on i386 (tested with ruby 1.8.6 patchlevel 111 in ubuntu 8.04)		
 
 		Compatibility with ruby1.9 on i386 (tested with ruby 1.9.0 in ubuntu 8.04)		
