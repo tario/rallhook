@@ -127,6 +127,7 @@ extern VALUE rb_hook_proc;
 extern int is_calibrate;
 extern VALUE calibrate_klass;
 extern VALUE calibrate_recv;
+extern ID calibrate_mid;
 #endif
 
 

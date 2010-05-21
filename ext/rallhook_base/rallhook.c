@@ -65,8 +65,9 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 		calibrate_recv = test_value;
 		calibrate_klass = CLASS_OF(test_value);
+		calibrate_mid = rb_intern("to_s");
 
-		rb_funcall(test_value, rb_intern("to_s"), 0);
+		rb_funcall(test_value, calibrate_mid, 0);
 		#endif
 
 		if (!rb_call_copy) {

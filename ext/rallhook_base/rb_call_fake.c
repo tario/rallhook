@@ -61,12 +61,14 @@ __asm__("mov %ecx, %eax");
 }
 
 int rb_call_write_eax(int value) {
+	return value;
 }
 
 int is_fastcall = 1;
 int is_calibrate = 0;
 VALUE calibrate_klass;
 VALUE calibrate_recv;
+ID calibrate_mid;
 
 #endif
 
@@ -303,8 +305,10 @@ rb_call_fake_regs(
 
 	if (is_calibrate) {
 
-		if ((VALUE)edx == calibrate_recv && (VALUE)eax == calibrate_klass) {
+		if ((VALUE)edx == calibrate_recv && (VALUE)eax == calibrate_klass && (ID)ecx == calibrate_mid) {
 			is_fastcall = 1;
+		} else if ( (VALUE)edx == calibrate_recv && (VALUE)eax == calibrate_klass && (ID)esp[0] == calibrate_mid ) {
+			is_fastcall = 2;
 		} else {
 			is_fastcall = 0;
 		}
@@ -321,6 +325,14 @@ rb_call_fake_regs(
 		argv = (VALUE*)esp[4];
 		scope = (int)esp[5];
 		self = (VALUE)esp[6];
+	} else if (is_fastcall == 2) {
+		klass = (VALUE)eax;
+		recv = (VALUE)edx;
+		mid = (VALUE)esp[0];
+		argc = (int)esp[1];
+		argv = (VALUE*)esp[2];
+		scope = (int)esp[3];
+		self = (VALUE)esp[4];
 	} else {
 		klass = (VALUE)eax;
 		recv = (VALUE)edx;

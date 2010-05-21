@@ -56,6 +56,7 @@ int yield_0_fastcall = 0;
 #endif
 
 int write_eax(int value) {
+	return value;
 }
 
 static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int avalue)
