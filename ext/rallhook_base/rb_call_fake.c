@@ -88,7 +88,7 @@ VALUE rb_call_copy_i(
     VALUE self
 ) {
 #ifdef __i386__
-	if (is_fastcall) {
+	if (is_fastcall == 1) {
 
 		int array[7] = { (int)klass, (int)recv, mid, argc, (int)argv, scope, (int)self };
 		rb_call_write_eax(array);
@@ -108,6 +108,33 @@ VALUE rb_call_copy_i(
 		__asm__("mov (%eax), %eax\n");
 		__asm__("call *rb_call_copy\n");
 		__asm__("add $0x10, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
+
+	} else if ( is_fastcall == 2) {
+		int array[7] = { (int)klass, (int)recv, mid, argc, (int)argv, scope, (int)self };
+		rb_call_write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x4(%eax), %edx\n");
+		__asm__("push 0x18(%eax)\n");
+		__asm__("push 0x14(%eax)\n");
+		__asm__("push 0x10(%eax)\n");
+		__asm__("push 0x0c(%eax)\n");
+		__asm__("push 0x08(%eax)\n");
+		__asm__("mov (%eax), %eax\n");
+		__asm__("call *rb_call_copy\n");
+		__asm__("add $0x14, %esp\n");
 		__asm__("pop %ecx\n");
 		__asm__("pop %edx\n");
 		__asm__("pop %ebx\n");
