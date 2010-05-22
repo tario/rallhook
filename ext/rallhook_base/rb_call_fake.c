@@ -209,34 +209,24 @@ VALUE vm_call_method_wrapper(VALUE ary ) {
 
 		vm_call_method_parameters_t* params = (vm_call_method_parameters_t*)ary;
 
-		// redirigir la llamada del metodo a otro objeto
-		VALUE obj = rb_funcall(
-			rb_cRallHook,
-			id_method_wrapper,
-			3,
-			params->recv,
-			params->klass,
-			LONG2FIX(params->id)
-			);
+		VALUE sym;
 
-		params->recv = obj;
-		params->klass = CLASS_OF(obj);
-		params->mn = rb_method_node( params->klass, id_call);
-		if (params->mn == 0) rb_bug("Null method node for method %s", rb_id2name(id_call) );
-
-		params->id = id_call;
+		// avoid to send symbols without name (crash the interpreter)
+		if (rb_id2name(params->id) == NULL){
+			sym = Qnil;
+		} else {
+			sym = ID2SYM(params->id);
+		}
 
 
-		return vm_call_method_copy(
-				params->th,
-				params->cfp,
-				params->num,
-				params->blockptr,
-				params->flag,
-				params->id,
-				params->mn,
-				params->recv,
-				params->klass);
+		VALUE argv_[6];
+		argv_[0] = params->klass;
+		argv_[1] = params->recv;
+		argv_[2] = sym;
+		argv_[3] = Qnil;
+		argv_[4] = LONG2FIX(params->id);
+
+		return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 5, argv_);
 }
 
 VALUE
@@ -277,7 +267,42 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		params.recv = recv_;
 		params.klass = klass;
 
-		return rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+		VALUE result = rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+
+		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
+			return rb_ivar_get(result, rb_intern("@return_value") );
+		}
+		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
+			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
+			ID mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
+	-		void* mn_ = rb_method_node( klass_, mid);
+-			if (mn_ == 0) rb_bug("Null method node for method %s", rb_id2name(mid_) );
+
+
+			return vm_call_method_copy(
+				params->th,
+				params->cfp,
+				params->num,
+				params->blockptr,
+				params->flag,
+				mid_,
+				mn_,
+				recv_,
+				klass_);
+		}
+
+		return vm_call_method_copy(
+				params->th,
+				params->cfp,
+				params->num,
+				params->blockptr,
+				params->flag,
+				params->id,
+				params->mn,
+				params->recv,
+				params->klass);
+
 
 	}
 }
@@ -336,7 +361,7 @@ rb_call_fake(
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
 			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
-			VALUE mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
+			ID mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
 
 			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
 		}
