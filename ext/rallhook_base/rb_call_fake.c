@@ -186,8 +186,9 @@ VALUE rb_call_wrapper(VALUE parameters){
 	argv_[1] = params->recv;
 	argv_[2] = sym;
 	argv_[3] = args;
+	argv_[4] = LONG2FIX(params->mid);
 
-	return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 4, argv_);
+	return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 5, argv_);
 }
 
 #ifdef RUBY1_9
