@@ -105,7 +105,7 @@ static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int ava
 		__asm__("push 0x08(%eax)\n");
 		__asm__("mov (%eax), %eax\n");
 		__asm__("call *rb_yield_0_copy\n");
-		__asm__("add $0x8, %esp\n");
+		__asm__("add $0xc, %esp\n");
 		__asm__("pop %ecx\n");
 		__asm__("pop %edx\n");
 		__asm__("pop %ebx\n");
@@ -140,6 +140,7 @@ rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 			if (edx == 0 && ecx == 0 && esp[0] == 0 && (esp[1] == 2 || esp[1] == 0) ) {
 				yield_0_fastcall = 1;
 			} else if ( edx == 0 && esp[0] == 0 && esp[1] == 0 && (esp[2] == 2 || esp[2] == 0) ){
+				printf("FASTCALL2\n");
 				yield_0_fastcall = 2;
 			} else {
 				yield_0_fastcall = 1;
