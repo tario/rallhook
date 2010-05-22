@@ -45,6 +45,9 @@ int hook_enabled = 0;
 int hook_enable_left = 0;
 void* rb_call_copy;
 extern VALUE rb_cRallHook;
+extern VALUE rb_mMethodRedirect;
+extern VALUE rb_mMethodReturn;
+
 
 
 #ifdef __i386__
@@ -273,19 +276,23 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 			return rb_ivar_get(result, rb_intern("@return_value") );
 		}
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+
 			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
 			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
 			ID mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
-	-		void* mn_ = rb_method_node( klass_, mid);
--			if (mn_ == 0) rb_bug("Null method node for method %s", rb_id2name(mid_) );
 
+			void *mn_ = rb_method_node( klass_, mid_);
+
+			if (mn_ == 0) {
+				rb_bug("Null method node for method %s", rb_id2name(mid_) );
+			}
 
 			return vm_call_method_copy(
-				params->th,
-				params->cfp,
-				params->num,
-				params->blockptr,
-				params->flag,
+				th,
+				cfp,
+				num,
+				blockptr,
+				flag,
 				mid_,
 				mn_,
 				recv_,
@@ -293,15 +300,15 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		}
 
 		return vm_call_method_copy(
-				params->th,
-				params->cfp,
-				params->num,
-				params->blockptr,
-				params->flag,
-				params->id,
-				params->mn,
-				params->recv,
-				params->klass);
+				th,
+				cfp,
+				num,
+				blockptr,
+				flag,
+				id,
+				mn,
+				recv,
+				klass);
 
 
 	}
@@ -310,9 +317,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 #endif
 
 #ifdef __x86_64__
-
-extern VALUE rb_mMethodRedirect;
-extern VALUE rb_mMethodReturn;
 
 VALUE
 rb_call_fake(
