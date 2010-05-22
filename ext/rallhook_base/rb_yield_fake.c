@@ -136,10 +136,16 @@ rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 		if (esp[0] == expected_val ) {
 			yield_0_fastcall = 0;
 		} else if ( (VALUE)eax == expected_val ){
-			yield_0_fastcall = 1;
-		} else {
-			yield_0_fastcall = 1;
+
+			if (edx == 0 && ecx == 0 && esp[0] == 0 && (esp[1] == 2 || esp[1] == 0) ) {
+				yield_0_fastcall = 1;
+			} else if ( edx == 0 && esp[0] == 0 && esp[1] == 0 && (esp[2] == 2 || esp[2] == 0) ){
+				yield_0_fastcall = 2;
+			} else {
+				yield_0_fastcall = 1;
+			}
 		}
+
 		calibrate_convention_yield_0 = 0;
 		return Qnil;
 	}
