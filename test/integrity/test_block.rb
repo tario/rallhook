@@ -30,6 +30,9 @@ class TestBlock < Test::Unit::TestCase
     _test_block_passing(1,2)
     _test_block_passing("3333")
     _test_block_passing("3333",9999, 1.32)
+    _test_block_passing([1,2,3])
+    _test_block_passing([1])
+    _test_block_passing([[1]])
   end
 end
 
