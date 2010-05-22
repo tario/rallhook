@@ -64,7 +64,7 @@ static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int ava
 	last_avalue = avalue;
 
 #ifdef __i386__
-	if (yield_0_fastcall) {
+	if (yield_0_fastcall == 1) {
 
 		int array[6] = {val, self, klass, flags, avalue };
 		write_eax(array);
@@ -89,6 +89,31 @@ static VALUE rb_yield_0_i(VALUE val, VALUE self, VALUE klass, int flags, int ava
 		__asm__("pop %esi\n");
 		__asm__("pop %ebp\n");
 		return read_eax();
+	} else if (yield_0_fastcall ==  2) {
+		int array[6] = {val, self, klass, flags, avalue };
+		write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x4(%eax), %edx\n");
+		__asm__("push 0x10(%eax)\n");
+		__asm__("push 0x0c(%eax)\n");
+		__asm__("push 0x08(%eax)\n");
+		__asm__("mov (%eax), %eax\n");
+		__asm__("call *rb_yield_0_copy\n");
+		__asm__("add $0x8, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
+
 	} else {
 #endif
 		return rb_yield_0_copy(val,self,klass,flags,avalue);
@@ -119,8 +144,10 @@ rb_yield_0_fake_regs(_WORD eax, _WORD edx, _WORD ecx, _WORD* esp)
 		return Qnil;
 	}
 
-	if (yield_0_fastcall) {
-		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)esp[0],(int)esp[0]);
+	if (yield_0_fastcall == 1) {
+		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)ecx,(int)esp[0],(int)esp[1]);
+	} else if (yield_0_fastcall == 2){
+		return rb_yield_0_i((VALUE)eax,(VALUE)edx,(VALUE)esp[0],(int)esp[1],(int)esp[2]);
 	} else {
 		return rb_yield_0_i((VALUE)esp[0],(VALUE)esp[1],(VALUE)esp[2],(int)esp[3],(int)esp[4]);
 	}
