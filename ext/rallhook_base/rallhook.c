@@ -29,6 +29,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_yield_fake.h"
 
 VALUE rb_cRallHook;
+VALUE rb_mRallHook;
+VALUE rb_mMethodRedirect;
+VALUE rb_mMethodReturn;
 ID id_call_;
 
 VALUE unhook(VALUE self) {
@@ -128,7 +131,7 @@ VALUE reunhook_reyield_ensure( VALUE arguments) {
 		VALUE arguments_inspect = rb_inspect(arguments);
 
 		printf("_ changed %s by %s\n", rb_string_value_ptr( &arguments_inspect ), rb_string_value_ptr( &argumentsinspect ) );
-*/	
+*/
 		return rb_yield_splat(rb_ary_new3(1,other_arguments));
 	} else {
 		return rb_yield_splat(arguments);
@@ -238,7 +241,7 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 		VALUE arguments_inspect = rb_inspect(arguments);
 
 		printf("_ changed %s by %s\n", rb_string_value_ptr( &arguments_inspect ), rb_string_value_ptr( &argumentsinspect ) );
-*/	
+*/
 		hook_enabled = 1;
 		return rb_yield_splat(rb_ary_new3(1,other_arguments));
 	} else {
@@ -322,14 +325,18 @@ extern void Init_rallhook_base() {
 						"require 'ruby-cymbol'\n";
 
 	rb_eval_string(initcode);
-
-	rb_cRallHook = rb_define_class("RallHook", rb_cObject);
+	rb_mRallHook = rb_define_module("RallHook");
+	rb_cRallHook = rb_define_class_under(rb_mRallHook, "RallHook", rb_cObject);
 	rb_define_method(rb_cRallHook, "hook", hook, 1);
 	rb_define_method(rb_cRallHook, "unhook", unhook, 0);
 	rb_define_method(rb_cRallHook, "from", from, 1);
 
 	rb_define_singleton_method(rb_cRallHook, "call", rallhook_call, 5);
 	rb_define_singleton_method(rb_cRallHook, "method_wrapper", rallhook_new_method_wrapper, 3);
+
+	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
+	rb_mMethodReturn = rb_define_module_under(rb_mRallHook, "MethodReturn");
+
 
 	rb_define_method(rb_cObject, "hooked_send", rb_f_send_copy, -1);
 

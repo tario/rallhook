@@ -153,9 +153,41 @@ VALUE rb_call_copy_i(
 }
 
 
-VALUE rb_call_wrapper(VALUE ary){
-	VALUE* argv = (VALUE*)ary;
-	return rb_call_copy_i(CLASS_OF(rb_cRallHook), rb_cRallHook, id_call,5,argv,1,Qundef);
+typedef struct {
+    VALUE klass; VALUE recv;
+    ID    mid;
+    int argc;			/* OK */
+    const VALUE *argv;		/* OK */
+    int scope;
+    VALUE self;
+} rb_call_parameters_t;
+
+VALUE rb_call_wrapper(VALUE parameters){
+	rb_call_parameters_t* params = (rb_call_parameters_t*)parameters;
+
+
+	VALUE sym;
+
+	// avoid to send symbols without name (crash the interpreter)
+	if (rb_id2name(params->mid) == NULL){
+		sym = Qnil;
+	} else {
+		sym = ID2SYM(params->mid);
+	}
+
+	VALUE args = rb_ary_new2(params->argc);
+	int i;
+	for (i = 0; i < params->argc; i ++) {
+		rb_ary_store (args, i, params->argv[i] );
+	}
+
+	VALUE argv_[6];
+	argv_[0] = params->klass;
+	argv_[1] = params->recv;
+	argv_[2] = sym;
+	argv_[3] = args;
+
+	return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 4, argv_);
 }
 
 #ifdef RUBY1_9
@@ -253,6 +285,9 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 #ifdef __x86_64__
 
+extern VALUE rb_mMethodRedirect;
+extern VALUE rb_mMethodReturn;
+
 VALUE
 rb_call_fake(
     VALUE klass, VALUE recv,
@@ -282,29 +317,30 @@ rb_call_fake(
 
 		hook_enabled = 0;
 
-		VALUE sym;
+		rb_call_parameters_t params;
 
-		// avoid to send symbols without name (crash the interpreter)
-		if (rb_id2name(mid) == NULL){
-			sym = Qnil;
-		} else {
-			sym = ID2SYM(mid);
+		params.klass = klass;
+		params.recv = recv;
+		params.mid = mid;
+		params.argc = argc;
+		params.argv = argv;
+		params.scope = scope;
+		params.self = self;
+
+		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+
+		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
+			return rb_ivar_get(result, rb_intern("@return_value") );
+		}
+		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
+			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
+			VALUE mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
+
+			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
 		}
 
-		VALUE args = rb_ary_new2(argc);
-		int i;
-		for (i = 0; i < argc; i ++) {
-			rb_ary_store (args, i, argv[i] );
-		}
-
-		VALUE argv_[6];
-		argv_[0] = klass;
-		argv_[1] = recv;
-		argv_[2] = sym;
-		argv_[3] = args;
-		argv_[4] = LONG2FIX(mid);
-
-		return rb_ensure(rb_call_wrapper,(VALUE)argv_,restore_hook_status_ensure,Qnil);
+		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 
 	}
 
