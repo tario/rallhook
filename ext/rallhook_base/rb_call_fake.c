@@ -38,6 +38,10 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 ID id_call;
 ID id_method_wrapper;
+ID id_handle_method;
+
+ID id_return_value_var, id_klass_var, id_recv_var, id_method_var;
+
 VALUE rb_hook_proc = Qnil;
 
 // extern, exported variables
@@ -191,7 +195,7 @@ VALUE rb_call_wrapper(VALUE parameters){
 	argv_[3] = args;
 	argv_[4] = LONG2FIX(params->mid);
 
-	return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 5, argv_);
+	return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
 }
 
 #ifdef RUBY1_9
@@ -229,7 +233,7 @@ VALUE vm_call_method_wrapper(VALUE ary ) {
 		argv_[3] = Qnil;
 		argv_[4] = LONG2FIX(params->id);
 
-		return rb_funcall2( rb_hook_proc, rb_intern("handle_method"), 5, argv_);
+		return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
 }
 
 VALUE
@@ -273,13 +277,13 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		VALUE result = rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
 
 		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
-			return rb_ivar_get(result, rb_intern("@return_value") );
+			return rb_ivar_get(result, id_return_value_var );
 		}
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 
-			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
-			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
-			ID mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
+			VALUE klass_ = rb_ivar_get(result,id_klass_var );
+			VALUE recv_ = rb_ivar_get(result,id_recv_var );
+			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
 
 			void *mn_ = rb_method_node( klass_, mid_);
 
@@ -360,12 +364,13 @@ rb_call_fake(
 		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
 
 		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
-			return rb_ivar_get(result, rb_intern("@return_value") );
+			return rb_ivar_get(result, id_return_value_var );
 		}
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-			VALUE klass_ = rb_ivar_get(result,rb_intern("@klass") );
-			VALUE recv_ = rb_ivar_get(result,rb_intern("@recv") );
-			ID mid_ = rb_to_id( rb_ivar_get(result,rb_intern("@method")) );
+
+			VALUE klass_ = rb_ivar_get(result,id_klass_var );
+			VALUE recv_ = rb_ivar_get(result,id_recv_var );
+			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
 
 			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
 		}
@@ -490,4 +495,9 @@ rb_call_fake_init() {
 
 	id_call = rb_intern("call");
 	id_method_wrapper = rb_intern("method_wrapper");
+	id_handle_method = rb_intern("handle_method");
+	id_return_value_var = rb_intern("@return_value");
+	id_klass_var = rb_intern("@klass");
+	id_recv_var = rb_intern("@recv");
+	id_method_var = rb_intern("@method");
 }
