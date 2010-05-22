@@ -120,9 +120,20 @@ VALUE reunhook_reyield_ensure( VALUE arguments) {
 	hook_enabled = 0;
 	// only work and is needed in ruby1.8
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
-		arguments = rb_ary_new3(1,arguments);
+
+		VALUE other_arguments;
+		other_arguments = rb_ary_new3(1,arguments);
+/*
+		VALUE argumentsinspect = rb_inspect(other_arguments);
+		VALUE arguments_inspect = rb_inspect(arguments);
+
+		printf("_ changed %s by %s\n", rb_string_value_ptr( &arguments_inspect ), rb_string_value_ptr( &argumentsinspect ) );
+*/	
+		return rb_yield_splat(rb_ary_new3(1,other_arguments));
+	} else {
+		return rb_yield_splat(arguments);
+
 	}
-	return rb_yield_splat(arguments);
 }
 
 
@@ -220,11 +231,22 @@ VALUE rehook_reyield_ensure( VALUE arguments) {
 
 	// only work and is needed in ruby1.8
 	if (! (get_rb_yield_0_avalue()==Qtrue) ) {
-		arguments = rb_ary_new3(1,arguments);
+		VALUE other_arguments;
+		other_arguments = rb_ary_new3(1,arguments);
+/*
+		VALUE argumentsinspect = rb_inspect(other_arguments);
+		VALUE arguments_inspect = rb_inspect(arguments);
+
+		printf("_ changed %s by %s\n", rb_string_value_ptr( &arguments_inspect ), rb_string_value_ptr( &argumentsinspect ) );
+*/	
+		hook_enabled = 1;
+		return rb_yield_splat(rb_ary_new3(1,other_arguments));
+	} else {
+
+		hook_enabled = 1;
+		return rb_yield_splat(arguments);
 	}
 
-	hook_enabled = 1;
-	return rb_yield_splat(arguments);
 }
 
 VALUE rehook_reyield( VALUE arguments, VALUE args) {
