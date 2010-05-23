@@ -24,7 +24,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include "hook_rb_call.h"
 #include "method_node.h"
-#include "method_wrapper.h"
 #include <tag_container.h>
 #include "rb_yield_fake.h"
 
@@ -285,40 +284,6 @@ VALUE rallhook_call(VALUE self, VALUE klass, VALUE recv, VALUE sym, VALUE args, 
 	}
 }
 
-VALUE rallhook_new_method_wrapper(VALUE self, VALUE recv, VALUE klass, VALUE method_id) {
-	VALUE mw = new_method_wrapper();
-
-	method_wrapper_set_klass(mw, klass);
-	method_wrapper_set_recv(mw, recv);
-	method_wrapper_set_method_id_(mw, method_id);
-
-	return mw;
-}
-
-
-VALUE method_wrapper_call(VALUE self, VALUE args) {
-
-	VALUE klass = method_wrapper_get_klass(self);
-	VALUE recv = method_wrapper_get_recv(self);
-	VALUE sym;
-	VALUE method_id = method_wrapper_get_method_id(self);
-	ID mid = FIX2LONG( method_id );
-
-	if (rb_id2name(mid) == NULL){
-		sym = Qnil;
-	} else {
-		sym = ID2SYM(mid);
-	}
-
-	if (rb_block_given_p()) {
-		VALUE argv[6] = {klass, recv, sym, args, method_id};
-		return rb_block_call(rb_hook_proc, id_call_, 5, argv, rehook_reyield, Qnil );
-	} else {
-
-		return rb_funcall(rb_hook_proc, id_call_ ,5, klass, recv, sym, args, method_id);
-	}
-}
-
 extern void Init_rallhook_base() {
 
 	const char* initcode = 	"require 'rubygems'\n"
@@ -332,7 +297,6 @@ extern void Init_rallhook_base() {
 	rb_define_method(rb_cRallHook, "from", from, 1);
 
 	rb_define_singleton_method(rb_cRallHook, "call", rallhook_call, 5);
-	rb_define_singleton_method(rb_cRallHook, "method_wrapper", rallhook_new_method_wrapper, 3);
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
 	rb_mMethodReturn = rb_define_module_under(rb_mRallHook, "MethodReturn");
@@ -344,14 +308,10 @@ extern void Init_rallhook_base() {
 	rb_call_fake_init();
 	init_node();
 	init_tag_container();
-	init_method_wrapper();
 
 #ifdef RUBY1_8
 	init_rb_yield_fake();
 #endif
-
-	rb_define_method(rb_cMethodWrapper, "call", method_wrapper_call, -2);
-
 	id_call_ = rb_intern("call");
 /*
 
