@@ -1,8 +1,18 @@
 require "rubygems"
 require "rallhook"
-require "hook_proc"
 
-print_hook do
+include RallHook
+
+class HookProc
+	def handle_method (klass,self_,m,args, method_id)
+	
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}|#{klass} args: #{args.inspect}\n"
+		nil # do nothing
+	end
+end
+
+hook_proc = HookProc.new
+RallHook::RallHook.new.hook hook_proc do
 	print 2+2,"\n"
 	print [1,2,3].inject{|x,y| x+y},"\n"
 end

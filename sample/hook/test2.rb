@@ -1,6 +1,15 @@
 require "rubygems"
 require "rallhook"
-require "hook_proc"
+
+include RallHook
+
+class HookProc
+	def handle_method (klass,self_,m,args, method_id)
+	
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}|#{klass} args: #{args.inspect}\n"
+		nil # do nothing
+	end
+end
 
 class X
 	def foo
@@ -13,7 +22,8 @@ class Y <X
 	end
 end
 
-print_hook do
+hook_proc = HookProc.new
+RallHook::RallHook.new.hook hook_proc do
 	y = Y.new
 	y.foo
 end
