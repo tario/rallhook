@@ -17,7 +17,7 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files = [ 'README' ]
 #  s.rdoc_options << '--main' << 'README'
   s.extensions = FileList["ext/**/extconf.rb"].to_a
-  s.files = Dir.glob("{sample,lib,test,ext}/**/*") +
+  s.files = Dir.glob("{examples,lib,test,ext}/**/*") +
     [ 'AUTHORS', 'CHANGELOG', 'README', 'Rakefile', 'TODO' ]
 end
 
