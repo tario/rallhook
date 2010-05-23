@@ -2,22 +2,14 @@ require "test/unit"
 require "rallhook"
 
 class BasicHookProc
-  def call(klass,recv_,m,args, method_id)
-    ret = nil
-    if block_given?
-      ret = recv_.hooked_send(klass,method_id,*args) do |*args_|
-        yield(*args_)
-      end
-    else
-      ret = recv_.hooked_send(klass,method_id,*args)
-    end
-    ret
+  def handle_method(klass,recv_,m,args, method_id)
+	  nil
   end
 end
 
 module BasicHookProcTest
   def hook
-    rallhook = RallHook.new
+    rallhook = RallHook::Hook.new
     basichook = BasicHookProc.new
 
     rallhook.hook basichook do
