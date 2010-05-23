@@ -44,7 +44,6 @@ VALUE rb_hook_proc = Qnil;
 int hook_enabled = 0;
 int hook_enable_left = 0;
 void* rb_call_copy;
-extern VALUE rb_cRallHook;
 extern VALUE rb_mMethodRedirect;
 extern VALUE rb_mMethodReturn;
 

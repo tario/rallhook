@@ -27,7 +27,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <tag_container.h>
 #include "rb_yield_fake.h"
 
-VALUE rb_cRallHook;
+VALUE rb_cHook;
 VALUE rb_mRallHook;
 VALUE rb_mMethodRedirect;
 VALUE rb_mMethodReturn;
@@ -291,12 +291,12 @@ extern void Init_rallhook_base() {
 
 	rb_eval_string(initcode);
 	rb_mRallHook = rb_define_module("RallHook");
-	rb_cRallHook = rb_define_class_under(rb_mRallHook, "RallHook", rb_cObject);
-	rb_define_method(rb_cRallHook, "hook", hook, 1);
-	rb_define_method(rb_cRallHook, "unhook", unhook, 0);
-	rb_define_method(rb_cRallHook, "from", from, 1);
+	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
+	rb_define_method(rb_cHook, "hook", hook, 1);
+	rb_define_method(rb_cHook, "unhook", unhook, 0);
+	rb_define_method(rb_cHook, "from", from, 1);
 
-	rb_define_singleton_method(rb_cRallHook, "call", rallhook_call, 5);
+	rb_define_singleton_method(rb_cHook, "call", rallhook_call, 5);
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
 	rb_mMethodReturn = rb_define_module_under(rb_mRallHook, "MethodReturn");
