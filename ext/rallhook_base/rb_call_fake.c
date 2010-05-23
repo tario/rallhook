@@ -74,12 +74,54 @@ ID calibrate_mid;
 
 #endif
 
+#ifdef RUBY1_9
 
-VALUE restore_hook_status_ensure(VALUE ary) {
+typedef void rb_vm_t_;
+
+typedef struct rb_thread_struct
+{
+    VALUE self;
+    rb_vm_t_ *vm;
+
+    /* execution information */
+    VALUE *stack;		/* must free, must mark */
+    unsigned long stack_size;
+    rb_control_frame_t_ *cfp;
+    int safe_level;
+    int raised_flag;
+    VALUE last_status; /* $? */
+
+    /* passing state */
+    int state;
+
+    /* for rb_iterate */
+    rb_block_t_ *passed_block;
+
+    // ...
+} rb_thread_t__;
+#endif
+
+VALUE restore_hook_status_ensure(VALUE unused) {
 	hook_enabled = 1;
 	return Qnil;
 }
 
+#ifdef RUBY1_9
+VALUE restore_hook_status_ensure_rb_call(VALUE argument) {
+
+	void** parameters = (void**)argument;
+	void*  passed_block = parameters[0];
+	rb_thread_t__* th = parameters[1];
+
+	// restore the passed_block
+	th->passed_block = passed_block;
+
+	hook_enabled = 1;
+
+	return Qnil;
+}
+
+#endif
 
 VALUE rb_call_copy_i(
     VALUE klass, VALUE recv,
@@ -194,6 +236,7 @@ VALUE rb_call_wrapper(VALUE parameters){
 }
 
 #ifdef RUBY1_9
+
 
 typedef struct {
 	rb_thread_t_* th;
@@ -356,7 +399,17 @@ rb_call_fake(
 		params.scope = scope;
 		params.self = self;
 
+#ifdef RUBY1_9
+		rb_thread_t__* th;
+		VALUE current_thread = rb_funcall2(rb_cThread, rb_intern("current"), 0, 0);
+		Data_Get_Struct( current_thread, rb_thread_t__, th );
+		void* parameters[2] = {th->passed_block, th};
+
+		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure_rb_call,(VALUE)parameters);
+#else
 		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+#endif
+
 
 		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
 			return rb_ivar_get(result, id_return_value_var );
