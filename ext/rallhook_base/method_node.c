@@ -27,8 +27,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #ifdef RUBY1_9
-#include <ruby/node.h>
-#define RUBY_VM_METHOD_NODE NODE_METHOD
+#include <node_defs.h>
 #endif
 
 #include "ruby_symbols.h"
@@ -62,6 +61,7 @@ unsigned char* base__;
 #endif
 
 #ifdef RUBY1_9
+
 // from proc.c
 struct METHOD {
     VALUE oclass;		/* class that holds the method */
@@ -125,7 +125,7 @@ VALUE rb_node_file(VALUE self) {
     #ifdef RUBY1_9
 
 	if (nd_type(_node) == RUBY_VM_METHOD_NODE) {
-		VALUE iseqval = (VALUE)_node->nd_body;
+		VALUE iseqval = (VALUE)(_node->nd_body);
 		rb_iseq_t__* ptr;
 		Data_Get_Struct(iseqval, rb_iseq_t__, ptr);
 

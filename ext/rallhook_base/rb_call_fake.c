@@ -26,10 +26,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <env.h> // from ruby
 #endif
 
-#ifdef RUBY1_9
-#include <ruby/node.h>
-#endif
-
 #include <dlfcn.h>
 #include <stdarg.h>
 #include "ruby_symbols.h"

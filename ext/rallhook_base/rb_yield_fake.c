@@ -26,10 +26,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <env.h> // from ruby
 #endif
 
-#ifdef RUBY1_9
-#include <ruby/node.h>
-#endif
-
 #include "rb_yield_fake.h"
 #include "hook.h"
 #include "ruby_symbols.h"
