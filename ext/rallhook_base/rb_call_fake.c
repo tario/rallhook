@@ -401,7 +401,7 @@ rb_call_fake(
 
 #ifdef RUBY1_9
 		rb_thread_t__* th;
-		VALUE current_thread = rb_funcall2(rb_cThread, rb_intern("current"), 0, 0);
+		VALUE current_thread = rb_thread_current();
 		Data_Get_Struct( current_thread, rb_thread_t__, th );
 		void* parameters[2] = {th->passed_block, th};
 
