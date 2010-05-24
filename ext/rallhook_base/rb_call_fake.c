@@ -435,6 +435,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	}
 }
 
+#ifdef __i386__
 
 VALUE vm_call_method_fake_regs(
 	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
@@ -495,7 +496,7 @@ VALUE vm_call_method_fake_regs(
 
 }
 
-
+#endif
 
 #endif
 
