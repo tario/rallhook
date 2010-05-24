@@ -70,6 +70,8 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		calibrate_mid = rb_intern("to_s");
 
 		rb_funcall(test_value, calibrate_mid, 0);
+		
+
 		#endif
 
 		if (!rb_call_copy) {
@@ -78,7 +80,16 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 		#ifdef RUBY1_9
 			#ifdef __i386__
+
+			rb_eval_string("def Object.___calibrate_x(x); x.to_s; end");
+
+			calibrate_recv = test_value;
+			calibrate_klass = CLASS_OF(test_value);
+			calibrate_mid = rb_intern("to_s");
+
 			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake_regs);
+			vm_is_calibrate = 1;
+
 			#endif
 			#ifdef __x86_64__
 			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake);

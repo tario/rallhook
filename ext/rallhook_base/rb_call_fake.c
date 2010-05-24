@@ -451,9 +451,9 @@ VALUE vm_call_method_fake_regs(
 		} else {
 			vm_is_fastcall = 1;
 		}
-
+		vm_is_fastcall = 2;
 		vm_is_calibrate = 0;
-		return Qnil;
+
 	}
 
 	if (vm_is_fastcall == 0) {
@@ -471,7 +471,7 @@ VALUE vm_call_method_fake_regs(
 	} else if (vm_is_fastcall == 2 ) {
 		return vm_call_method_fake(
 			(rb_thread_t_*)eax,
-			(rb_control_frame_t_*)ecx,
+			(rb_control_frame_t_*)edx,
 			(int)esp[0],
 			(rb_block_t_*)esp[1],
 			(VALUE)esp[2],
@@ -484,8 +484,8 @@ VALUE vm_call_method_fake_regs(
 	} else {
 		return vm_call_method_fake(
 			(rb_thread_t_*)eax,
-			(rb_control_frame_t_*)ecx,
-			(int)edx,
+			(rb_control_frame_t_*)edx,
+			(int)ecx,
 			(rb_block_t_*)esp[0],
 			(VALUE)esp[1],
 			(ID)esp[2],
@@ -602,7 +602,6 @@ rb_call_fake_regs(
 		} else {
 			is_fastcall = 0;
 		}
-
 		is_calibrate = 0;
 		return Qnil;
 	}

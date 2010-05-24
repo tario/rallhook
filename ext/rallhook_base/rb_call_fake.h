@@ -129,6 +129,7 @@ extern int hook_enable_left;
 extern VALUE rb_hook_proc;
 
 #ifdef __i386__
+extern int vm_is_calibrate;
 extern int is_calibrate;
 extern VALUE calibrate_klass;
 extern VALUE calibrate_recv;
