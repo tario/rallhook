@@ -77,7 +77,12 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		}
 
 		#ifdef RUBY1_9
+			#ifdef __i386__
+			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake_regs);
+			#endif
+			#ifdef __x86_64__
 			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake);
+			#endif
 
 			if (!vm_call_method_copy) {
 				rb_raise( rb_eFatal, "libruby incompatible with rallhook");

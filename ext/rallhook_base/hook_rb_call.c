@@ -39,7 +39,14 @@ void* hook_vm_call_method(void *fake_function) {
 		return 0;
 	}
 	int inst_size = get_instructions_size(vm_call_method_original, 256);
+
+#ifdef __i386__
+	return put_jmp_hook_with_regs(vm_call_method_original, fake_function, inst_size);
+#endif
+
+#ifdef __x86_64__
 	return put_jmp_hook(vm_call_method_original, fake_function, inst_size);
+#endif
 
 }
 

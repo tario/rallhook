@@ -68,6 +68,8 @@ int rb_call_write_eax(int value) {
 
 int is_fastcall = 1;
 int is_calibrate = 0;
+int vm_is_fastcall = 1;
+int vm_is_calibrate = 0;
 VALUE calibrate_klass;
 VALUE calibrate_recv;
 ID calibrate_mid;
@@ -274,7 +276,6 @@ VALUE vm_call_method_wrapper(VALUE ary ) {
 
 		return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
 }
-
 VALUE
 vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
@@ -356,6 +357,71 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 	}
 }
+
+
+VALUE vm_call_method_fake_regs(
+	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
+) {
+
+	esp++;
+
+	if (vm_is_calibrate) {
+
+		if ((VALUE)esp[7] == calibrate_recv && (VALUE)esp[8] == calibrate_klass && (ID)esp[5] == calibrate_mid) {
+			vm_is_fastcall = 0;
+		} else if ( (VALUE)esp[5] == calibrate_recv ) {
+			vm_is_fastcall = 2;
+		} else {
+			vm_is_fastcall = 1;
+		}
+
+		vm_is_calibrate = 0;
+		return Qnil;
+	}
+
+	if (vm_is_fastcall == 0) {
+		return vm_call_method_fake(
+			(rb_thread_t_*)esp[0],
+			(rb_control_frame_t_*)esp[1],
+			(int)esp[2],
+			(rb_block_t_*)esp[3],
+			(VALUE)esp[3],
+			(ID)esp[4],
+			(void*)esp[5],
+			(VALUE)esp[6],
+			(VALUE)esp[7]
+			);
+	} else if (vm_is_fastcall == 2 ) {
+		return vm_call_method_fake(
+			(rb_thread_t_*)eax,
+			(rb_control_frame_t_*)ecx,
+			(int)esp[0],
+			(rb_block_t_*)esp[1],
+			(VALUE)esp[2],
+			(ID)esp[3],
+			(void*)esp[4],
+			(VALUE)esp[5],
+			(VALUE)esp[6]
+			);
+
+	} else {
+		return vm_call_method_fake(
+			(rb_thread_t_*)eax,
+			(rb_control_frame_t_*)ecx,
+			(int)edx,
+			(rb_block_t_*)esp[0],
+			(VALUE)esp[1],
+			(ID)esp[2],
+			(void*)esp[3],
+			(VALUE)esp[4],
+			(VALUE)esp[5]
+			);
+
+	}
+
+}
+
+
 
 #endif
 

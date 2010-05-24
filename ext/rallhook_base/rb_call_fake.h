@@ -115,6 +115,11 @@ rb_call_fake_regs(
 	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
 );
 
+VALUE
+vm_call_method_fake_regs(
+	_WORD eax, _WORD edx, _WORD ecx, _WORD* esp
+);
+
 #endif
 
 
