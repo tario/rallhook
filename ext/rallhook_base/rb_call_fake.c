@@ -443,7 +443,6 @@ VALUE vm_call_method_fake_regs(
 	esp++;
 
 	if (vm_is_calibrate) {
-
 		if ((VALUE)esp[7] == calibrate_recv && (VALUE)esp[8] == calibrate_klass && (ID)esp[5] == calibrate_mid) {
 			vm_is_fastcall = 0;
 		} else if ( (VALUE)esp[5] == calibrate_recv ) {
@@ -451,9 +450,7 @@ VALUE vm_call_method_fake_regs(
 		} else {
 			vm_is_fastcall = 1;
 		}
-		vm_is_fastcall = 2;
 		vm_is_calibrate = 0;
-
 	}
 
 	if (vm_is_fastcall == 0) {
