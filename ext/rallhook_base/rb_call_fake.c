@@ -499,7 +499,6 @@ VALUE vm_call_method_fake_regs(
 
 #endif
 
-#ifdef __x86_64__
 
 VALUE
 rb_call_fake(
@@ -570,8 +569,6 @@ rb_call_fake(
 
 }
 
-#endif
-
 
 #ifdef __i386__
 
@@ -628,55 +625,7 @@ rb_call_fake_regs(
 		scope = (int)esp[2];
 		self = (VALUE)esp[3];
 	}
-
-	int must_hook = hook_enabled;
-
-	if (is_tag(recv) ) {
-		volatile VALUE orig_recv = recv;
-		volatile VALUE klass_;
-		recv = tag_container_get_self(orig_recv);
-		klass_ = tag_container_get_tag(orig_recv);
-
-		if (klass_ != Qnil ) {
-			klass = klass_;
-		}
-	}
-
-	if (must_hook == 0 || hook_enable_left > 0  ) {
-		if (hook_enable_left > 0) hook_enable_left--;
-		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
-	} else {
-		hook_enabled = 0;
-
-		rb_call_parameters_t params;
-
-		params.klass = klass;
-		params.recv = recv;
-		params.mid = mid;
-		params.argc = argc;
-		params.argv = argv;
-		params.scope = scope;
-		params.self = self;
-
-		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
-
-		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
-			return rb_ivar_get(result, id_return_value_var );
-		}
-
-		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-
-			VALUE klass_ = rb_ivar_get(result,id_klass_var );
-			VALUE recv_ = rb_ivar_get(result,id_recv_var );
-			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
-
-			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
-		}
-
-		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
-
-
-	}
+	return rb_call_fake(klass,recv,mid,argc,argv,scope,self);
 }
 
 #endif
