@@ -276,6 +276,83 @@ VALUE vm_call_method_wrapper(VALUE ary ) {
 
 		return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
 }
+
+VALUE
+vm_call_method_i(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
+	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
+	       const ID id, void * mn, const VALUE recv_, VALUE klass)
+{
+
+#ifdef __i386__
+	if (vm_is_fastcall == 1) {
+
+		int array[9] = { (int)th, (int)cfp, num, (int)blockptr, (int)flag, (int)id, (int)mn, (int)recv_, (int)klass };
+		rb_call_write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x4(%eax), %edx\n");
+		__asm__("mov 0x8(%eax), %ecx\n");
+		__asm__("push 0x20(%eax)\n");
+		__asm__("push 0x1c(%eax)\n");
+		__asm__("push 0x18(%eax)\n");
+		__asm__("push 0x14(%eax)\n");
+		__asm__("push 0x10(%eax)\n");
+		__asm__("push 0x0c(%eax)\n");
+		__asm__("mov (%eax), %eax\n");
+		__asm__("call *vm_call_method_copy\n");
+		__asm__("add $0x18, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
+
+	} else if ( vm_is_fastcall == 2) {
+		int array[9] = { (int)th, (int)cfp, num, (int)blockptr, (int)flag, (int)id, (int)mn, (int)recv_, (int)klass };
+		rb_call_write_eax(array);
+
+		__asm__("push %ebp\n");	// save all registers
+		__asm__("push %esi\n");
+		__asm__("push %edi\n");
+		__asm__("push %ebx\n");
+		__asm__("push %edx\n");
+		__asm__("push %ecx\n");
+		__asm__("mov 0x4(%eax), %edx\n");
+		__asm__("push 0x20(%eax)\n");
+		__asm__("push 0x1c(%eax)\n");
+		__asm__("push 0x18(%eax)\n");
+		__asm__("push 0x14(%eax)\n");
+		__asm__("push 0x10(%eax)\n");
+		__asm__("push 0x0c(%eax)\n");
+		__asm__("push 0x08(%eax)\n");
+		__asm__("mov (%eax), %eax\n");
+		__asm__("call *vm_call_method_copy\n");
+		__asm__("add $0x1c, %esp\n");
+		__asm__("pop %ecx\n");
+		__asm__("pop %edx\n");
+		__asm__("pop %ebx\n");
+		__asm__("pop %edi\n");
+		__asm__("pop %esi\n");
+		__asm__("pop %ebp\n");
+		return read_eax();
+
+	} else {
+#endif
+		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv_,klass);
+#ifdef __i386__
+	}
+#endif
+
+
+}
+
 VALUE
 vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
@@ -298,7 +375,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
-		return vm_call_method_copy(th,cfp,num,blockptr,flag,id,mn,recv,klass);
+		return vm_call_method_i(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
 		hook_enabled = 0;
 
@@ -331,7 +408,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 				rb_bug("Null method node for method %s", rb_id2name(mid_) );
 			}
 
-			return vm_call_method_copy(
+			return vm_call_method_i(
 				th,
 				cfp,
 				num,
@@ -343,7 +420,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 				klass_);
 		}
 
-		return vm_call_method_copy(
+		return vm_call_method_i(
 				th,
 				cfp,
 				num,
