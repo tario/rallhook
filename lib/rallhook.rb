@@ -60,7 +60,13 @@ module RallHook
       attr_accessor :klass, :recv, :method_name, :method_id
 
       def rehook
-        ::RallHook::Hook.rehook
+        if block_given?
+          ::RallHook::Hook.rehook do
+            yield
+          end
+        else
+          ::RallHook::Hook.rehook
+        end
       end
 
       def call(*args)
