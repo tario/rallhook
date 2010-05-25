@@ -30,7 +30,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
-#include "tag_container.h"
 
 ID id_call;
 ID id_method_wrapper;
@@ -359,17 +358,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	int must_hook = hook_enabled;
 	volatile VALUE recv = recv_;
 
-	if (is_tag(recv) ) {
-		volatile VALUE orig_recv = recv;
-		volatile VALUE klass_;
-		recv = tag_container_get_self(orig_recv);
-		klass_ = tag_container_get_tag(orig_recv);
-
-		if (klass_ != Qnil ) {
-			klass = klass_;
-		}
-	}
-
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
 
@@ -506,17 +494,6 @@ rb_call_fake(
     VALUE self
 ) {
 	int must_hook = hook_enabled;
-
-	if (is_tag(recv) ) {
-		volatile VALUE orig_recv = recv;
-		volatile VALUE klass_;
-		recv = tag_container_get_self(orig_recv);
-		klass_ = tag_container_get_tag(orig_recv);
-
-		if (klass_ != Qnil ) {
-			klass = klass_;
-		}
-	}
 
 	if (must_hook == 0 || hook_enable_left > 0 ) {
 		if (hook_enable_left > 0) hook_enable_left--;
