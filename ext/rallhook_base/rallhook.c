@@ -70,7 +70,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 		calibrate_mid = rb_intern("to_s");
 
 		rb_funcall(test_value, calibrate_mid, 0);
-		
+
 
 		#endif
 
@@ -319,8 +319,6 @@ extern void Init_rallhook_base() {
 	rb_define_singleton_method(rb_cHook, "call", rallhook_call, 5);
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
-	rb_mMethodReturn = rb_define_module_under(rb_mRallHook, "MethodReturn");
-
 
 	rb_define_method(rb_cObject, "hooked_send", rb_f_send_copy, -1);
 

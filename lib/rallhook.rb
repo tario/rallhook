@@ -24,36 +24,40 @@ require "rallhook_base"
 module RallHook
 	class Redirect_
 		include MethodRedirect
-		
+
 		def initialize(klass, recv, m)
 			@klass = klass
 			@recv = recv
 			@method = m
 		end
 	end
-	
-	class ReturnValue_
-		include MethodRedirect
 
-		def initialize(v)
+	class ReturnHolder
+	 	def initialize(v)
 			@value = v
-		end
-	end
+    end
+    def value(*x)
+      @value
+    end
+  end
 
 	module Helper
-	
+
 		def redirect_call(klass, recv, m)
 			::RallHook::Redirect_.new(klass,recv,m)
 		end
-		
+
 		def return_value(v)
-			::RallHook::ReturnValue_.new(v)
+      recv = ReturnHolder.new(v)
+      klass = recv.class
+      m = :value
+			redirect_call(klass, recv, m)
 		end
 	end
 end
 
 class Object
-	
+
 	def redirect(m, klass = nil)
 		if klass
 			::RallHook::Redirect_.new(klass,self,m)

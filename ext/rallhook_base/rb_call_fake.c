@@ -45,8 +45,6 @@ int hook_enabled = 0;
 int hook_enable_left = 0;
 void* rb_call_copy;
 extern VALUE rb_mMethodRedirect;
-extern VALUE rb_mMethodReturn;
-
 
 
 #ifdef __i386__
@@ -393,9 +391,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 		VALUE result = rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
 
-		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
-			return rb_ivar_get(result, id_return_value_var );
-		}
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 
 			VALUE klass_ = rb_ivar_get(result,id_klass_var );
@@ -552,9 +547,6 @@ rb_call_fake(
 #endif
 
 
-		if (rb_obj_is_kind_of(result,rb_mMethodReturn) == Qtrue ) {
-			return rb_ivar_get(result, id_return_value_var );
-		}
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 
 			VALUE klass_ = rb_ivar_get(result,id_klass_var );
