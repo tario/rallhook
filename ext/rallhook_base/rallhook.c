@@ -120,6 +120,9 @@ VALUE from(VALUE self, VALUE num) {
 
 VALUE rehook(VALUE unused) {
 	hook_enabled = 1;
+	if (rb_block_given_p() ) {
+		return rb_ensure(rb_yield, Qnil, unhook, Qnil);
+	}
 	return Qnil;
 }
 
