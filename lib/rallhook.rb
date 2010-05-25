@@ -66,13 +66,19 @@ module RallHook
       def call(*args)
       end
 
+      def call_with_rehook(*args)
+        call(*args)
+      ensure
+        rehook
+      end
+
       def self.redirect_handler(klass,recv,method_name, method_id)
         mw = self.new
         mw.klass = klass
         mw.recv = recv
         mw.method_name = method_name
         mw.method_id = method_id
-        mw.redirect_with_unhook(:call)
+        mw.redirect_with_unhook(:call_with_rehook)
       end
 
     end
