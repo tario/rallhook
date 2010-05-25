@@ -118,6 +118,11 @@ VALUE from(VALUE self, VALUE num) {
 	return self;
 }
 
+VALUE rehook(VALUE unused) {
+	hook_enabled = 1;
+	return Qnil;
+}
+
 extern void Init_rallhook_base() {
 
 	const char* initcode = 	"require 'rubygems'\n"
@@ -126,6 +131,9 @@ extern void Init_rallhook_base() {
 	rb_eval_string(initcode);
 	rb_mRallHook = rb_define_module("RallHook");
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
+
+	rb_define_singleton_method( rb_cHook, "rehook", rehook, 0 );
+
 	rb_define_method(rb_cHook, "hook", hook, 1);
 	rb_define_method(rb_cHook, "unhook", unhook, 0);
 	rb_define_method(rb_cHook, "from", from, 1);
