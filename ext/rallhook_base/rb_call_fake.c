@@ -35,7 +35,7 @@ ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;
 
-ID id_return_value_var, id_klass_var, id_recv_var, id_method_var;
+ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
 VALUE rb_hook_proc = Qnil;
 
@@ -391,6 +391,10 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 				rb_bug("Null method node for method %s", rb_id2name(mid_) );
 			}
 
+			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
+				hook_enabled = 0;
+			}
+
 			return vm_call_method_i(
 				th,
 				cfp,
@@ -530,6 +534,10 @@ rb_call_fake(
 			VALUE recv_ = rb_ivar_get(result,id_recv_var );
 			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
 
+			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
+				hook_enabled = 0;
+			}
+
 			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
 		}
 
@@ -610,4 +618,5 @@ rb_call_fake_init() {
 	id_klass_var = rb_intern("@klass");
 	id_recv_var = rb_intern("@recv");
 	id_method_var = rb_intern("@method");
+	id_unhook_var = rb_intern("@unhook");
 }

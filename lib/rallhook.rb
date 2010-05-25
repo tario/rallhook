@@ -25,10 +25,11 @@ module RallHook
 	class Redirect_
 		include MethodRedirect
 
-		def initialize(klass, recv, m)
+		def initialize(klass, recv, m, unhook = nil)
 			@klass = klass
 			@recv = recv
 			@method = m
+      @unhook = unhook
 		end
 	end
 
@@ -58,6 +59,14 @@ end
 
 class Object
 
+  def redirect_with_unhook(m, klass = nil)
+    if klass
+      ::RallHook::Redirect_.new(klass,self,m,true)
+    else
+      ::RallHook::Redirect_.new(self.class,self,m,true)
+    end
+
+  end
 	def redirect(m, klass = nil)
 		if klass
 			::RallHook::Redirect_.new(klass,self,m)
