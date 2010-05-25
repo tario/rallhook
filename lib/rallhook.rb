@@ -53,8 +53,32 @@ module RallHook
       klass = recv.class
       m = :value
 			redirect_call(klass, recv, m)
-		end
-	end
+	  end
+
+    class MethodWrapper
+
+      attr_accessor :klass, :recv, :method_name, :method_id
+
+      def rehook
+        ::RallHook::Hook.rehook
+      end
+
+      def call(*args)
+      end
+
+      def self.redirect_handler(klass,recv,method_name, method_id)
+        mw = self.new
+        mw.klass = klass
+        mw.recv = recv
+        mw.method_name = method_name
+        mw.method_id = method_id
+        mw.redirect_with_unhook(:call)
+      end
+
+    end
+  end
+
+
 end
 
 class Object
