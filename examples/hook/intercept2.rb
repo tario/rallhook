@@ -13,7 +13,6 @@ class MethodHandler
 				original_call(*x) do |*a|
 					yield(*a)
 				end
-				
 				# add "¿bar?"
 				yield("bar?")
 			else
@@ -23,14 +22,11 @@ class MethodHandler
 	end
 
 	def handle_method (klass,recv,m,args, method_id)
-
 		if m == :each
 			return FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
 		end
-
 		nil # do nothing
 	end
-	
 end
 
 print "calling Array#each without hook\n"
