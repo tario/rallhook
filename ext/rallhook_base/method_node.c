@@ -84,7 +84,9 @@ unsigned char* base__;
 
 #endif
 
-
+/*
+	The node that acts as body of the method
+*/
 VALUE rb_method_body(VALUE self) {
 
 //	VALUE name = rb_funcall(self, intern_name, 0);
@@ -98,6 +100,9 @@ VALUE rb_method_body(VALUE self) {
 	return Data_Wrap_Struct(rb_cNode, 0, 0, method->body);
 }
 
+/*
+The number of the line  where the node are defined in the ruby source file
+*/
 VALUE rb_node_line(VALUE self) {
     NODE* _node;
     Data_Get_Struct(self,NODE,_node);
@@ -111,6 +116,9 @@ VALUE rb_node_line(VALUE self) {
     #endif
 }
 
+/*
+The name of the ruby source file where the node are defined
+*/
 VALUE rb_node_file(VALUE self) {
     NODE* _node;
     Data_Get_Struct(self,NODE,_node);
@@ -196,7 +204,26 @@ my_mnew(klass, obj, id, mklass)
 
 #endif
 
+/*
+Overload of Object#method
 
+With one argument, has the same behaviour as the original Object#method
+With two argument adds the possibility of specify the class. example:
+
+	class X
+		def foo
+		end
+	end
+	class X < Y
+		def foo
+		end
+	end
+
+	y = Y.new
+
+	y.method(X, :foo) # returns the method foo implemented in X
+	x.method(Y, :foo) # returns the method foo implemented in Y
+*/
 VALUE
 rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
     ID mid;
@@ -242,6 +269,11 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
 void  init_node() {
 	rb_define_method(rb_cMethod, "body", rb_method_body,0);
 
+	/*
+	The class Node represents the internal ruby node, a node is a piece of ruby code used
+	for represent ruby methods in memory and other executable entities, many nodes come from
+	the ruby source code and may be associated with a file and line where thats node are defined
+	*/
 	rb_cNode = rb_define_class("Node", rb_cObject);
 
 	rb_define_method(rb_cNode, "line", rb_node_line, 0);
