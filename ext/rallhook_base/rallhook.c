@@ -147,9 +147,6 @@ extern void Init_rallhook_base() {
 	rb_call_fake_init();
 	init_node();
 
-#ifdef RUBY1_8
-	init_rb_yield_fake();
-#endif
 	id_call_ = rb_intern("call");
 /*
 
