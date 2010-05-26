@@ -78,16 +78,17 @@ module RallHook
        mname = self.method_name
        mklass = self.klass
        mid = self.method_id
+       recv_ = self.recv
 
        if block_given?
-         from(2).rehook do
-           recv.method(mklass,mid).call(*args) do |*blockargs|
+         from(4).rehook do
+           recv_.method(mklass,mid).call(*args) do |*blockargs|
              yield(*blockargs)
            end
          end
        else
-         from(2).rehook do
-           recv.method(mklass,mid).call(*args)
+         from(4).rehook do
+           recv_.method(mklass,mid).call(*args)
          end
        end
       end
