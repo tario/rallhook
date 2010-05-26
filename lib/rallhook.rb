@@ -97,7 +97,13 @@ module RallHook
       end
 
       def call_with_rehook(*args)
-        call(*args)
+        if block_given?
+          call(*args) do |*x|
+            yield(*x)
+          end
+        else
+          call(*args)
+        end
       ensure
         rehook
       end
