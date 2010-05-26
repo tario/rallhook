@@ -231,10 +231,10 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
 	}
 
 #ifdef RUBY1_8
-    return my_mnew(klass, obj, rb_to_id(method_id), rb_cMethod);
+    return my_mnew(klass, obj, mid, rb_cMethod);
 #endif
 #ifdef RUBY1_9
-    return mnew_(klass, obj, rb_to_id(method_id), rb_cMethod, Qfalse);
+    return mnew_(klass, obj, mid, rb_cMethod, Qfalse);
 #endif
 
 }
