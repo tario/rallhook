@@ -2,8 +2,24 @@ require "test/unit"
 require "rallhook"
 
 class BasicHookProc
+
+ include RallHook::Helper
+
+  class BasicMethodWrapper < MethodWrapper
+
+    def call(*args)
+      if block_given?
+        original_call(*args) do |*x|
+         yield(*x)
+        end
+      else
+        original_call(*args)
+      end
+    end
+  end
+
   def handle_method(klass,recv_,m,args, method_id)
-	  nil
+    return BasicMethodWrapper.redirect_handler(klass,recv_,m,method_id)
   end
 end
 
