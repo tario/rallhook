@@ -69,6 +69,28 @@ module RallHook
         end
       end
 
+      def from(a)
+        ::RallHook::Hook.new.from(a)
+        self
+      end
+
+      def original_call(*args)
+       mname = self.method_name
+       mklass = self.klass
+
+       if block_given?
+         from(2).rehook do
+           recv.method(mklass,mname).call(*args) do |*blockargs|
+             yield(*blockargs)
+           end
+         end
+       else
+         from(2).rehook do
+           recv.method(mklass,mname).call(*args)
+         end
+       end
+      end
+
       def call(*args)
       end
 
