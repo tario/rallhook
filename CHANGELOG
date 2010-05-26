@@ -1,4 +1,6 @@
-0.3.1	Changed interface of handlling of methods (see README and examples) to avoid errors in the handling of yield functions in ruby1.8
+0.3.1	Added new method of intercept calls
+
+		Changed interface of handlling of methods (see README and examples) to avoid errors in the handling of yield functions in ruby1.8
 
 		New internal method of hook fixe many many bugs
 
