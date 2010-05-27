@@ -146,7 +146,6 @@ VALUE rb_node_file(VALUE self) {
 
 }
 
-#ifdef RUBY1_8
 
 // from eval.c
 static void
@@ -206,8 +205,6 @@ my_mnew(klass, obj, id, mklass)
     return method;
 
 }
-
-#endif
 
 /*
 Overload of Object#method
