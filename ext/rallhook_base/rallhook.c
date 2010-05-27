@@ -36,10 +36,6 @@ VALUE unhook(VALUE self) {
 	return Qnil;
 }
 
-#ifdef RUBY1_9
-VMCALLMETHOD vm_call_method_copy;
-#endif
-
 ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;

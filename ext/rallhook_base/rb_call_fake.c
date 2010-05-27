@@ -103,7 +103,7 @@ VALUE restore_hook_status_ensure_rb_call(VALUE argument) {
 	// restore the passed_block
 	th->passed_block = passed_block;
 
-	hook_enabled = 1;
+	enable_redirect();
 
 	return Qnil;
 }
@@ -213,30 +213,6 @@ typedef struct {
 	VALUE klass;
 } vm_call_method_parameters_t;
 
-VALUE vm_call_method_wrapper(VALUE ary ) {
-
-		vm_call_method_parameters_t* params = (vm_call_method_parameters_t*)ary;
-
-		VALUE sym;
-
-		// avoid to send symbols without name (crash the interpreter)
-		if (rb_id2name(params->id) == NULL){
-			sym = Qnil;
-		} else {
-			sym = ID2SYM(params->id);
-		}
-
-
-		VALUE argv_[6];
-		argv_[0] = params->klass;
-		argv_[1] = params->recv;
-		argv_[2] = sym;
-		argv_[3] = Qnil;
-		argv_[4] = LONG2FIX(params->id);
-
-		return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
-}
-
 VALUE
 vm_call_method_i(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
@@ -318,15 +294,17 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
 	       const ID id, void * mn, const VALUE recv_, VALUE klass)
 {
-	int must_hook = hook_enabled;
+	int must_hook = redirect_enabled();
 	volatile VALUE recv = recv_;
 
-	if (must_hook == 0 || hook_enable_left > 0 ) {
-		if (hook_enable_left > 0) hook_enable_left--;
+	if (must_hook == 0 || redirect_enable_left() > 0 ) {
+		if (redirect_enable_left()  > 0) {
+			redirect_left(redirect_enable_left()-1);
+		}
 
 		return vm_call_method_i(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
-		hook_enabled = 0;
+		disable_redirect();
 
 		CallData call_data;
 
@@ -335,7 +313,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		call_data.mid = id;
 		call_data.args = Qnil;
 
-		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
+		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
 
 		return vm_call_method_i(
 				th,
@@ -462,9 +440,9 @@ rb_call_fake(
 		Data_Get_Struct( current_thread, rb_thread_t__, th );
 		void* parameters[2] = {th->passed_block, th};
 
-		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure_rb_call,(VALUE)parameters);
+		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure_rb_call,(VALUE)parameters);
 #else
-		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
+		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
 #endif
 		return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
 
