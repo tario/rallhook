@@ -66,28 +66,6 @@ ID calibrate_mid;
 VMCALLMETHOD vm_call_method_copy;
 
 typedef void rb_vm_t_;
-
-typedef struct rb_thread_struct
-{
-    VALUE self;
-    rb_vm_t_ *vm;
-
-    /* execution information */
-    VALUE *stack;		/* must free, must mark */
-    unsigned long stack_size;
-    rb_control_frame_t_ *cfp;
-    int safe_level;
-    int raised_flag;
-    VALUE last_status; /* $? */
-
-    /* passing state */
-    int state;
-
-    /* for rb_iterate */
-    rb_block_t_ *passed_block;
-
-    // ...
-} rb_thread_t__;
 #endif
 
 VALUE restore_hook_status_ensure(VALUE unused) {
@@ -95,22 +73,6 @@ VALUE restore_hook_status_ensure(VALUE unused) {
 	return Qnil;
 }
 
-#ifdef RUBY1_9
-VALUE restore_hook_status_ensure_rb_call(VALUE argument) {
-
-	void** parameters = (void**)argument;
-	void*  passed_block = parameters[0];
-	rb_thread_t__* th = parameters[1];
-
-	// restore the passed_block
-	th->passed_block = passed_block;
-
-	enable_redirect();
-
-	return Qnil;
-}
-
-#endif
 
 VALUE rb_call_copy_i(
     VALUE klass, VALUE recv,
@@ -195,9 +157,8 @@ typedef struct {
     VALUE self;
 } rb_call_parameters_t;
 
-VALUE generic_wrapper(VALUE parameters){
-	get_current_redirect_handler()((CallData*)parameters );
-	return Qnil;
+void generic_wrapper(CallData* call_data){
+	get_current_redirect_handler()(call_data);
 }
 
 #ifdef RUBY1_9
@@ -306,8 +267,6 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 		return vm_call_method_i(th,cfp,num,blockptr,flag,id,mn,recv,klass);
 	} else {
-		disable_redirect();
-
 		CallData call_data;
 
 		call_data.klass = klass;
@@ -315,7 +274,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		call_data.mid = id;
 		call_data.args = Qnil;
 
-		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
+		generic_wrapper( &call_data );
 
 		return vm_call_method_i(
 				th,
@@ -415,11 +374,6 @@ rb_call_fake(
 		}
 		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 	} else {
-
-		disable_redirect();
-
-
-
 		VALUE args;
 		if (argv == 0) {
 			args = rb_ary_new2(0);
@@ -435,17 +389,7 @@ rb_call_fake(
 		call_data.recv = recv;
 		call_data.mid = mid;
 
-
-#ifdef RUBY1_9
-		rb_thread_t__* th;
-		VALUE current_thread = rb_thread_current();
-		Data_Get_Struct( current_thread, rb_thread_t__, th );
-		void* parameters[2] = {th->passed_block, th};
-
-		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure_rb_call,(VALUE)parameters);
-#else
-		rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
-#endif
+		generic_wrapper( &call_data );
 		return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
 
 	}

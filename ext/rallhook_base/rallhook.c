@@ -43,6 +43,37 @@ ID id_handle_method;
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
 
+typedef struct rb_thread_struct
+{
+    VALUE self;
+	void *vm; // rb_vm_t_
+
+    /* execution information */
+    VALUE *stack;		/* must free, must mark */
+    unsigned long stack_size;
+    void *cfp; // rb_control_frame_t_
+    int safe_level;
+    int raised_flag;
+    VALUE last_status; /* $? */
+
+    /* passing state */
+    int state;
+
+    /* for rb_iterate */
+    void *passed_block; // rb_block_t_
+
+    // ...
+} rb_thread_t__;
+
+VALUE ensured_handle_method( VALUE params ) {
+	return rb_funcall2( rb_hook_proc, id_handle_method, 5, (VALUE*)params );
+}
+
+VALUE restore_hook_status(VALUE unused) {
+	enable_redirect();
+	return Qnil;
+}
+
 void rallhook_redirect_handler ( CallData* call_data ) {
 
 	VALUE sym;
@@ -62,7 +93,16 @@ void rallhook_redirect_handler ( CallData* call_data ) {
 	argv_[3] = call_data->args;
 	argv_[4] = LONG2FIX(call_data->mid);
 
-	VALUE result = rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
+	disable_redirect();
+
+	rb_thread_t__* th;
+	VALUE current_thread = rb_thread_current();
+	Data_Get_Struct( current_thread, rb_thread_t__, th );
+
+	void* blockptr = th->passed_block;
+	VALUE result = rb_ensure(ensured_handle_method,(VALUE)argv_,restore_hook_status,Qnil);
+
+	th->passed_block = blockptr;
 
 	if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 
