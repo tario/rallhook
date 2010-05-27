@@ -147,34 +147,11 @@ VALUE rb_call_copy_i(
 
 }
 
-
-typedef struct {
-    VALUE klass; VALUE recv;
-    ID    mid;
-    int argc;			/* OK */
-    const VALUE *argv;		/* OK */
-    int scope;
-    VALUE self;
-} rb_call_parameters_t;
-
 void generic_wrapper(CallData* call_data){
 	get_current_redirect_handler()(call_data);
 }
 
 #ifdef RUBY1_9
-
-
-typedef struct {
-	rb_thread_t_* th;
-	rb_control_frame_t_* cfp;
-	int num;
-	rb_block_t_* blockptr;
-	VALUE flag;
-	ID id;
-	void *mn;
-	VALUE recv;
-	VALUE klass;
-} vm_call_method_parameters_t;
 
 VALUE
 vm_call_method_i(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
