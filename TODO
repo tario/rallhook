@@ -1,4 +1,4 @@
-* Restore the ruby hook functionality (hooked_send, etc...)
+* RDoc documentation in the code
 * Fix the leaks of hook to make it secure. 
 ie: hooked_send from within hooked execution allow to escape the hook and invoque any method without hook
 * More integrity testcases (with use of ruby core methods)
