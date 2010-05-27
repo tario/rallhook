@@ -102,6 +102,14 @@ void enable_redirect() {
 	hook_enabled = 1;
 }
 
+int redirect_enabled() {
+	return hook_enabled;
+}
+
+int redirect_enable_left() {
+	return hook_enable_left;
+}
+
 void redirect_left(int left) {
 	hook_enable_left = left;
 }

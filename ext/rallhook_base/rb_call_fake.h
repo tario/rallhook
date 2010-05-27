@@ -124,9 +124,6 @@ vm_call_method_fake_regs(
 
 
 extern void* rb_call_original;
-extern int hook_enabled;
-extern int hook_enable_left;
-extern VALUE rb_hook_proc;
 
 #ifdef __i386__
 extern int vm_is_calibrate;

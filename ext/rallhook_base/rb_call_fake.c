@@ -427,14 +427,18 @@ rb_call_fake(
     int scope,
     VALUE self
 ) {
-	int must_hook = hook_enabled;
+	int must_hook = redirect_enabled();
 
-	if (must_hook == 0 || hook_enable_left > 0 ) {
-		if (hook_enable_left > 0) hook_enable_left--;
+	if (must_hook == 0 || redirect_enable_left() > 0 ) {
+		if (redirect_enable_left() > 0) {
+			redirect_left( redirect_enable_left()-1 );
+		}
 		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 	} else {
 
-		hook_enabled = 0;
+		disable_redirect();
+
+
 
 		VALUE args;
 		if (argv == 0) {
