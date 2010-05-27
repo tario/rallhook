@@ -146,6 +146,71 @@ VALUE rb_node_file(VALUE self) {
 
 }
 
+#ifdef RUBY1_9
+// from proc.c
+static void
+rb_print_undef(klass, id, unused)
+    VALUE klass;
+    ID id;
+    int unused;
+{
+    rb_name_error(id, "undefined method `%s' for %s `%s'",
+		  rb_id2name(id),
+		  (TYPE(klass) == T_MODULE) ? "module" : "class",
+		  rb_class2name(klass));
+}
+
+
+
+static VALUE
+my_mnew(VALUE klass, VALUE obj, ID id, VALUE mclass, int scope)
+{
+    VALUE method;
+    NODE *body;
+    struct METHOD *data;
+    VALUE rclass = klass;
+    ID oid = id;
+
+  again:
+    if ((body = rb_get_method_body(klass, id, 0)) == 0) {
+	rb_print_undef(rclass, oid, 0);
+    }
+//    if (scope && (body->nd_noex & NOEX_MASK) != NOEX_PUBLIC) {
+//	rb_print_undef(rclass, oid, (body->nd_noex & NOEX_MASK));
+//    }
+
+    klass = body->nd_clss;
+    body = body->nd_body;
+
+    if (nd_type(body) == NODE_ZSUPER) {
+	klass = RCLASS_SUPER(klass);
+	goto again;
+    }
+
+    while (rclass != klass &&
+	   (FL_TEST(rclass, FL_SINGLETON) || TYPE(rclass) == T_ICLASS)) {
+	rclass = RCLASS_SUPER(rclass);
+    }
+    if (TYPE(klass) == T_ICLASS)
+	klass = RBASIC(klass)->klass;
+
+	// FIXME: add valid bm_mark as in the source in proc.c
+    method = Data_Make_Struct(mclass, struct METHOD, 0, -1, data);
+    data->oclass = klass;
+    data->recv = obj;
+
+    data->id = id;
+    data->body = body;
+    data->rclass = rclass;
+    data->oid = oid;
+    OBJ_INFECT(method, klass);
+
+    return method;
+}
+
+#endif
+
+#ifdef RUBY1_8
 
 // from eval.c
 static void
@@ -186,11 +251,6 @@ my_mnew(klass, obj, id, mklass)
 	rklass = RCLASS(rklass)->super;
     }
 
-#ifdef RUBY1_9
-    if (TYPE(klass) == T_ICLASS)
-		klass = RBASIC(klass)->klass;
-#endif
-
 	// FIXME :     method = Data_Make_Struct(mklass, struct METHOD, bm_mark, free, data);
     method = Data_Make_Struct(mklass, struct METHOD, 0, free, data);
     data->klass = klass;
@@ -205,6 +265,8 @@ my_mnew(klass, obj, id, mklass)
     return method;
 
 }
+
+#endif
 
 /*
 Overload of Object#method
@@ -259,7 +321,12 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
 		mid = FIX2LONG(method_id);
 	}
 
+#ifdef RUBY1_8
     return my_mnew(klass, obj, mid, rb_cMethod);
+#endif
+#ifdef RUBY1_9
+    return my_mnew(klass, obj, mid, rb_cMethod,Qfalse);
+#endif
 
 }
 
