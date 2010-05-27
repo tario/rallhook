@@ -63,6 +63,8 @@ ID calibrate_mid;
 
 #ifdef RUBY1_9
 
+VMCALLMETHOD vm_call_method_copy;
+
 typedef void rb_vm_t_;
 
 typedef struct rb_thread_struct
