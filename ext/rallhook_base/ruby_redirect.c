@@ -27,5 +27,16 @@ int put_redirect_handler( REDIRECTHANDLER* redirect_handler) {
 	return 0;
 }
 
+void disable_redirect() {
+
+}
+
+void enable_redirect() {
+
+}
+
+REDIRECTHANDLER* get_current_redirect_handler() {
+	return current_redirect_handler;
+}
 
 
