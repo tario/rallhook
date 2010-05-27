@@ -187,6 +187,11 @@ my_mnew(klass, obj, id, mklass)
 	rklass = RCLASS(rklass)->super;
     }
 
+#ifdef RUBY1_9
+    if (TYPE(klass) == T_ICLASS)
+		klass = RBASIC(klass)->klass;
+#endif
+
 	// FIXME :     method = Data_Make_Struct(mklass, struct METHOD, bm_mark, free, data);
     method = Data_Make_Struct(mklass, struct METHOD, 0, free, data);
     data->klass = klass;
@@ -257,12 +262,7 @@ rb_obj_method_(int argc,VALUE* argv, VALUE obj ) {
 		mid = FIX2LONG(method_id);
 	}
 
-#ifdef RUBY1_8
     return my_mnew(klass, obj, mid, rb_cMethod);
-#endif
-#ifdef RUBY1_9
-    return mnew_(klass, obj, mid, rb_cMethod, Qfalse);
-#endif
 
 }
 
