@@ -30,21 +30,9 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
+#include "ruby_redirect.h"
 
-ID id_call;
-ID id_method_wrapper;
-ID id_handle_method;
-
-ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
-
-VALUE rb_hook_proc = Qnil;
-
-// extern, exported variables
-int hook_enabled = 0;
-int hook_enable_left = 0;
 void* rb_call_copy;
-extern VALUE rb_mMethodRedirect;
-
 
 #ifdef __i386__
 
@@ -101,7 +89,7 @@ typedef struct rb_thread_struct
 #endif
 
 VALUE restore_hook_status_ensure(VALUE unused) {
-	hook_enabled = 1;
+	enable_redirect();
 	return Qnil;
 }
 
@@ -205,34 +193,9 @@ typedef struct {
     VALUE self;
 } rb_call_parameters_t;
 
-VALUE rb_call_wrapper(VALUE parameters){
-
-	rb_call_parameters_t* params = (rb_call_parameters_t*)parameters;
-
-
-	VALUE sym;
-
-	// avoid to send symbols without name (crash the interpreter)
-	if (rb_id2name(params->mid) == NULL){
-		sym = Qnil;
-	} else {
-		sym = ID2SYM(params->mid);
-	}
-
-	VALUE args = rb_ary_new2(params->argc);
-	int i;
-	for (i = 0; i < params->argc; i ++) {
-		rb_ary_store (args, i, params->argv[i] );
-	}
-
-	VALUE argv_[6];
-	argv_[0] = params->klass;
-	argv_[1] = params->recv;
-	argv_[2] = sym;
-	argv_[3] = args;
-	argv_[4] = LONG2FIX(params->mid);
-
-	return rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
+VALUE generic_wrapper(VALUE parameters){
+	get_current_redirect_handler()((CallData*)parameters );
+	return Qnil;
 }
 
 #ifdef RUBY1_9
@@ -365,47 +328,14 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	} else {
 		hook_enabled = 0;
 
-		vm_call_method_parameters_t params;
+		CallData call_data;
 
-		params.th = th;
-		params.cfp = cfp;
-		params.num = num;
-		params.blockptr = blockptr;
-		params.flag = flag;
-		params.id = id;
-		params.mn = mn;
-		params.recv = recv_;
-		params.klass = klass;
+		call_data.klass = klass;
+		call_data.recv = recv;
+		call_data.mid = id;
+		call_data.args = Qnil;
 
-		VALUE result = rb_ensure(vm_call_method_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
-
-		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-
-			VALUE klass_ = rb_ivar_get(result,id_klass_var );
-			VALUE recv_ = rb_ivar_get(result,id_recv_var );
-			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
-
-			void *mn_ = rb_method_node( klass_, mid_);
-
-			if (mn_ == 0) {
-				rb_bug("Null method node for method %s", rb_id2name(mid_) );
-			}
-
-			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
-				hook_enabled = 0;
-			}
-
-			return vm_call_method_i(
-				th,
-				cfp,
-				num,
-				blockptr,
-				flag,
-				mid_,
-				mn_,
-				recv_,
-				klass_);
-		}
+		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
 
 		return vm_call_method_i(
 				th,
@@ -413,10 +343,10 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 				num,
 				blockptr,
 				flag,
-				id,
+				call_data.mid,
 				mn,
-				recv,
-				klass);
+				call_data.recv,
+				call_data.klass);
 
 
 	}
@@ -506,15 +436,21 @@ rb_call_fake(
 
 		hook_enabled = 0;
 
-		rb_call_parameters_t params;
+		VALUE args;
+		if (argv == 0) {
+			args = rb_ary_new2(0);
+		} else {
+			args = rb_ary_new4(argc, argv);
+		}
 
-		params.klass = klass;
-		params.recv = recv;
-		params.mid = mid;
-		params.argc = argc;
-		params.argv = argv;
-		params.scope = scope;
-		params.self = self;
+
+		CallData call_data;
+
+		call_data.klass = klass;
+		call_data.args = args;
+		call_data.recv = recv;
+		call_data.mid = mid;
+
 
 #ifdef RUBY1_9
 		rb_thread_t__* th;
@@ -522,26 +458,11 @@ rb_call_fake(
 		Data_Get_Struct( current_thread, rb_thread_t__, th );
 		void* parameters[2] = {th->passed_block, th};
 
-		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure_rb_call,(VALUE)parameters);
+		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure_rb_call,(VALUE)parameters);
 #else
-		VALUE result = rb_ensure(rb_call_wrapper,(VALUE)&params,restore_hook_status_ensure,Qnil);
+		VALUE result = rb_ensure(generic_wrapper,(VALUE)&call_data,restore_hook_status_ensure,Qnil);
 #endif
-
-
-		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-
-			VALUE klass_ = rb_ivar_get(result,id_klass_var );
-			VALUE recv_ = rb_ivar_get(result,id_recv_var );
-			ID mid_ = rb_to_id( rb_ivar_get(result,id_method_var) );
-
-			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
-				hook_enabled = 0;
-			}
-
-			return rb_call_copy_i(klass_,recv_,mid_,argc,argv,scope,self);
-		}
-
-		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+		return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
 
 	}
 
@@ -611,12 +532,4 @@ rb_call_fake_regs(
 void
 rb_call_fake_init() {
 
-	id_call = rb_intern("call");
-	id_method_wrapper = rb_intern("method_wrapper");
-	id_handle_method = rb_intern("handle_method");
-	id_return_value_var = rb_intern("@return_value");
-	id_klass_var = rb_intern("@klass");
-	id_recv_var = rb_intern("@recv");
-	id_method_var = rb_intern("@method");
-	id_unhook_var = rb_intern("@unhook");
 }

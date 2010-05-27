@@ -20,10 +20,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ruby.h>
-#include "ruby_symbols.h"
-#include "rb_call_fake.h"
-#include "hook_rb_call.h"
 #include "method_node.h"
+#include "ruby_redirect.h"
 
 VALUE rb_cHook;
 VALUE rb_mRallHook;
@@ -31,8 +29,10 @@ VALUE rb_mMethodRedirect;
 VALUE rb_mMethodReturn;
 ID id_call_;
 
+VALUE rb_hook_proc = Qnil;
+
 VALUE unhook(VALUE self) {
-	hook_enabled = 0;
+	disable_redirect();
 	return Qnil;
 }
 
@@ -40,70 +40,53 @@ VALUE unhook(VALUE self) {
 VMCALLMETHOD vm_call_method_copy;
 #endif
 
+ID id_call;
+ID id_method_wrapper;
+ID id_handle_method;
 
-int code_changed = 0;
+ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
+
+
+void rallhook_redirect_handler ( CallData* call_data ) {
+
+	VALUE sym;
+
+	// avoid to send symbols without name (crash the interpreter)
+	if (rb_id2name(call_data->mid) == NULL){
+		sym = Qnil;
+	} else {
+		sym = ID2SYM(call_data->mid);
+	}
+
+
+	VALUE argv_[6];
+	argv_[0] = call_data->klass;
+	argv_[1] = call_data->recv;
+	argv_[2] = sym;
+	argv_[3] = call_data->args;
+	argv_[4] = LONG2FIX(call_data->mid);
+
+	VALUE result = rb_funcall2( rb_hook_proc, id_handle_method, 5, argv_);
+
+	if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+
+		call_data->klass = rb_ivar_get(result,id_klass_var );
+		call_data->recv = rb_ivar_get(result,id_recv_var );
+		call_data->mid = rb_to_id( rb_ivar_get(result,id_method_var) );
+
+		if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
+			disable_redirect();
+		}
+
+	}
+
+}
 
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
-	hook_enabled = 1;
+	put_redirect_handler( rallhook_redirect_handler );
 
-	if (!code_changed) {
-		// insert inconditional jmp from rb_call to rb_call_copy
-
-		#ifdef __i386__
-		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake_regs);
-		#endif
-
-		#ifdef __x86_64__
-		rb_call_copy = (RBCALL)hook_rb_call(rb_call_fake);
-		#endif
-		// calibrate protocol of rb_call
-		#ifdef __i386__
-		is_calibrate = 1;
-
-		VALUE test_value = LONG2FIX(0);
-
-		calibrate_recv = test_value;
-		calibrate_klass = CLASS_OF(test_value);
-		calibrate_mid = rb_intern("to_s");
-
-		rb_funcall(test_value, calibrate_mid, 0);
-
-
-		#endif
-
-		if (!rb_call_copy) {
-			rb_raise( rb_eFatal, "libruby incompatible with rallhook");
-		}
-
-		#ifdef RUBY1_9
-			#ifdef __i386__
-
-			rb_eval_string("def Object.___calibrate_x(x); end");
-
-			calibrate_recv = rb_cObject;
-			calibrate_klass = CLASS_OF(rb_cObject);
-			calibrate_mid = rb_intern("___calibrate_x");
-
-			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake_regs);
-			vm_is_calibrate = 1;
-
-			char code[256];
-			snprintf(code, sizeof(code), "Object.___calibrate_x(%i)", test_value);
-			rb_eval_string(code);
-
-			#endif
-			#ifdef __x86_64__
-			vm_call_method_copy = (VMCALLMETHOD)hook_vm_call_method(vm_call_method_fake);
-			#endif
-
-			if (!vm_call_method_copy) {
-				rb_raise( rb_eFatal, "libruby incompatible with rallhook");
-			}
-		#endif
-
-		code_changed = 1;
-	}
+	enable_redirect();
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
@@ -114,12 +97,12 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 
 VALUE from(VALUE self, VALUE num) {
-	hook_enable_left = FIX2INT(num)+1;
+	redirect_left(FIX2INT(num)+1);
 	return self;
 }
 
 VALUE rehook(VALUE unused) {
-	hook_enabled = 1;
+	enable_redirect();
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, Qnil);
 	}
@@ -148,6 +131,15 @@ extern void Init_rallhook_base() {
 	init_node();
 
 	id_call_ = rb_intern("call");
+
+	id_call = rb_intern("call");
+	id_method_wrapper = rb_intern("method_wrapper");
+	id_handle_method = rb_intern("handle_method");
+	id_return_value_var = rb_intern("@return_value");
+	id_klass_var = rb_intern("@klass");
+	id_recv_var = rb_intern("@recv");
+	id_method_var = rb_intern("@method");
+	id_unhook_var = rb_intern("@unhook");
 /*
 
 */

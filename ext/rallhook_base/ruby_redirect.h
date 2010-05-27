@@ -32,11 +32,12 @@ typedef struct _CallData {
 	VALUE args;
 } CallData;
 
-typedef VALUE (*REDIRECTHANDLER) ( CallData* call_data );
+typedef void (*REDIRECTHANDLER) ( CallData* call_data );
 
-int put_redirect_handler( REDIRECTHANDLER* redirect_handler);
+int put_redirect_handler( REDIRECTHANDLER redirect_handler);
 void disable_redirect();
 void enable_redirect();
-REDIRECTHANDLER* get_current_redirect_handler();
+void redirect_left(int left);
+REDIRECTHANDLER get_current_redirect_handler();
 
 #endif
