@@ -174,12 +174,43 @@ extern void Init_rallhook_base() {
 This module brings together all classes and methods belonging to rallhook with the exception of Node
 */
 	rb_mRallHook = rb_define_module("RallHook");
+/*
+This class handles the hook, enabling and disable it. Example:
+
+	# ... instanciate method_handler ... (see README and examples)
+
+	rallhook = RallHook::Hook.new
+	rallhook.hook method_hadler do
+		print "hello world\n" # calls to print, write or whatever are intercepted by method_handler#method_handle
+	end # in the finish of the block, the hook are disabled
+*/
+
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
 
+/*
+Re-enable the hook if the hook was disabled and was activated previously with Hook#hook
+If no call to Hook#hook has made, rehook does nothing
+*/
 	rb_define_singleton_method( rb_cHook, "rehook", rehook, 0 );
+/*
+Activate the hook, it is desirable to use the RAII call to make the hook block exception safe:
 
+	rallhook.hook method_hadler do
+		print "hello world\n" # calls to print, write or whatever are intercepted by method_handler#method_handle
+	end # in the finish of the block, the hook are disabled
+
+*/
 	rb_define_method(rb_cHook, "hook", hook, 1);
+
+/*
+Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
+*/
 	rb_define_method(rb_cHook, "unhook", unhook, 0);
+
+/*
+Disable the hook in the next N calls and reenable them. Useful to avoid infinite recursion and used
+in HanMethodWrapper
+*/
 	rb_define_method(rb_cHook, "from", from, 1);
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
