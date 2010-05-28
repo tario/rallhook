@@ -124,12 +124,6 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 	void* blockptr = th->passed_block;
 	VALUE result = rb_ensure(ensured_handle_method,(VALUE)argv_,restore_hook_status,Qnil);
 
-	// methods over class hook are illegal, may change the state of hook
-	if (*recv == rb_cHook ) {
-		rb_raise(rb_eFatal, "Illegal method call: Hook.%s", rb_id2name(*mid) );
-	}
-
-
 	th->passed_block = blockptr;
 
 	if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
@@ -143,6 +137,12 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		}
 
 	}
+
+	// methods over class hook are illegal, may change the state of hook
+	if (*recv == rb_cHook ) {
+		rb_raise(rb_eFatal, "Illegal method call: Hook.%s", rb_id2name(*mid) );
+	}
+
 
 }
 
