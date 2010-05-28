@@ -213,6 +213,43 @@ This class handles the hook, enabling and disable it. Example:
 	rb_define_method(rb_cHook, "unhook", unhook, 0);
 	rb_define_method(rb_cHook, "from", from, 1);
 
+/*
+Marker module to indicate messages of method redirection
+
+Example:
+
+	class MyMessage
+		include MethodRedirect # indicates that this message is about method redirection
+
+		def initialize(klass, recv, m)
+			@klass = klass
+			@recv = recv
+			@method = m
+		end
+	end
+	class MethodHandler
+		class X
+			def foo
+			end
+		end
+		def method_handle( ... )
+			MyMessage.new(X, x.new, :foo)
+		end
+	end
+
+Don't use this module, use x.redirect(:foo) instead.
+
+Example:
+	class MethodHandler
+		class X
+			def foo
+			end
+		end
+		def method_handle( ... )
+			x.redirect(:foo)
+		end
+	end
+*/
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
 
 	init_node();
