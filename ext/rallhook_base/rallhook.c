@@ -73,10 +73,18 @@ VALUE restore_hook_status(VALUE unused) {
 	enable_redirect();
 	return Qnil;
 }
+extern int hook_enabled;
+extern int hook_enable_left;
+extern REDIRECTHANDLER current_redirect_handler;
 
 void rallhook_redirect_handler ( CallData* call_data ) {
 
 	VALUE sym;
+
+	if (hook_enabled == 0 || hook_enable_left > 0){
+		if(hook_enable_left>0) hook_enable_left --;
+		return;
+	}
 
 	// avoid to send symbols without name (crash the interpreter)
 	if (rb_id2name(call_data->mid) == NULL){
