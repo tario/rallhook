@@ -66,7 +66,7 @@ typedef struct rb_thread_struct
 } rb_thread_t__;
 
 VALUE ensured_handle_method( VALUE params ) {
-	return rb_funcall2( rb_hook_proc, id_handle_method, 5, (VALUE*)params );
+	return rb_funcall2( rb_hook_proc, id_handle_method, 4, (VALUE*)params );
 }
 
 VALUE restore_hook_status(VALUE unused) {
@@ -88,7 +88,7 @@ void redirect_left(int left) {
 	hook_enable_left = left;
 }
 
-void rallhook_redirect_handler ( CallData* call_data ) {
+void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	VALUE sym;
 
@@ -98,19 +98,18 @@ void rallhook_redirect_handler ( CallData* call_data ) {
 	}
 
 	// avoid to send symbols without name (crash the interpreter)
-	if (rb_id2name(call_data->mid) == NULL){
+	if (rb_id2name(*mid) == NULL){
 		sym = Qnil;
 	} else {
-		sym = ID2SYM(call_data->mid);
+		sym = ID2SYM(*mid);
 	}
 
 
 	VALUE argv_[6];
-	argv_[0] = call_data->klass;
-	argv_[1] = call_data->recv;
+	argv_[0] = *klass;
+	argv_[1] = *recv;
 	argv_[2] = sym;
-	argv_[3] = call_data->args;
-	argv_[4] = LONG2FIX(call_data->mid);
+	argv_[3] = LONG2FIX(*mid);
 
 	disable_redirect();
 
@@ -125,9 +124,9 @@ void rallhook_redirect_handler ( CallData* call_data ) {
 
 	if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
 
-		call_data->klass = rb_ivar_get(result,id_klass_var );
-		call_data->recv = rb_ivar_get(result,id_recv_var );
-		call_data->mid = rb_to_id( rb_ivar_get(result,id_method_var) );
+		*klass = rb_ivar_get(result,id_klass_var );
+		*recv = rb_ivar_get(result,id_recv_var );
+		*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
 
 		if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
 			disable_redirect();

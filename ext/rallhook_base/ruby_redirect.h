@@ -25,15 +25,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <ruby.h>
 
-typedef struct _CallData {
-	VALUE klass;
-	VALUE recv;
-	ID mid;
-	VALUE args;
-} CallData;
-
-typedef void (*REDIRECTHANDLER) ( CallData* call_data );
-
+typedef void (*REDIRECTHANDLER) ( VALUE* klass, VALUE* recv, ID* mid );
 int put_redirect_handler( REDIRECTHANDLER redirect_handler);
 
 #endif

@@ -224,19 +224,16 @@ vm_call_method_i(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 VALUE
 vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
-	       const ID id, void * mn, const VALUE recv, VALUE klass)
+	       ID id, void * mn, VALUE recv, VALUE klass)
 {
-	CallData call_data;
+	VALUE klass_copy = klass;
+	VALUE recv_copy = recv;
+	ID id_copy = id;
 
-	call_data.klass = klass;
-	call_data.recv = recv;
-	call_data.mid = id;
-	call_data.args = Qnil;
+	current_redirect_handler(&klass, &recv, &id);
 
-	current_redirect_handler(&call_data);
-
-	if (call_data.mid != id || call_data.klass != klass || call_data.recv != recv) {
-		mn = rb_get_method_body(call_data.klass, call_data.mid, 0);
+	if (id_copy != id || klass_copy != klass || recv_copy != recv) {
+		mn = rb_get_method_body(klass, id, 0);
 	}
 
 	return vm_call_method_i(
@@ -245,10 +242,10 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 			num,
 			blockptr,
 			flag,
-			call_data.mid,
+			id,
 			mn,
-			call_data.recv,
-			call_data.klass);
+			recv,
+			klass);
 
 
 }
@@ -329,23 +326,8 @@ rb_call_fake(
     VALUE self
 ) {
 
-	VALUE args;
-	if (argv == 0) {
-		args = rb_ary_new2(0);
-	} else {
-		args = rb_ary_new4(argc, argv);
-	}
-
-
-	CallData call_data;
-
-	call_data.klass = klass;
-	call_data.args = args;
-	call_data.recv = recv;
-	call_data.mid = mid;
-
-	current_redirect_handler(&call_data);
-	return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
+	current_redirect_handler(&klass, &recv, &mid);
+	return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
 
 }
 
