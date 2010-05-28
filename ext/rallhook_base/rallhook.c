@@ -31,6 +31,10 @@ ID id_call_;
 
 VALUE rb_hook_proc = Qnil;
 
+
+/*
+Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
+*/
 VALUE unhook(VALUE self) {
 	disable_redirect();
 	return Qnil;
@@ -136,6 +140,14 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 }
 
+/*
+Activate the hook, it is desirable to use the RAII call to make the hook block exception safe:
+
+	rallhook.hook method_hadler do
+		print "hello world\n" # calls to print, write or whatever are intercepted by method_handler#method_handle
+	end # in the finish of the block, the hook are disabled
+
+*/
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
 	put_redirect_handler( rallhook_redirect_handler );
@@ -150,11 +162,20 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 }
 
 
+/*
+Disable the hook in the next N calls and reenable them. Useful to avoid infinite recursion and used
+in RallHook::Helper::MethodWrapper
+*/
 VALUE from(VALUE self, VALUE num) {
 	redirect_left(FIX2INT(num)+1);
 	return self;
 }
 
+
+/*
+Re-enable the hook if the hook was disabled and was activated previously with Hook#hook
+If no call to Hook#hook has made, rehook does nothing
+*/
 VALUE rehook(VALUE unused) {
 	enable_redirect();
 	if (rb_block_given_p() ) {
@@ -187,30 +208,9 @@ This class handles the hook, enabling and disable it. Example:
 
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
 
-/*
-Re-enable the hook if the hook was disabled and was activated previously with Hook#hook
-If no call to Hook#hook has made, rehook does nothing
-*/
 	rb_define_singleton_method( rb_cHook, "rehook", rehook, 0 );
-/*
-Activate the hook, it is desirable to use the RAII call to make the hook block exception safe:
-
-	rallhook.hook method_hadler do
-		print "hello world\n" # calls to print, write or whatever are intercepted by method_handler#method_handle
-	end # in the finish of the block, the hook are disabled
-
-*/
 	rb_define_method(rb_cHook, "hook", hook, 1);
-
-/*
-Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
-*/
 	rb_define_method(rb_cHook, "unhook", unhook, 0);
-
-/*
-Disable the hook in the next N calls and reenable them. Useful to avoid infinite recursion and used
-in HanMethodWrapper
-*/
 	rb_define_method(rb_cHook, "from", from, 1);
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
