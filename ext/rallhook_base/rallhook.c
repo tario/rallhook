@@ -196,14 +196,16 @@ This module brings together all classes and methods belonging to rallhook with t
 */
 	rb_mRallHook = rb_define_module("RallHook");
 /*
-This class handles the hook, enabling and disable it. Example:
+This class handles the hook, enabling and disable it.
+
+Example:
 
 	# ... instanciate method_handler ... (see README and examples)
 
-	rallhook = RallHook::Hook.new
-	rallhook.hook method_hadler do
+	RallHook::Hook.hook method_hadler do
 		print "hello world\n" # calls to print, write or whatever are intercepted by method_handler#method_handle
 	end # in the finish of the block, the hook are disabled
+
 */
 
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);

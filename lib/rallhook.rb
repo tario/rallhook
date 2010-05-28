@@ -240,6 +240,63 @@ module RallHook
   end
 
 
+
+class HookHandler
+
+#default method_handler of a Hook does nothing with any method call
+  def handle_method
+    nil
+  end
+
+#enable the hook. Example
+#
+#  class MethodHandler < Hook
+#    def handle_method
+#      nil # do nothing
+#    end
+#  end
+#
+#  mh = MethodHandler.new
+#     print "hello world\n"
+#  end
+#
+
+  def hook
+    if block_given?
+      ::RallHook::Hook.hook self do
+        yield
+      end
+    else
+      ::RallHook::Hook.hook self
+    end
+  end
+
+#Instance handler and activate the hook
+#Example:
+#
+#  class MethodHandler < Hook
+#    def handle_method
+#      nil # do nothing
+#    end
+#  end
+#
+#  MethodHandler.hook do
+#    print "hello world\n"
+#  end
+
+  def self.hook
+    if block_given?
+      self.new.hook do
+        yield
+      end
+    else
+      self.new.hook
+    end
+  end
+end
+
+
+
 end
 
 # To facilitate the use of hooking/redirection features,
