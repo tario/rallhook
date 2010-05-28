@@ -75,10 +75,85 @@ module RallHook
 			redirect_call(klass, recv, m)
 	  end
 
+#
+#This class acts as base to define classes that acts as receptors and wrappers of
+#redirected methods. Allows interception of methods with its parameters and controlled recall
+#in a hooking logic
+#
+#Example 1: basic modifications of arguments
+#
+# class MethodHandler
+#  include RallHook::Helper
+#
+#  class FooMethodWrapper < RallHook::MethodWrapper
+#    def call(foo_argument)
+#      original_call(foo_argument + 5) # add 5 in all calls to foo
+#    end
+#  end
+#
+#  def handle_method (klass,recv,m,method_id)
+#   if m == :foo
+#    FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+#   else
+#    nil
+#   end
+#  end
+# end
+#
+# ... hooking using MethodHandler ( see Hook#hook, README and examples)
+#
+#
+#Example 2: generic recall of methods
+#
+# class MethodHandler
+#  include RallHook::Helper
+#
+#  class GenericMethodWrapper < RallHook::MethodWrapper
+#    def call(*x)
+#      # call with reyield if block_given
+#      if block_given?
+#        original_call(*x) do |*a|
+#          yield(*a)
+#        end
+#      else
+#        original_call(*x)
+#      end
+#    end
+#  end
+#
+#  def handle_method (klass,recv,m,method_id)
+#    return GenericMethodWrapper.redirect_handler(klass,recv,m,method_id)
+#  end
+# end
+#
+# ... hooking using MethodHandler ( see Hook#hook, README and examples)
+#
+#
     class MethodWrapper
 
       attr_accessor :klass, :recv, :method_name, :method_id
 
+#Reactivate the hook status to intercept methods
+#Allow to pass a block to enable the hook status only in that block
+#
+#Example:
+# class MethodHandler
+#  include RallHook::Helper
+#
+#  class FooMethodWrapper < RallHook::MethodWrapper
+#    def call(foo_argument)
+#      original_call(foo_argument + 5) # add 5 in all calls to foo
+#      rehook do  # the print "hello world hooked" are intercepted too
+#         print "hello world hooked\n"
+#      end
+#    end
+#  end
+#
+#  ... definition of handle_method that use  FooMethodWrapper as redirect, etc...
+#
+#Note: is not necesary to use rehook to hook the nested calls in original_call
+#MethodWrapper#original_call does that internally
+#
       def rehook
         if block_given?
           ::RallHook::Hook.rehook do
@@ -89,11 +164,17 @@ module RallHook
         end
       end
 
+#
+#Same as Hook#from
+#
       def from(a)
         ::RallHook::Hook.new.from(a)
         self
       end
 
+#
+#Recall the original method(specified in initialization parameters)
+#
       def original_call(*args)
        mname = self.method_name
        mklass = self.klass
@@ -113,6 +194,9 @@ module RallHook
        end
       end
 
+#
+#Target of redirection, should be implemented to intercept the call
+#
       def call(*args)
       end
 
@@ -128,6 +212,11 @@ module RallHook
         rehook
       end
 
+#
+#Makes a redirect_handler to wrap a method call with this MethodWrapper. Example:
+#
+# FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+#
       def self.redirect_handler(klass,recv,method_name, method_id)
         mw = self.new
         mw.klass = klass
