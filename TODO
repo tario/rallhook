@@ -4,7 +4,6 @@ ie: hooked_send from within hooked execution allow to escape the hook and invoqu
 * More integrity testcases (with use of ruby core methods)
 * new features of method instrospection testcases
 * Security testcases (hook bypass checks,  security tests)
-* Separate rallhook in two layers: the rallhook logic and ruby interface and the necesary logic to intercept the ruby calls
 * Win32 compatibility
 * Delete distorm dependency
 * Delete libruby debuginfo dependency
