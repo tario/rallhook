@@ -235,6 +235,10 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 
 	current_redirect_handler(&call_data);
 
+	if (call_data.mid != id || call_data.klass != klass || call_data.recv != recv) {
+		mn = rb_get_method_body(call_data.klass, call_data.mid, 0);
+	}
+
 	return vm_call_method_i(
 			th,
 			cfp,
