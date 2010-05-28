@@ -178,7 +178,7 @@ module RallHook
 #Same as Hook#from
 #
       def from(a)
-        ::RallHook::Hook.new.from(a)
+        ::RallHook::Hook.from(a)
         self
       end
 

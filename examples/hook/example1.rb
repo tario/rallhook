@@ -13,7 +13,7 @@ class HookProc
 end
 
 hook_proc = HookProc.new
-Hook.new.hook hook_proc do
+Hook.hook hook_proc do
 	print 2+2,"\n"
 	print [1,2,3].inject{|x,y| x+y},"\n"
 end

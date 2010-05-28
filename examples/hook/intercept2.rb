@@ -37,7 +37,7 @@ print "\n"
 
 print "calling Array#each WITH hook\n"
 mhandler = MethodHandler.new
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 
 # 1 2 3 4 "bar?"
 [1,2,3,4].each do |x|

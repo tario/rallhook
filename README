@@ -42,7 +42,7 @@ end
 
 mhandler = MethodHandler.new
 
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 # all ruby calls in this block are intercepted by hook_recv::call
 
 	[1,2,3].each do |x|
@@ -117,7 +117,7 @@ x.bar
 
 print "WITH HOOK:\n"
 
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 # all ruby calls in this block are intercepted by hook_recv::call
 x = X.new
 x.foo # redirected to X#bar
@@ -165,7 +165,7 @@ print "\n"
 
 print "calling Array#each WITH hook\n"
 mhandler = MethodHandler.new
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 
 # 1 2 3 4 "bar?"
 [1,2,3,4].each do |x|

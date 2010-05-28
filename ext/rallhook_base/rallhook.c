@@ -208,10 +208,10 @@ This class handles the hook, enabling and disable it. Example:
 
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
 
-	rb_define_singleton_method( rb_cHook, "rehook", rehook, 0 );
-	rb_define_method(rb_cHook, "hook", hook, 1);
-	rb_define_method(rb_cHook, "unhook", unhook, 0);
-	rb_define_method(rb_cHook, "from", from, 1);
+	rb_define_singleton_method(rb_cHook, "rehook", rehook, 0 );
+	rb_define_singleton_method(rb_cHook, "hook", hook, 1);
+	rb_define_singleton_method(rb_cHook, "unhook", unhook, 0);
+	rb_define_singleton_method(rb_cHook, "from", from, 1);
 
 /*
 Marker module to indicate messages of method redirection

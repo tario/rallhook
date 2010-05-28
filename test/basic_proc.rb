@@ -25,7 +25,7 @@ end
 
 module BasicHookProcTest
   def hook
-    rallhook = RallHook::Hook.new
+    rallhook = RallHook::Hook
     basichook = BasicHookProc.new
 
     rallhook.hook basichook do

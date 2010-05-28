@@ -14,7 +14,7 @@ end
 
 mhandler = MethodHandler.new
 
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 # all ruby calls in this block are intercepted by hook_recv::call
 
 	[1,2,3].each do |x|

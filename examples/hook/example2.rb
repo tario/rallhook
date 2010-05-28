@@ -24,7 +24,7 @@ class Y <X
 end
 
 hook_proc = HookProc.new
-Hook.new.hook hook_proc do
+Hook.hook hook_proc do
 	y = Y.new
 	y.foo
 end

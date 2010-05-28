@@ -35,7 +35,7 @@ x.foo 4 # "foo in X with a = 4"
 
 print "calling X#foo WITH hook\n"
 mhandler = MethodHandler.new
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 x.foo 4 # "foo in X with a = 9" :)
 end
 
