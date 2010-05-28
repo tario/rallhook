@@ -70,12 +70,6 @@ VMCALLMETHOD vm_call_method_copy;
 typedef void rb_vm_t_;
 #endif
 
-VALUE restore_hook_status_ensure(VALUE unused) {
-	enable_redirect();
-	return Qnil;
-}
-
-
 VALUE rb_call_copy_i(
     VALUE klass, VALUE recv,
     ID    mid,

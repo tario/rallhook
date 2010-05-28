@@ -35,8 +35,5 @@ typedef struct _CallData {
 typedef void (*REDIRECTHANDLER) ( CallData* call_data );
 
 int put_redirect_handler( REDIRECTHANDLER redirect_handler);
-void disable_redirect();
-void enable_redirect();
-void redirect_left(int left);
 
 #endif

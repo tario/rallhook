@@ -23,9 +23,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "rb_call_fake.h"
 #include "hook_rb_call.h"
 
-// extern, exported variables
-int hook_enabled = 0;
-int hook_enable_left = 0;
 int code_changed = 0;
 
 REDIRECTHANDLER current_redirect_handler;
@@ -96,18 +93,6 @@ int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
 	}
 
 	return 0;
-}
-
-void disable_redirect() {
-	hook_enabled = 0;
-}
-
-void enable_redirect() {
-	hook_enabled = 1;
-}
-
-void redirect_left(int left) {
-	hook_enable_left = left;
 }
 
 void init_redirect() {

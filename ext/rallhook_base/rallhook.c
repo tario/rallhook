@@ -73,9 +73,20 @@ VALUE restore_hook_status(VALUE unused) {
 	enable_redirect();
 	return Qnil;
 }
-extern int hook_enabled;
-extern int hook_enable_left;
-extern REDIRECTHANDLER current_redirect_handler;
+int hook_enabled;
+int hook_enable_left;
+
+void disable_redirect() {
+	hook_enabled = 0;
+}
+
+void enable_redirect() {
+	hook_enabled = 1;
+}
+
+void redirect_left(int left) {
+	hook_enable_left = left;
+}
 
 void rallhook_redirect_handler ( CallData* call_data ) {
 
