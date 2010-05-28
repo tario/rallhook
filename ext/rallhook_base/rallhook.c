@@ -101,6 +101,12 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		return;
 	}
 
+	// methods over class hook are illegal, may change the state of hook
+	if (*recv == rb_cHook || rb_obj_is_kind_of(*recv, rb_cHook) ) {
+		rb_raise(rb_eFatal, "Illegal method call: Hook.%s", rb_id2name(*mid) );
+	}
+
+
 	// avoid to send symbols without name (crash the interpreter)
 	if (rb_id2name(*mid) == NULL){
 		sym = Qnil;
