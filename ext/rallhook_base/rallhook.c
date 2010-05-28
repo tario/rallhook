@@ -169,6 +169,10 @@ extern void Init_rallhook_base() {
 						"require 'ruby-cymbol'\n";
 
 	rb_eval_string(initcode);
+
+/*
+This module brings together all classes and methods belonging to rallhook with the exception of Node
+*/
 	rb_mRallHook = rb_define_module("RallHook");
 	rb_cHook = rb_define_class_under(rb_mRallHook, "Hook", rb_cObject);
 
