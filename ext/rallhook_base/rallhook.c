@@ -162,8 +162,6 @@ extern void Init_rallhook_base() {
 
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
 
-	init_hook_rb_call();
-	rb_call_fake_init();
 	init_node();
 
 	id_call_ = rb_intern("call");

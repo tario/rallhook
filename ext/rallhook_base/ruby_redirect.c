@@ -30,10 +30,14 @@ int code_changed = 0;
 
 REDIRECTHANDLER current_redirect_handler;
 
+void init_redirect();
+
 int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
 	current_redirect_handler = redirect_handler;
 
 	if (!code_changed) {
+
+		init_redirect();
 		// insert inconditional jmp from rb_call to rb_call_copy
 
 		#ifdef __i386__
@@ -104,6 +108,11 @@ void enable_redirect() {
 
 void redirect_left(int left) {
 	hook_enable_left = left;
+}
+
+void init_redirect() {
+	init_hook_rb_call();
+	rb_call_fake_init();
 }
 
 
