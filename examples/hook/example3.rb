@@ -4,11 +4,10 @@ require "rallhook"
 include RallHook
 
 class MethodHandler
+	def handle_method (klass,self_,m,method_id)
 
-	def handle_method (klass,self_,m,args, method_id)
-
-		# print to the standar output details about the method called
-		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} args: #{args.inspect}\n"
+		# print to the standard output details about the method called
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}\n"
 		nil # do nothing
 	end
 end

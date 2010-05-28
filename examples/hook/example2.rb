@@ -4,9 +4,10 @@ require "rallhook"
 include RallHook
 
 class HookProc
-	def handle_method (klass,self_,m,args, method_id)
-	
-		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}|#{klass} args: #{args.inspect}\n"
+	def handle_method (klass,self_,m,method_id)
+
+		# print to the standard output details about the method called
+		print "method call #{m}:#{method_id} over #{self_}:#{self_.class}\n"
 		nil # do nothing
 	end
 end

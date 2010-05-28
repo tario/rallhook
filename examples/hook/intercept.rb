@@ -13,7 +13,7 @@ class MethodHandler
 		end
 	end
 
-	def handle_method (klass,recv,m,args, method_id)
+	def handle_method (klass,recv,m, method_id)
 
 		if m == :foo
 			return FooMethodWrapper.redirect_handler(klass,recv,m,method_id)

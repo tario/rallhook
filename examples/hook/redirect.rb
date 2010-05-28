@@ -6,7 +6,7 @@ include RallHook
 class MethodHandler
 	include RallHook::Helper
 
-	def handle_method (klass,recv,m,args, method_id)
+	def handle_method (klass,recv,m,method_id)
 
 		if m == :foo
 			# redirects the calls of method foo to method bar on the same object
