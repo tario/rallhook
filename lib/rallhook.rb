@@ -257,9 +257,9 @@ class Object
 #
   def redirect_with_unhook(method_name, klass = nil)
     if klass
-      ::RallHook::Redirect.new(klass,self,m,true)
+      ::RallHook::Redirect.new(klass,self,method_name,true)
     else
-      ::RallHook::Redirect.new(self.class,self,m,true)
+      ::RallHook::Redirect.new(self.class,self,method_name,true)
     end
 
   end
