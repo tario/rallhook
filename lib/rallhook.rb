@@ -347,9 +347,9 @@ class Object
 #
   def redirect(method_name, klass = nil)
 		if klass
-			::RallHook::Redirect.new(klass,self,m)
+			::RallHook::Redirect.new(klass,self,method_name)
 		else
-			::RallHook::Redirect.new(self.class,self,m)
+			::RallHook::Redirect.new(self.class,self,method_name)
 		end
 	end
 end
