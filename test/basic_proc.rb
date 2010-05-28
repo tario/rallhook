@@ -18,7 +18,7 @@ class BasicHookProc
     end
   end
 
-  def handle_method(klass,recv_,m,args, method_id)
+  def handle_method(klass,recv_,m, method_id)
     return BasicMethodWrapper.redirect_handler(klass,recv_,m,method_id)
   end
 end
