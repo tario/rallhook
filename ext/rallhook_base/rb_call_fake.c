@@ -34,13 +34,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void* rb_call_copy;
 
-extern int hook_enabled;
-extern int hook_enable_left;
 extern REDIRECTHANDLER current_redirect_handler;
-
-int redirect_enable_left() {
-	return hook_enable_left;
-}
 
 #ifdef __i386__
 
@@ -336,33 +330,24 @@ rb_call_fake(
     int scope,
     VALUE self
 ) {
-	int must_hook = hook_enabled;
 
-	if (must_hook == 0 || redirect_enable_left() > 0 ) {
-		if (redirect_enable_left() > 0) {
-			redirect_left( redirect_enable_left()-1 );
-		}
-		return rb_call_copy_i(klass,recv,mid,argc,argv,scope,self);
+	VALUE args;
+	if (argv == 0) {
+		args = rb_ary_new2(0);
 	} else {
-		VALUE args;
-		if (argv == 0) {
-			args = rb_ary_new2(0);
-		} else {
-			args = rb_ary_new4(argc, argv);
-		}
-
-
-		CallData call_data;
-
-		call_data.klass = klass;
-		call_data.args = args;
-		call_data.recv = recv;
-		call_data.mid = mid;
-
-		current_redirect_handler(&call_data);
-		return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
-
+		args = rb_ary_new4(argc, argv);
 	}
+
+
+	CallData call_data;
+
+	call_data.klass = klass;
+	call_data.args = args;
+	call_data.recv = recv;
+	call_data.mid = mid;
+
+	current_redirect_handler(&call_data);
+	return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
 
 }
 
