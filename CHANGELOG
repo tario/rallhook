@@ -1,3 +1,13 @@
+0.5.0	Security improved: Fixed leaks of hooking methods by making all methods called over Hook illegal if hook state is enabled
+
+		More helpers to make easier to use. (see MethodHandler class)
+
+		Documented methods and classes to generate useful RDoc
+		
+		Internal refactoring to split the logic of rallhook, hooking, method_handle invoke, etc... and the modification of the ruby interpreter with hook calls, etc...
+
+0.4.0	Fixed bug in the version numbering
+
 0.3.1	Added new method of intercept calls
 
 		Changed interface of handlling of methods (see README and examples) to avoid errors in the handling of yield functions in ruby1.8
