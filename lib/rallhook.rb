@@ -22,7 +22,22 @@ require "rubygems"
 require "rallhook_base"
 
 module RallHook
-	class Redirect
+#
+#Internal class used for return method redirection messages
+#Example:
+# ...
+# class X
+#   def foo
+#   end
+# end
+# def handle_method
+#   return RallHook::Redirect.new(X, X.new, :foo)
+# end
+# ...
+#
+# Use x.redirect(:foo) instead (see Object#redirect )
+#
+  class Redirect
 		include MethodRedirect
 
 		def initialize(klass, recv, m, unhook = nil)
@@ -32,7 +47,9 @@ module RallHook
       @unhook = unhook
 		end
 	end
-
+#
+#Internal class used by RallHook::Helper#return_value
+#
 	class ReturnHolder
 	 	def initialize(v)
 			@value = v
@@ -42,6 +59,9 @@ module RallHook
     end
   end
 
+#
+#This module brings together classes and methods to facilitate the handling
+#
 	module Helper
 
 		def redirect_call(klass, recv, m)
