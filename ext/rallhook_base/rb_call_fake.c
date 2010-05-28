@@ -151,10 +151,6 @@ VALUE rb_call_copy_i(
 
 }
 
-void generic_wrapper(CallData* call_data){
-	get_current_redirect_handler()(call_data);
-}
-
 #ifdef RUBY1_9
 
 VALUE
@@ -255,7 +251,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 		call_data.mid = id;
 		call_data.args = Qnil;
 
-		generic_wrapper( &call_data );
+		current_redirect_handler(&call_data);
 
 		return vm_call_method_i(
 				th,
@@ -370,7 +366,7 @@ rb_call_fake(
 		call_data.recv = recv;
 		call_data.mid = mid;
 
-		generic_wrapper( &call_data );
+		current_redirect_handler(&call_data);
 		return rb_call_copy_i(call_data.klass,call_data.recv,call_data.mid,argc,argv,scope,self);
 
 	}

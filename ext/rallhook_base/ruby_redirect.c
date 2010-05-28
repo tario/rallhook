@@ -111,8 +111,4 @@ void redirect_left(int left) {
 }
 
 
-REDIRECTHANDLER get_current_redirect_handler() {
-	return current_redirect_handler;
-}
-
 
