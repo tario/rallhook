@@ -38,6 +38,10 @@ extern int hook_enabled;
 extern int hook_enable_left;
 extern REDIRECTHANDLER current_redirect_handler;
 
+int redirect_enable_left() {
+	return hook_enable_left;
+}
+
 #ifdef __i386__
 
 VALUE read_eax( ) {
