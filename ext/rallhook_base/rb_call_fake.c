@@ -34,6 +34,10 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void* rb_call_copy;
 
+extern int hook_enabled;
+extern int hook_enable_left;
+extern REDIRECTHANDLER current_redirect_handler;
+
 #ifdef __i386__
 
 VALUE read_eax( ) {
@@ -234,7 +238,7 @@ vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
 	       const ID id, void * mn, const VALUE recv_, VALUE klass)
 {
-	int must_hook = redirect_enabled();
+	int must_hook = hook_enabled;
 	volatile VALUE recv = recv_;
 
 	if (must_hook == 0 || redirect_enable_left() > 0 ) {
@@ -343,7 +347,7 @@ rb_call_fake(
     int scope,
     VALUE self
 ) {
-	int must_hook = redirect_enabled();
+	int must_hook = hook_enabled;
 
 	if (must_hook == 0 || redirect_enable_left() > 0 ) {
 		if (redirect_enable_left() > 0) {

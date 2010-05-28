@@ -39,7 +39,6 @@ void disable_redirect();
 void enable_redirect();
 void redirect_left(int left);
 REDIRECTHANDLER get_current_redirect_handler();
-int redirect_enabled();
 int redirect_enable_left();
 
 #endif
