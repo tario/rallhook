@@ -64,10 +64,20 @@ module RallHook
 #
 	module Helper
 
+#Equivalent to:
+# recv.redirect(m, klass)
 		def redirect_call(klass, recv, m)
 			::RallHook::Redirect.new(klass,recv,m)
 		end
 
+#Return a value as return value of the method being handled
+#Example:
+#
+# include RallHook::Helper
+# def handle_method
+#   return_value(4) # all methods called returns 4
+# end
+#
 		def return_value(v)
       recv = ReturnHolder.new(v)
       klass = recv.class
