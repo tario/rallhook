@@ -22,7 +22,7 @@ require "rubygems"
 require "rallhook_base"
 
 module RallHook
-	class Redirect_
+	class Redirect
 		include MethodRedirect
 
 		def initialize(klass, recv, m, unhook = nil)
@@ -45,7 +45,7 @@ module RallHook
 	module Helper
 
 		def redirect_call(klass, recv, m)
-			::RallHook::Redirect_.new(klass,recv,m)
+			::RallHook::Redirect.new(klass,recv,m)
 		end
 
 		def return_value(v)
@@ -138,9 +138,9 @@ class Object
 #
   def redirect_with_unhook(method_name, klass = nil)
     if klass
-      ::RallHook::Redirect_.new(klass,self,m,true)
+      ::RallHook::Redirect.new(klass,self,m,true)
     else
-      ::RallHook::Redirect_.new(self.class,self,m,true)
+      ::RallHook::Redirect.new(self.class,self,m,true)
     end
 
   end
@@ -171,9 +171,9 @@ class Object
 #
   def redirect(method_name, klass = nil)
 		if klass
-			::RallHook::Redirect_.new(klass,self,m)
+			::RallHook::Redirect.new(klass,self,m)
 		else
-			::RallHook::Redirect_.new(self.class,self,m)
+			::RallHook::Redirect.new(self.class,self,m)
 		end
 	end
 end
