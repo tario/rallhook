@@ -123,9 +123,20 @@ module RallHook
 
 end
 
+# To facilitate the use of hooking/redirection features,
+# rallhook defines some methods in the Object class
+#
+
 class Object
 
-  def redirect_with_unhook(m, klass = nil)
+
+# Same as redirect, but disable the hook/interception of methods (dont call handle_redirect) before
+# make the call, the hook status may be restored with Hook#rehook
+# Anyway, it is desirable to use MethodWrapper instead to "wrap" method calls
+#
+# see RallHook::Helper::MethodWrapper
+#
+  def redirect_with_unhook(method_name, klass = nil)
     if klass
       ::RallHook::Redirect_.new(klass,self,m,true)
     else
@@ -133,7 +144,32 @@ class Object
     end
 
   end
-	def redirect(m, klass = nil)
+
+# Generates a redirect message to return it in handle_method to cause the redirection of
+# the method that is beign processed with the object as receiver, the method_name the new target
+# and the class as second parameter if specified
+#
+# Example:
+#   class X
+#     def foo(*args)
+#     end
+#   end
+#
+#   class MethodHandler
+#     @@x = x.new
+#     def handle_method(klass, recv, m , method_id)
+#       if m == :bar then
+#         # redirect bar calls to foo in x
+#         return x.redirect(:foo)
+#       end
+#       nil # do nothing
+#     end
+#   end
+#
+#   # hook using MethodHandler, etc... (see README and examples)
+#
+#
+  def redirect(method_name, klass = nil)
 		if klass
 			::RallHook::Redirect_.new(klass,self,m)
 		else
