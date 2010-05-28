@@ -236,40 +236,29 @@ vm_call_method_i(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 VALUE
 vm_call_method_fake(rb_thread_t_ * const th, rb_control_frame_t_ * const cfp,
 	       const int num, rb_block_t_ * const blockptr, const VALUE flag,
-	       const ID id, void * mn, const VALUE recv_, VALUE klass)
+	       const ID id, void * mn, const VALUE recv, VALUE klass)
 {
-	int must_hook = hook_enabled;
-	volatile VALUE recv = recv_;
+	CallData call_data;
 
-	if (must_hook == 0 || redirect_enable_left() > 0 ) {
-		if (redirect_enable_left()  > 0) {
-			redirect_left(redirect_enable_left()-1);
-		}
+	call_data.klass = klass;
+	call_data.recv = recv;
+	call_data.mid = id;
+	call_data.args = Qnil;
 
-		return vm_call_method_i(th,cfp,num,blockptr,flag,id,mn,recv,klass);
-	} else {
-		CallData call_data;
+	current_redirect_handler(&call_data);
 
-		call_data.klass = klass;
-		call_data.recv = recv;
-		call_data.mid = id;
-		call_data.args = Qnil;
-
-		current_redirect_handler(&call_data);
-
-		return vm_call_method_i(
-				th,
-				cfp,
-				num,
-				blockptr,
-				flag,
-				call_data.mid,
-				mn,
-				call_data.recv,
-				call_data.klass);
+	return vm_call_method_i(
+			th,
+			cfp,
+			num,
+			blockptr,
+			flag,
+			call_data.mid,
+			mn,
+			call_data.recv,
+			call_data.klass);
 
 
-	}
 }
 
 #ifdef __i386__
