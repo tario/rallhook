@@ -101,7 +101,7 @@ VALUE rb_method_body(VALUE self) {
 }
 
 /*
-The number of the line  where the node are defined in the ruby source file
+The number of the line where the code associated with note are defined in the ruby source file
 */
 VALUE rb_node_line(VALUE self) {
     NODE* _node;
@@ -117,7 +117,7 @@ VALUE rb_node_line(VALUE self) {
 }
 
 /*
-The name of the ruby source file where the node are defined
+The name of the ruby source file where the code associated with the node are defined
 */
 VALUE rb_node_file(VALUE self) {
     NODE* _node;
