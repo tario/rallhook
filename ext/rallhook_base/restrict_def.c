@@ -43,6 +43,13 @@ typedef void (*RBADDMETHOD) (
 
 RBADDMETHOD rb_add_method_copy;
 
+void disable_overwrite() {
+	restrict_def = 1;
+}
+void enable_overwrite() {
+	restrict_def = 0;
+}
+
 void rb_add_method_fake(
     VALUE klass,
     ID id,

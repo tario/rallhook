@@ -68,10 +68,12 @@ void redirect_left(int left) {
 }
 
 void enable_redirect() {
+	disable_overwrite();
 	hook_enabled = 1;
 }
 
 void disable_redirect() {
+	enable_overwrite();
 	hook_enabled = 0;
 }
 

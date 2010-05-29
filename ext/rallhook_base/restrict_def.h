@@ -23,4 +23,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void init_restrict_def();
 
+void disable_overwrite();
+void enable_overwrite();
+
 #endif
