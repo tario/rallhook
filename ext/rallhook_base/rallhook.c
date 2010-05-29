@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include <ruby.h>
 #include "method_node.h"
 #include "ruby_redirect.h"
+#include "restrict_def.h"
 
 VALUE rb_cHook;
 VALUE rb_mRallHook;
@@ -79,14 +80,6 @@ VALUE restore_hook_status(VALUE unused) {
 }
 int hook_enabled;
 int hook_enable_left;
-
-void disable_redirect() {
-	hook_enabled = 0;
-}
-
-void enable_redirect() {
-	hook_enabled = 1;
-}
 
 void redirect_left(int left) {
 	hook_enable_left = left;
@@ -261,6 +254,7 @@ Example:
 	rb_mMethodRedirect = rb_define_module_under(rb_mRallHook, "MethodRedirect");
 
 	init_node();
+	init_restrict_def();
 
 	id_call_ = rb_intern("call");
 

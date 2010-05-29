@@ -34,9 +34,9 @@ int get_instructions_size(void* code, int size) {
 	unsigned int decodedInstructionsCount;
 
 	#ifdef __x86_64__
-		_DecodeType dt = Decode32Bits;
-	#elif __i386__
 		_DecodeType dt = Decode64Bits;
+	#elif __i386__
+		_DecodeType dt = Decode32Bits;
 	#else
 		#error "unknown architecture"
 	#endif
@@ -123,11 +123,11 @@ void* put_jmp_hook_with_regs(void* function_address, void* fake_function, int in
 	p_regs[3] = 0x50; // push eax
 	p_regs[4] = 0xb8; // movl %eax, ???????
 	p_regs[9] = 0xff; // call *%eax
-	p_regs[10] = 0xd0; // 
+	p_regs[10] = 0xd0; //
 	p_regs[11] = 0x83; // add $0x10, %esp
-	p_regs[12] = 0xc4; // 
-	p_regs[13] = 0x10; // 
-	p_regs[14] = 0xc3; // ret 
+	p_regs[12] = 0xc4; //
+	p_regs[13] = 0x10; //
+	p_regs[14] = 0xc3; // ret
 
 	*((void**)(p_regs+5))=fake_function;
 
