@@ -35,7 +35,7 @@ module RallHook
 # end
 # ...
 #
-# Use x.redirect(:foo) instead (see Object#redirect )
+#Note: Use x.redirect(:foo) instead (see Object#redirect )
 #
   class Redirect
 		include MethodRedirect
