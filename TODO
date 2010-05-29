@@ -1,5 +1,4 @@
 * More integrity testcases (with use of ruby core methods)
-* new features of method instrospection testcases
 * Security testcases (hook bypass checks,  security tests)
 * Win32 compatibility
 * Delete distorm dependency
