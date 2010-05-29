@@ -32,15 +32,6 @@ ID id_call_;
 
 VALUE rb_hook_proc = Qnil;
 
-
-/*
-Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
-*/
-VALUE unhook(VALUE self) {
-	disable_redirect();
-	return Qnil;
-}
-
 ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;
@@ -69,6 +60,29 @@ typedef struct rb_thread_struct
 
     // ...
 } rb_thread_t__;
+int hook_enabled;
+int hook_enable_left;
+
+void redirect_left(int left) {
+	hook_enable_left = left;
+}
+
+void enable_redirect() {
+	hook_enabled = 1;
+}
+
+void disable_redirect() {
+	hook_enabled = 0;
+}
+
+
+/*
+Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
+*/
+VALUE unhook(VALUE self) {
+	disable_redirect();
+	return Qnil;
+}
 
 VALUE ensured_handle_method( VALUE params ) {
 	return rb_funcall2( rb_hook_proc, id_handle_method, 4, (VALUE*)params );
@@ -77,12 +91,6 @@ VALUE ensured_handle_method( VALUE params ) {
 VALUE restore_hook_status(VALUE unused) {
 	enable_redirect();
 	return Qnil;
-}
-int hook_enabled;
-int hook_enable_left;
-
-void redirect_left(int left) {
-	hook_enable_left = left;
 }
 
 void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
