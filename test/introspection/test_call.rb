@@ -1,7 +1,6 @@
 require "test/unit"
 require "test/basic_proc"
 
-
 class InstrospectionTestCall < Test::Unit::TestCase
 
   class X
