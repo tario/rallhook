@@ -38,6 +38,7 @@ ID id_handle_method;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
+void *rb_get_method_body(VALUE klass, ID id, ID *idp);
 
 typedef struct rb_thread_struct
 {
@@ -76,6 +77,8 @@ void disable_redirect() {
 	enable_overwrite();
 	hook_enabled = 0;
 }
+
+void *binding_method_node;
 
 
 /*
@@ -129,14 +132,23 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	th->passed_block = blockptr;
 
-	if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+	void* data = 0;
+	if ( !st_lookup(RCLASS_M_TBL(*klass), *mid,&data) ) {
+		data = 0;
+	}
 
-		*klass = rb_ivar_get(result,id_klass_var );
-		*recv = rb_ivar_get(result,id_recv_var );
-		*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
+	if (data != binding_method_node) {
 
-		if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
-			disable_redirect();
+		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+
+			*klass = rb_ivar_get(result,id_klass_var );
+			*recv = rb_ivar_get(result,id_recv_var );
+			*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
+
+			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
+				disable_redirect();
+			}
+
 		}
 
 	}
@@ -276,8 +288,11 @@ Example:
 	id_recv_var = rb_intern("@recv");
 	id_method_var = rb_intern("@method");
 	id_unhook_var = rb_intern("@unhook");
+
+	if ( ! st_lookup(RCLASS_M_TBL(rb_cObject), rb_intern("binding"),&binding_method_node) ) {
+		rb_warning("Cannot found Object#binding");
+	}
 /*
 
 */
 }
-
