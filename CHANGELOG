@@ -1,4 +1,6 @@
-0.5.0	Security improved: Added hook of rb_add_method to avoid the overwriting of any method
+0.5.0	Added special check for Object#binding to avoid change the binding behaviour with method redirection
+
+		Security improved: Added hook of rb_add_method to avoid the overwriting of any method
 
 		Security improved: Fixed leaks of hooking methods by making all methods called over Hook illegal if hook state is enabled
 
