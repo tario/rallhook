@@ -256,7 +256,7 @@ class HookHandler
 #    end
 #  end
 #
-#  mh = MethodHandler.new
+#  MethodHandler.hook do
 #     print "hello world\n"
 #  end
 #
