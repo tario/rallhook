@@ -6,6 +6,8 @@
 		
 		Internal refactoring to split the logic of rallhook, hooking, method_handle invoke, etc... and the modification of the ruby interpreter with hook calls, etc...
 
+0.4.1	Fixed bug in the hook module
+
 0.4.0	Fixed bug in the version numbering
 
 0.3.1	Added new method of intercept calls
