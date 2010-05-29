@@ -34,9 +34,9 @@ int get_instructions_size(void* code, int size) {
 	unsigned int decodedInstructionsCount;
 
 	#ifdef __x86_64__
-		_DecodeType dt = Decode32Bits;
-	#elif __i386__
 		_DecodeType dt = Decode64Bits;
+	#elif __i386__
+		_DecodeType dt = Decode32Bits;
 	#else
 		#error "unknown architecture"
 	#endif
