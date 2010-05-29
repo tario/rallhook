@@ -1,4 +1,6 @@
-0.5.0	Security improved: Fixed leaks of hooking methods by making all methods called over Hook illegal if hook state is enabled
+0.5.0	Security improved: Added hook of rb_add_method to avoid the overwriting of any method
+
+		Security improved: Fixed leaks of hooking methods by making all methods called over Hook illegal if hook state is enabled
 
 		More helpers to make easier to use. (see MethodHandler class)
 
