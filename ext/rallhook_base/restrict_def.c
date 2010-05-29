@@ -49,6 +49,14 @@ void rb_add_method_fake(
     NODE_* node,
     int noex
 ) {
+	if (restrict_def) {
+		void* data;
+		if (st_lookup(RCLASS_M_TBL(klass), id, &data)) {
+			// overwrite of method, access denied...
+			rb_raise(rb_eSecurityError, "Illegal overwrite of method %s", rb_id2name(id) );
+		}
+	}
+
 	rb_add_method_copy(klass,id,node,noex);
 }
 
