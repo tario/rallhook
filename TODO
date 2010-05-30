@@ -1,3 +1,4 @@
+* Threading support
 * More integrity testcases (with use of ruby core methods)
 * Security testcases (hook bypass checks,  security tests)
 * Win32 compatibility
