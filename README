@@ -24,184 +24,189 @@ gem install rallhook-X.X.X.gem
 
 === Basic Example
 
----- test.rb ----
-require "rubygems"
-require "rallhook"
+test.rb:
 
-include RallHook
+	require "rubygems"
+	require "rallhook"
 
-class MethodHandler
+	include RallHook
 
-	def handle_method (klass,self_,m, method_id)
+	class MethodHandler
 
-		# print to the standar output details about the method called
-		print "method call #{m}:#{method_id} over #{self_}:#{self_.class} \n"
-		nil # do nothing
-	end
-end
+		def handle_method (klass,self_,m, method_id)
 
-mhandler = MethodHandler.new
-
-Hook.hook mhandler do
-# all ruby calls in this block are intercepted by hook_recv::call
-
-	[1,2,3].each do |x|
-	print x,"\n"
+			# print to the standar output details about the method called
+			print "method call #{m}:#{method_id} over #{self_}:#{self_.class} \n"
+			nil # do nothing
+		end
 	end
 
-end
+	mhandler = MethodHandler.new
 
----- standard output result ----
-method call each:4001 over 123:Array 
-method call print:7697 over main:Object 
-method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-method call to_s:3137 over 1:Fixnum 
-1method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	Hook.hook mhandler do
+	# all ruby calls in this block are intercepted by hook_recv::call
 
-method call print:7697 over main:Object 
-method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-method call to_s:3137 over 2:Fixnum 
-2method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+		[1,2,3].each do |x|
+		print x,"\n"
+		end
 
-method call print:7697 over main:Object 
-method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-method call to_s:3137 over 3:Fixnum 
-3method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	end
+
+standard output:
+
+	method call each:4001 over 123:Array 
+	method call print:7697 over main:Object 
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call to_s:3137 over 1:Fixnum 
+	1method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+
+	method call print:7697 over main:Object 
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call to_s:3137 over 2:Fixnum 
+	2method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+
+	method call print:7697 over main:Object 
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call to_s:3137 over 3:Fixnum 
+	3method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
 
 === Redirecting calls
 
-require "rubygems"
-require "rallhook"
+	require "rubygems"
+	require "rallhook"
 
-include RallHook
+	include RallHook
 
-class MethodHandler
-	include RallHook::Helper
+	class MethodHandler
+		include RallHook::Helper
 
-	def handle_method (klass,recv,m,method_id)
+		def handle_method (klass,recv,m,method_id)
 
-		if m == :foo
-			# redirects the calls of method foo to method bar on the same object
-			return redirect_call(klass,recv, :bar)
+			if m == :foo
+				# redirects the calls of method foo to method bar on the same object
+				return redirect_call(klass,recv, :bar)
+			end
+
+			if m == :bar
+				# redirects the calls of method bar to method bar on the method_handler
+				return redirect_call(self.class,self, :bar)
+			end
+
+			nil # do nothing
 		end
-
-		if m == :bar
-			# redirects the calls of method bar to method bar on the method_handler
-			return redirect_call(self.class,self, :bar)
+		
+		def bar
+			print "bar in MethodHandler\n"
 		end
-
-		nil # do nothing
 	end
-	
-	def bar
-		print "bar in MethodHandler\n"
+
+	class X
+		def foo
+			print "foo in X\n"
+		end
+		def bar
+			print "bar in X\n"
+		end
 	end
-end
 
-class X
-	def foo
-		print "foo in X\n"
+	mhandler = MethodHandler.new
+
+	print "WITHOUT HOOK:\n"
+
+	x = X.new
+	x.foo
+	x.bar
+
+	print "WITH HOOK:\n"
+
+	Hook.hook mhandler do
+	# all ruby calls in this block are intercepted by hook_recv::call
+	x = X.new
+	x.foo # redirected to X#bar
+	x.bar # redirected to MethodHandler#bar
+
 	end
-	def bar
-		print "bar in X\n"
-	end
-end
-
-mhandler = MethodHandler.new
-
-print "WITHOUT HOOK:\n"
-
-x = X.new
-x.foo
-x.bar
-
-print "WITH HOOK:\n"
-
-Hook.hook mhandler do
-# all ruby calls in this block are intercepted by hook_recv::call
-x = X.new
-x.foo # redirected to X#bar
-x.bar # redirected to MethodHandler#bar
-
-end
 
 === Wrap Calls
-require "rubygems"
-require "rallhook"
+	require "rubygems"
+	require "rallhook"
 
-include RallHook
+	include RallHook
 
-class MethodHandler
-	include RallHook::Helper
-	
-	class FooMethodWrapper < MethodWrapper
-		def call(*x)
-			# call with reyield if block_given
-			if block_given?
-				original_call(*x) do |*a|
-					yield(*a)
+	class MethodHandler
+		include RallHook::Helper
+		
+		class FooMethodWrapper < MethodWrapper
+			def call(*x)
+				# call with reyield if block_given
+				if block_given?
+					original_call(*x) do |*a|
+						yield(*a)
+					end
+					# add "¿bar?"
+					yield("bar?")
+				else
+					original_call(*x)
 				end
-				# add "¿bar?"
-				yield("bar?")
-			else
-				original_call(*x)
 			end
 		end
-	end
 
-	def handle_method (klass,recv,m,method_id)
-		if m == :each
-			return FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+		def handle_method (klass,recv,m,method_id)
+			if m == :each
+				return FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+			end
+			nil # do nothing
 		end
-		nil # do nothing
 	end
-end
 
-print "calling Array#each without hook\n"
-[1,2,3,4].each do |x|
-	print x.inspect, " "
-end
-print "\n"
+	print "calling Array#each without hook\n"
+	[1,2,3,4].each do |x|
+		print x.inspect, " "
+	end
+	print "\n"
 
-print "calling Array#each WITH hook\n"
-mhandler = MethodHandler.new
-Hook.hook mhandler do
+	print "calling Array#each WITH hook\n"
+	mhandler = MethodHandler.new
+	Hook.hook mhandler do
 
-# 1 2 3 4 "bar?"
-[1,2,3,4].each do |x|
-	print x.inspect," "
-end
-print "\n"
+	# 1 2 3 4 "bar?"
+	[1,2,3,4].each do |x|
+		print x.inspect," "
+	end
+	print "\n"
 
-end
+	end
 
 
 === Method Instrospection new features example
 
----- source1.rb ----
-class X
-	def foo
+source1.rb
+
+	class X
+		def foo
+		end
 	end
-end
 
----- source2.rb ----
-class Y < X
-	def foo
+source2.rb
+
+	class Y < X
+		def foo
+		end
 	end
-end
 
----- main.rb ----
-require "rallhook"
-require "source1.rb"
-require "source2.rb"
+main.rb
 
-x = X.new
-y = Y.new
+	require "rallhook"
+	require "source1.rb"
+	require "source2.rb"
 
-print x.method(:foo).body.file,"\n" # source1.rb
-print y.method(:foo).body.file,"\n" # source2.rb
+	x = X.new
+	y = Y.new
 
-print y.method(X,:foo).body.file,"\n" # source1.rb
-print y.method(Y,:foo).body.file,"\n" # source2.rb
+	print x.method(:foo).body.file,"\n" # source1.rb
+	print y.method(:foo).body.file,"\n" # source2.rb
+
+	print y.method(X,:foo).body.file,"\n" # source1.rb
+	print y.method(Y,:foo).body.file,"\n" # source2.rb
 
 
