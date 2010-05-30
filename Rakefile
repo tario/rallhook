@@ -33,7 +33,7 @@ end
 desc 'Generate RDoc'
 Rake::RDocTask.new :rdoc do |rd|
   rd.rdoc_dir = 'doc'
-  rd.rdoc_files.add 'lib', 'README'
+  rd.rdoc_files.add 'lib', 'ext', 'README'
   rd.main = 'README'
 end
 
