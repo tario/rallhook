@@ -1,4 +1,6 @@
-0.5.0	Added special check for Object#binding to avoid change the binding behaviour with method redirection
+0.5.0	Security Improved: Restricted define of singleton methods over classes when hook is enabled
+
+		Added special check for Object#binding to avoid change the binding behaviour with method redirection
 
 		Security improved: Added hook of rb_add_method to avoid the overwriting of any method
 
