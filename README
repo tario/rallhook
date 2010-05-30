@@ -31,7 +31,7 @@ test.rb:
 
 	include RallHook
 
-	class MethodHandler
+	class MethodHandler < HookHandler
 
 		def handle_method (klass,self_,m, method_id)
 
@@ -41,9 +41,7 @@ test.rb:
 		end
 	end
 
-	mhandler = MethodHandler.new
-
-	Hook.hook mhandler do
+	MethodHandler.hook do
 	# all ruby calls in this block are intercepted by hook_recv::call
 
 		[1,2,3].each do |x|
@@ -77,7 +75,7 @@ standard output:
 
 	include RallHook
 
-	class MethodHandler
+	class MethodHandler < HookHandler
 		include RallHook::Helper
 
 		def handle_method (klass,recv,m,method_id)
@@ -109,8 +107,6 @@ standard output:
 		end
 	end
 
-	mhandler = MethodHandler.new
-
 	print "WITHOUT HOOK:\n"
 
 	x = X.new
@@ -119,11 +115,11 @@ standard output:
 
 	print "WITH HOOK:\n"
 
-	Hook.hook mhandler do
-	# all ruby calls in this block are intercepted by hook_recv::call
-	x = X.new
-	x.foo # redirected to X#bar
-	x.bar # redirected to MethodHandler#bar
+	MethodHandler.hook do
+		# all ruby calls in this block are intercepted by hook_recv::call
+		x = X.new
+		x.foo # redirected to X#bar
+		x.bar # redirected to MethodHandler#bar
 
 	end
 
@@ -133,7 +129,7 @@ standard output:
 
 	include RallHook
 
-	class MethodHandler
+	class MethodHandler < HookHandler
 		include RallHook::Helper
 		
 		class FooMethodWrapper < MethodWrapper
@@ -166,14 +162,13 @@ standard output:
 	print "\n"
 
 	print "calling Array#each WITH hook\n"
-	mhandler = MethodHandler.new
-	Hook.hook mhandler do
+	MethodHandler.hook do
 
-	# 1 2 3 4 "bar?"
-	[1,2,3,4].each do |x|
-		print x.inspect," "
-	end
-	print "\n"
+		# 1 2 3 4 "bar?"
+		[1,2,3,4].each do |x|
+			print x.inspect," "
+		end
+		print "\n"
 
 	end
 
