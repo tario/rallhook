@@ -35,6 +35,7 @@ VALUE rb_hook_proc = Qnil;
 ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;
+ID id_binding;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -78,8 +79,6 @@ void disable_redirect() {
 	hook_enabled = 0;
 }
 
-void *binding_method_node;
-
 
 /*
 Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
@@ -121,6 +120,8 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 	argv_[2] = sym;
 	argv_[3] = LONG2FIX(*mid);
 
+	ID original_id = *mid;
+
 	disable_redirect();
 
 	rb_thread_t__* th;
@@ -132,15 +133,10 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	th->passed_block = blockptr;
 
-	void* data = 0;
-	if ( !st_lookup(RCLASS_M_TBL(*klass), *mid,&data) ) {
-		data = 0;
-	}
+	if (original_id != id_binding ) {
 
-	if (data != binding_method_node) {
-
+		// method named "binding" cannot be redirected
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-
 			*klass = rb_ivar_get(result,id_klass_var );
 			*recv = rb_ivar_get(result,id_recv_var );
 			*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
@@ -150,7 +146,6 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 			}
 
 		}
-
 	}
 
 	// methods over class hook are illegal, may change the state of hook
@@ -288,11 +283,6 @@ Example:
 	id_recv_var = rb_intern("@recv");
 	id_method_var = rb_intern("@method");
 	id_unhook_var = rb_intern("@unhook");
+	id_binding = rb_intern("binding");
 
-	if ( ! st_lookup(RCLASS_M_TBL(rb_cObject), rb_intern("binding"),&binding_method_node) ) {
-		rb_warning("Cannot found Object#binding");
-	}
-/*
-
-*/
 }
