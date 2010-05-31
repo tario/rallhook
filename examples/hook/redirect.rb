@@ -45,7 +45,7 @@ x.bar
 
 print "WITH HOOK:\n"
 
-Hook.new.hook mhandler do
+Hook.hook mhandler do
 # all ruby calls in this block are intercepted by hook_recv::call
 x = X.new
 x.foo # redirected to X#bar
