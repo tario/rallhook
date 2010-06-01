@@ -234,6 +234,9 @@ module RallHook
         mw.recv = recv
         mw.method_name = method_name
         mw.method_id = method_id
+        if block_given?
+          yield(mw)
+        end
         mw.redirect_with_unhook(:call_with_rehook)
       end
 
