@@ -25,10 +25,5 @@ class InstrospectionTestCall < Test::Unit::TestCase
     assert_raise NameError do
       y.specific_method(Fixnum,:foo)
     end
-
-    assert_raise NameError do
-      y.specific_method(Y, -43)
-    end
-
   end
 end
