@@ -229,15 +229,21 @@ module RallHook
 # FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
 #
       def self.redirect_handler(klass,recv,method_name, method_id)
-        mw = self.new
-        mw.klass = klass
-        mw.recv = recv
-        mw.method_name = method_name
-        mw.method_id = method_id
-        if block_given?
-          yield(mw)
+
+        if method_name
+
+          mw = self.new
+          mw.klass = klass
+          mw.recv = recv
+          mw.method_name = method_name
+          mw.method_id = method_id
+          if block_given?
+            yield(mw)
+          end
+          mw.redirect_with_unhook(:call_with_rehook)
+        else
+          nil
         end
-        mw.redirect_with_unhook(:call_with_rehook)
       end
 
     end
