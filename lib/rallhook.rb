@@ -190,16 +190,17 @@ module RallHook
        mklass = self.klass
        mid = self.method_id
        recv_ = self.recv
+       m = recv_.specific_method(mklass,mname)
 
        if block_given?
-         from(4).rehook do
-           recv_.method(mklass,mid).call(*args) do |*blockargs|
+         from(3).rehook do
+           m.call(*args) do |*blockargs|
              yield(*blockargs)
            end
          end
        else
-         from(4).rehook do
-           recv_.method(mklass,mid).call(*args)
+         from(3).rehook do
+           m.call(*args)
          end
        end
       end
@@ -351,5 +352,16 @@ class Object
 		else
 			::RallHook::Redirect.new(self.class,self,method_name)
 		end
-	end
+  end
+
+  def specific_method(arg1, arg2=nil)
+    if arg2
+      method_name = arg2
+      klass = arg1
+
+      klass.instance_method(method_name).bind(self)
+    else
+      method(arg1)
+    end
+  end
 end

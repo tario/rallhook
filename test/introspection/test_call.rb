@@ -18,16 +18,16 @@ class InstrospectionTestCall < Test::Unit::TestCase
   def test_file
     y = Y.new
 
-    assert_equal y.method(:foo).call, "fooY"
-    assert_equal y.method(X,:foo).call, "fooX"
-    assert_equal y.method(Y,:foo).call, "fooY"
+    assert_equal y.specific_method(:foo).call, "fooY"
+    assert_equal y.specific_method(X,:foo).call, "fooX"
+    assert_equal y.specific_method(Y,:foo).call, "fooY"
 
     assert_raise NameError do
-      y.method(Fixnum,:foo)
+      y.specific_method(Fixnum,:foo)
     end
 
     assert_raise NameError do
-      y.method(Y, -43)
+      y.specific_method(Y, -43)
     end
 
   end
