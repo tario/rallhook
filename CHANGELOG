@@ -1,3 +1,5 @@
+0.6.1	Fixed bug on binding of class methods in Object#specific_method
+
 0.6.0	Implemented method UboundMethod#body
 
 		Improved compatibility of test cases with ruby1.9 and ruby1.8 behaviour
