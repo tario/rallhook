@@ -1,3 +1,11 @@
+0.6.0	Implemented method UboundMethod#body
+
+		Improved compatibility of test cases with ruby1.9 and ruby1.8 behaviour
+
+		Implemented Object#specific_method to lookup methods by klass and method_id
+
+		Delete overload of Object#method
+
 0.5.0	Security Improved: Restricted define of singleton methods over classes when hook is enabled
 
 		Added special check for Object#binding to avoid change the binding behaviour with method redirection
