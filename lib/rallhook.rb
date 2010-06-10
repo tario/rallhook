@@ -368,7 +368,11 @@ class Object
       method_name = arg2
       klass = arg1
 
-      klass.instance_method(method_name).bind(self)
+      if instance_of? Class
+        method(method_name)
+      else
+        klass.instance_method(method_name).bind(self)
+      end
     else
       method(arg1)
     end
