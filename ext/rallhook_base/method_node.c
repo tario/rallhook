@@ -151,6 +151,7 @@ VALUE rb_node_file(VALUE self) {
 
 void  init_node() {
 	rb_define_method(rb_cMethod, "body", rb_method_body,0);
+	rb_define_method(rb_cUnboundMethod, "body", rb_method_body,0);
 
 	/*
 	The class Node represents the internal ruby node, a node is a piece of ruby code used
