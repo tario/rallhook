@@ -17,12 +17,8 @@ class TestClassMethod < Test::Unit::TestCase
 
   class MethodHandler < RallHook::HookHandler
     def handle_method (klass,self_,m,method_id)
-      # print to the standard output details about the method called
-      print "method call #{m}:#{method_id} over #{self_}:#{self_.class}\n"
-
       if m
       file = klass.instance_method(m).body.file
-      print "file: #{file}\n"
       end
 
       nil # do nothing
