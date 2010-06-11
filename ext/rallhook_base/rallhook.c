@@ -145,6 +145,8 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 				disable_redirect();
 			}
 
+		} else {
+			shadow_redirect(klass, recv, mid);
 		}
 	}
 

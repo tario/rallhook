@@ -21,9 +21,13 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #ifndef __RESTRICT_DEF_H
 #define __RESTRICT_DEF_H
 
+#include "ruby.h"
+
 void init_restrict_def();
 
 void disable_overwrite();
 void enable_overwrite();
+
+void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid);
 
 #endif

@@ -29,7 +29,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <dlfcn.h>
 
-
+ID shadow_id;
 int restrict_def = 0;
 
 typedef void NODE_;
@@ -50,30 +50,45 @@ void enable_overwrite() {
 	restrict_def = 0;
 }
 
+VALUE shadow_or_create(VALUE klass) {
+	if (restrict_def) {
+		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
+		if ( shadow_klass == Qnil ) {
+			shadow_klass = rb_obj_dup(klass);
+			rb_ivar_set(klass, shadow_id, shadow_klass );
+		}
+		return shadow_klass;
+	} else {
+		return klass;
+	}
+}
+
+VALUE shadow_or_original(VALUE klass) {
+	if (restrict_def) {
+		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
+		if ( shadow_klass == Qnil ) {
+			return klass;
+		}
+		return shadow_klass;
+	} else {
+		return klass;
+	}
+
+}
+
+
 void rb_add_method_fake(
     VALUE klass,
     ID id,
     NODE_* node,
     int noex
 ) {
-	if (restrict_def) {
+	rb_add_method_copy(shadow_or_create(klass),id,node,noex);
+}
 
-		if (FL_TEST(klass, FL_SINGLETON)) {
-
-			// singleton method over classes are illegal
-			if ( strcmp( rb_class2name(klass), "Class") == 0) {
-				rb_raise(rb_eSecurityError, "Illegal singleton method %s", rb_id2name(id) );
-			}
-		}
-
-		void* data;
-		if (st_lookup(RCLASS_M_TBL(klass), id, &data)) {
-			// overwrite of method, access denied...
-			rb_raise(rb_eSecurityError, "Illegal overwrite of method %s", rb_id2name(id) );
-		}
-	}
-
-	rb_add_method_copy(klass,id,node,noex);
+void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
+	// shadow redirection if restrict_def (ever)
+	*klass = shadow_or_original(*klass);
 }
 
 
@@ -89,5 +104,7 @@ void init_restrict_def() {
 
 	int inst_size = get_instructions_size(rb_add_method_original, 256);
 	rb_add_method_copy = put_jmp_hook(rb_add_method_original, rb_add_method_fake, inst_size);
+
+	shadow_id = rb_intern("__shadow__");
 
 }
