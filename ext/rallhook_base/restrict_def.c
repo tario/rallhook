@@ -29,6 +29,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 #include <dlfcn.h>
 
+ID __shadow___id;
 ID shadow_id;
 int restrict_def = 0;
 
@@ -57,11 +58,10 @@ VALUE shadow_or_create(VALUE klass) {
 			return klass;
 		}
 
-
-		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
+		VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
 		if ( shadow_klass == Qnil ) {
 			shadow_klass = rb_obj_dup(klass);
-			rb_ivar_set(klass, shadow_id, shadow_klass );
+			rb_ivar_set(klass, __shadow___id, shadow_klass );
 		}
 		return shadow_klass;
 	} else {
@@ -76,7 +76,7 @@ VALUE shadow_or_original(VALUE klass) {
 			return klass;
 		}
 
-		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
+		VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
 		if ( shadow_klass == Qnil ) {
 			return klass;
 		}
@@ -126,6 +126,10 @@ void init_restrict_def() {
 	int inst_size = get_instructions_size(rb_add_method_original, 256);
 	rb_add_method_copy = put_jmp_hook(rb_add_method_original, rb_add_method_fake, inst_size);
 
-	shadow_id = rb_intern("__shadow__");
+	__shadow___id = rb_intern("__shadow__");
+	shadow_id = rb_intern("shadow");
+
+	rb_define_method(rb_cClass, "shadow", shadow_or_original, 0);
+	rb_define_method(rb_cClass, "create_shadow", shadow_or_create, 0);
 
 }

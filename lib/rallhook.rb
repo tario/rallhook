@@ -190,7 +190,9 @@ module RallHook
        mklass = self.klass
        mid = self.method_id
        recv_ = self.recv
-       m = recv_.specific_method(mklass,mname)
+
+       # original calls over the shadow of the class, not the original one
+       m = recv_.specific_method(mklass.shadow,mname)
 
        if block_given?
          from(3).rehook do
