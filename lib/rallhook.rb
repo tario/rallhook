@@ -373,7 +373,7 @@ class Object
       if instance_of? Class
         method(method_name)
       else
-        klass.instance_method(method_name).bind(self)
+        klass.instance_method(method_name).unchecked_bind(self)
       end
     else
       method(arg1)
