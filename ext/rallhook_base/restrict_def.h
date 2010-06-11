@@ -30,4 +30,6 @@ void enable_overwrite();
 
 void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid);
 
+VALUE unshadow(VALUE klass) ;
+
 #endif
