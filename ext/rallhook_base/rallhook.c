@@ -36,6 +36,7 @@ ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;
 ID id_binding;
+ID id_method_added;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -115,7 +116,11 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 
 	VALUE argv_[6];
-	argv_[0] = *klass;
+	if(*mid == id_method_added) {
+		argv_[0] = Qnil;
+	} else {
+		argv_[0] = *klass;
+	}
 	argv_[1] = *recv;
 	argv_[2] = sym;
 	argv_[3] = LONG2FIX(*mid);
@@ -286,5 +291,6 @@ Example:
 	id_method_var = rb_intern("@method");
 	id_unhook_var = rb_intern("@unhook");
 	id_binding = rb_intern("binding");
+	id_method_added = rb_intern("method_added");
 
 }
