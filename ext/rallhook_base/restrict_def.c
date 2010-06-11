@@ -52,6 +52,12 @@ void enable_overwrite() {
 
 VALUE shadow_or_create(VALUE klass) {
 	if (restrict_def) {
+		if (FL_TEST(klass, FL_SINGLETON)) {
+			// the singleton classes has no shadow
+			return klass;
+		}
+
+
 		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
 		if ( shadow_klass == Qnil ) {
 			shadow_klass = rb_obj_dup(klass);
@@ -65,6 +71,11 @@ VALUE shadow_or_create(VALUE klass) {
 
 VALUE shadow_or_original(VALUE klass) {
 	if (restrict_def) {
+		if (FL_TEST(klass, FL_SINGLETON)) {
+			// the singleton classes has no shadow
+			return klass;
+		}
+
 		VALUE shadow_klass = rb_ivar_get(klass, shadow_id);
 		if ( shadow_klass == Qnil ) {
 			return klass;
@@ -83,6 +94,16 @@ void rb_add_method_fake(
     NODE_* node,
     int noex
 ) {
+
+	if (restrict_def) {
+		if (FL_TEST(klass, FL_SINGLETON)) {
+    		// singleton method over classes are illegal
+			if ( strcmp( rb_class2name(klass), "Class") == 0) {
+				rb_raise(rb_eSecurityError, "Illegal singleton method %s", rb_id2name(id) );
+			}
+		}
+	}
+
 	rb_add_method_copy(shadow_or_create(klass),id,node,noex);
 }
 
