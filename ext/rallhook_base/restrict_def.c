@@ -53,39 +53,31 @@ void enable_overwrite() {
 }
 
 VALUE shadow_or_create(VALUE klass) {
-	if (restrict_def) {
-		if (FL_TEST(klass, FL_SINGLETON)) {
-			// the singleton classes has no shadow
-			return klass;
-		}
-
-		VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
-		if ( shadow_klass == Qnil ) {
-			shadow_klass = rb_obj_dup(klass);
-			rb_ivar_set(klass, __shadow___id, shadow_klass );
-			rb_ivar_set(shadow_klass, __unshadow___id, klass );
-		}
-		return shadow_klass;
-	} else {
+	if (FL_TEST(klass, FL_SINGLETON)) {
+		// the singleton classes has no shadow
 		return klass;
 	}
+
+	VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
+	if ( shadow_klass == Qnil ) {
+		shadow_klass = rb_obj_dup(klass);
+		rb_ivar_set(klass, __shadow___id, shadow_klass );
+		rb_ivar_set(shadow_klass, __unshadow___id, klass );
+	}
+	return shadow_klass;
 }
 
 VALUE shadow_or_original(VALUE klass) {
-	if (restrict_def) {
-		if (FL_TEST(klass, FL_SINGLETON)) {
-			// the singleton classes has no shadow
-			return klass;
-		}
-
-		VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
-		if ( shadow_klass == Qnil ) {
-			return klass;
-		}
-		return shadow_klass;
-	} else {
+	if (FL_TEST(klass, FL_SINGLETON)) {
+		// the singleton classes has no shadow
 		return klass;
 	}
+
+	VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
+	if ( shadow_klass == Qnil ) {
+		return klass;
+	}
+	return shadow_klass;
 
 }
 
@@ -113,14 +105,19 @@ void rb_add_method_fake(
 				rb_raise(rb_eSecurityError, "Illegal singleton method %s", rb_id2name(id) );
 			}
 		}
+		rb_add_method_copy(shadow_or_create(klass),id,node,noex);
+	} else {
+		rb_add_method_copy(klass,id,node,noex);
 	}
 
-	rb_add_method_copy(shadow_or_create(klass),id,node,noex);
 }
 
 void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
 	// shadow redirection if restrict_def (ever)
+
+	if (restrict_def) {
 	*klass = shadow_or_original(*klass);
+	}
 }
 
 
@@ -143,5 +140,6 @@ void init_restrict_def() {
 
 	rb_define_method(rb_cClass, "shadow", shadow_or_original, 0);
 	rb_define_method(rb_cClass, "create_shadow", shadow_or_create, 0);
+	rb_define_method(rb_cClass, "unshadow", unshadow, 0);
 
 }
