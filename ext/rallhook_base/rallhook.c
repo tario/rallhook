@@ -117,11 +117,12 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	VALUE argv_[6];
 	if(*mid == id_method_added) {
-		argv_[0] = Qnil;
+		argv_[1] = unshadow(*recv);
+		argv_[0] = CLASS_OF(argv_[1]);
 	} else {
 		argv_[0] = *klass;
+		argv_[1] = *recv;
 	}
-	argv_[1] = *recv;
 	argv_[2] = sym;
 	argv_[3] = LONG2FIX(*mid);
 
