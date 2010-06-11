@@ -147,11 +147,49 @@ VALUE rb_node_file(VALUE self) {
 }
 
 
+static void
+bm_mark(struct METHOD *data)
+{
+#ifdef RUBY1_8
+    rb_gc_mark(data->klass);
+    rb_gc_mark(data->rklass);
+    rb_gc_mark(data->recv);
+    rb_gc_mark((VALUE)data->body);
+#endif
+#ifdef RUBY1_9
+    rb_gc_mark(data->rclass);
+    rb_gc_mark(data->oclass);
+    rb_gc_mark(data->recv);
+    rb_gc_mark((VALUE)data->body);
+#endif
+
+}
+
+static VALUE
+umethod_unchecked_bind(VALUE method, VALUE recv)
+{
+    struct METHOD *data, *bound;
+
+    Data_Get_Struct(method, struct METHOD, data);
+
+    method = Data_Make_Struct(rb_cMethod, struct METHOD, bm_mark, -1, bound);
+    *bound = *data;
+    bound->recv = recv;
+#ifdef RUBY1_8
+    bound->rklass = CLASS_OF(recv);
+#endif
+#ifdef RUBY1_9
+    bound->rclass = CLASS_OF(recv);
+#endif
+
+    return method;
+}
 
 
 void  init_node() {
 	rb_define_method(rb_cMethod, "body", rb_method_body,0);
 	rb_define_method(rb_cUnboundMethod, "body", rb_method_body,0);
+	rb_define_method(rb_cUnboundMethod, "unchecked_bind", umethod_unchecked_bind,1);
 
 	/*
 	The class Node represents the internal ruby node, a node is a piece of ruby code used
