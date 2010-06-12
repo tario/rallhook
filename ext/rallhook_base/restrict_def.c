@@ -97,15 +97,17 @@ void rb_add_method_fake(
     NODE_* node,
     int noex
 ) {
-
 	if (restrict_def) {
 		if (FL_TEST(klass, FL_SINGLETON)) {
     		// singleton method over classes are illegal
 			if ( strcmp( rb_class2name(klass), "Class") == 0) {
 				rb_raise(rb_eSecurityError, "Illegal singleton method %s", rb_id2name(id) );
+			} else {
+				rb_add_method_copy(klass,id,node,noex);
 			}
+		} else {
+			rb_add_method_copy(shadow_or_create(klass),id,node,noex);
 		}
-		rb_add_method_copy(shadow_or_create(klass),id,node,noex);
 	} else {
 		rb_add_method_copy(klass,id,node,noex);
 	}
