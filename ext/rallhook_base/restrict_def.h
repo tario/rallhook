@@ -32,4 +32,6 @@ void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid);
 
 VALUE unshadow(VALUE klass) ;
 
+VALUE shadow_or_create(VALUE klass);
+
 #endif

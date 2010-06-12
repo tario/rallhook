@@ -37,6 +37,7 @@ ID id_method_wrapper;
 ID id_handle_method;
 ID id_binding;
 ID id_method_added;
+ID id_new;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -118,6 +119,12 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 	VALUE argv_[6];
 	if(*mid == id_method_added) {
 		*recv = unshadow(*recv); // recv is THE class
+		*klass = CLASS_OF(*recv);
+	}
+
+	if(*mid == id_new) {
+		// redirects new to shadow
+		*recv = shadow_or_create(*recv);
 		*klass = CLASS_OF(*recv);
 	}
 
@@ -293,5 +300,6 @@ Example:
 	id_unhook_var = rb_intern("@unhook");
 	id_binding = rb_intern("binding");
 	id_method_added = rb_intern("method_added");
+	id_new = rb_intern("new");
 
 }
