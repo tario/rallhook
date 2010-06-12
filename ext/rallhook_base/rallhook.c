@@ -128,7 +128,7 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		*klass = CLASS_OF(*recv);
 	}
 
-	argv_[0] = *klass;
+	argv_[0] = unshadow(*klass);
 	argv_[1] = *recv;
 	argv_[2] = sym;
 	argv_[3] = LONG2FIX(*mid);
