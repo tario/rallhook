@@ -122,19 +122,27 @@ void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
 	}
 }
 
+int add_method_code_changed = 0;
 
 void init_restrict_def() {
-	void* handle = dlopen(current_libruby(),0x101);
-	char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
-	Dl_info info;
-	dladdr(rb_funcall, &info);
 
-	unsigned char* base = (unsigned char*)info.dli_fbase;
 
-	void* rb_add_method_original = ruby_resolv(base,"rb_add_method");
+	if (!add_method_code_changed) {
 
-	int inst_size = get_instructions_size(rb_add_method_original, 256);
-	rb_add_method_copy = put_jmp_hook(rb_add_method_original, rb_add_method_fake, inst_size);
+		void* handle = dlopen(current_libruby(),0x101);
+		char* rb_funcall = (char*)dlsym(handle, "rb_funcall");
+		Dl_info info;
+		dladdr(rb_funcall, &info);
+
+		unsigned char* base = (unsigned char*)info.dli_fbase;
+
+		void* rb_add_method_original = ruby_resolv(base,"rb_add_method");
+
+		int inst_size = get_instructions_size(rb_add_method_original, 256);
+		rb_add_method_copy = put_jmp_hook(rb_add_method_original, rb_add_method_fake, inst_size);
+
+		add_method_code_changed = 1;
+	}
 
 	__shadow___id = rb_intern("__shadow__");
 	__unshadow___id = rb_intern("__unshadow__");
