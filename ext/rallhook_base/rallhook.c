@@ -65,6 +65,7 @@ typedef struct rb_thread_struct
 } rb_thread_t__;
 int hook_enabled;
 int hook_enable_left;
+int handle_method_arity = 4;
 
 void redirect_left(int left) {
 	hook_enable_left = left;
@@ -90,7 +91,9 @@ VALUE unhook(VALUE self) {
 }
 
 VALUE ensured_handle_method( VALUE params ) {
-	return rb_funcall2( rb_hook_proc, id_handle_method, 4, (VALUE*)params );
+	int argc = (int)((VALUE*)params)[0];
+	VALUE* argv = ((VALUE*)params)+1;
+	return rb_funcall2( rb_hook_proc, id_handle_method, argc, argv);
 }
 
 VALUE restore_hook_status(VALUE unused) {
@@ -98,22 +101,20 @@ VALUE restore_hook_status(VALUE unused) {
 	return Qnil;
 }
 
-void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
+int current_handle_method_arity() {
+	return handle_method_arity;
+}
 
-	VALUE sym;
+void set_handle_method_arity(int value) {
+	handle_method_arity = value;
+}
+
+void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	if (hook_enabled == 0 || hook_enable_left > 0){
 		if(hook_enable_left>0) hook_enable_left --;
 		return;
 	}
-
-	// avoid to send symbols without name (crash the interpreter)
-	if (rb_id2name(*mid) == NULL){
-		sym = Qnil;
-	} else {
-		sym = ID2SYM(*mid);
-	}
-
 
 	VALUE argv_[6];
 	if(*mid == id_method_added) {
@@ -121,10 +122,27 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		*klass = CLASS_OF(*recv);
 	}
 
-	argv_[0] = unshadow(*klass);
-	argv_[1] = *recv;
-	argv_[2] = sym;
-	argv_[3] = LONG2FIX(*mid);
+	int handle_method_arity = current_handle_method_arity();
+	argv_[0] = handle_method_arity;
+	if (handle_method_arity == 4) {
+
+		VALUE sym;
+	    if (rb_id2name(*mid)) {
+	    	sym = ID2SYM(*mid);
+	    } else {
+	    	sym =Qnil;
+	    }
+
+
+		argv_[1] = unshadow(*klass);
+		argv_[2] = *recv;
+		argv_[3] = sym;
+		argv_[4] = LONG2FIX(*mid);
+	} else {
+		argv_[1] = unshadow(*klass);
+		argv_[2] = *recv;
+		argv_[3] = LONG2FIX(*mid);
+	}
 
 	ID original_id = *mid;
 
@@ -174,6 +192,11 @@ Activate the hook, it is desirable to use the RAII call to make the hook block e
 */
 VALUE hook(VALUE self, VALUE hook_proc) {
 	rb_hook_proc = hook_proc;
+
+	VALUE handle_method_method =rb_obj_method(hook_proc, ID2SYM(id_handle_method) );
+	VALUE handle_method_method_arity = rb_funcall( handle_method_method, rb_intern("arity"), 0 );
+	set_handle_method_arity( FIX2INT( handle_method_method_arity ) );
+
 	put_redirect_handler( rallhook_redirect_handler );
 
 	enable_redirect();
