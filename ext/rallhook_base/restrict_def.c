@@ -52,15 +52,21 @@ void enable_overwrite() {
 	restrict_def = 0;
 }
 
+VALUE shadow_or_create(VALUE klass);
+
 VALUE create_shadow(VALUE klass) {
-	return rb_class_new(klass);
+	if (FL_TEST(klass, FL_SINGLETON)) {
+		VALUE obj = rb_iv_get(klass, "__attached__");
+		VALUE obj_klass = rb_obj_class(obj);
+		VALUE shadow_of_klass = shadow_or_create(obj_klass);
+
+		return rb_class_boot(shadow_of_klass);
+	} else {
+		return rb_class_new(klass);
+	}
 }
 
 VALUE shadow_or_create(VALUE klass) {
-	if (FL_TEST(klass, FL_SINGLETON)) {
-		// the singleton classes has no shadow
-		return klass;
-	}
 
 	VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
 	if ( shadow_klass == Qnil ) {
@@ -72,10 +78,6 @@ VALUE shadow_or_create(VALUE klass) {
 }
 
 VALUE shadow_or_original(VALUE klass) {
-	if (FL_TEST(klass, FL_SINGLETON)) {
-		// the singleton classes has no shadow
-		return klass;
-	}
 
 	VALUE shadow_klass = rb_ivar_get(klass, __shadow___id);
 	if ( shadow_klass == Qnil ) {
