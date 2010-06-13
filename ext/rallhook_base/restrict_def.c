@@ -60,7 +60,9 @@ VALUE create_shadow(VALUE klass) {
 		VALUE obj_klass = rb_obj_class(obj);
 		VALUE shadow_of_klass = shadow_or_create(obj_klass);
 
-		return rb_class_boot(shadow_of_klass);
+		VALUE retvalue = rb_class_boot(shadow_of_klass);
+		FL_SET(retvalue, FL_SINGLETON);
+		return retvalue;
 	} else {
 		return rb_class_new(klass);
 	}
