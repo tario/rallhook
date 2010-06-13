@@ -62,6 +62,9 @@ VALUE create_shadow(VALUE klass) {
 
 		VALUE retvalue = rb_class_boot(shadow_of_klass);
 		FL_SET(retvalue, FL_SINGLETON);
+
+		// define as __attached__ of the new singleton class the same object
+		rb_iv_set(retvalue, "__attached__", obj);
 		return retvalue;
 	} else {
 		return rb_class_new(klass);
