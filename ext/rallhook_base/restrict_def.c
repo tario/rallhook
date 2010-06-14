@@ -32,6 +32,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 ID __shadow___id;
 ID __unshadow___id;
 ID shadow_id;
+ID id_restrict_def;
+
 int restrict_def = 0;
 
 typedef void NODE_;
@@ -46,14 +48,17 @@ typedef void (*RBADDMETHOD) (
 RBADDMETHOD rb_add_method_copy;
 
 void disable_overwrite(VALUE current_thread) {
-	restrict_def = 1;
+	rb_ivar_set(current_thread, id_restrict_def, 1);
 }
 void enable_overwrite(VALUE current_thread) {
-	restrict_def = 0;
+	rb_ivar_set(current_thread, id_restrict_def, 0);
 }
 
 int overwrite_enabled(VALUE current_thread) {
-	return restrict_def;
+	VALUE result = rb_ivar_get(current_thread, id_restrict_def);
+
+	if (result == Qnil) return 0;
+	return result;
 }
 
 VALUE shadow_or_create(VALUE klass);
@@ -165,6 +170,7 @@ void init_restrict_def() {
 	__shadow___id = rb_intern("__shadow__");
 	__unshadow___id = rb_intern("__unshadow__");
 	shadow_id = rb_intern("shadow");
+	id_restrict_def = rb_intern("__restrict_def");
 
 	rb_define_method(rb_cClass, "shadow", shadow_or_original, 0);
 	rb_define_method(rb_cClass, "create_shadow", shadow_or_create, 0);

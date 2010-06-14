@@ -37,6 +37,8 @@ ID id_method_wrapper;
 ID id_handle_method;
 ID id_binding;
 ID id_method_added;
+ID id_hook_enabled;
+ID id_hook_enable_left;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -68,25 +70,25 @@ int hook_enable_left;
 int handle_method_arity = 4;
 
 void redirect_left(VALUE current_thread, int left) {
-	hook_enable_left = left;
+	rb_ivar_set(current_thread, id_hook_enable_left, left);
 }
 
 void enable_redirect(VALUE current_thread) {
 	disable_overwrite(current_thread);
-	hook_enabled = 1;
+	rb_ivar_set(current_thread, id_hook_enabled, 1);
 }
 
 void disable_redirect(VALUE current_thread) {
 	enable_overwrite(current_thread);
-	hook_enabled = 0;
+	rb_ivar_set(current_thread, id_hook_enabled, 0);
 }
 
 int get_hook_enable_left(VALUE current_thread ) {
-	return hook_enable_left;
+	return rb_ivar_get(current_thread, id_hook_enable_left);
 }
 
 int get_hook_enabled(VALUE current_thread) {
-	return hook_enabled;
+	return rb_ivar_get(current_thread, id_hook_enabled);
 }
 
 /*
@@ -327,5 +329,7 @@ Example:
 	id_unhook_var = rb_intern("@unhook");
 	id_binding = rb_intern("binding");
 	id_method_added = rb_intern("method_added");
+	id_hook_enabled = rb_intern("__hook_enabled");
+	id_hook_enable_left = rb_intern("__hook_enable_left");
 
 }
