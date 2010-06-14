@@ -1,3 +1,9 @@
+0.7.0	Restrictions about overwrite instance methods disabled
+
+		Added class shadows to confine the behaviour added throught methods to hook state
+
+		Implemented UboundMethod#unchecked_bind to bind methods of different classes
+
 0.6.1	Fixed bug on binding of class methods in Object#specific_method
 
 0.6.0	Implemented method UboundMethod#body
