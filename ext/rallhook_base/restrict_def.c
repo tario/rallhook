@@ -45,11 +45,15 @@ typedef void (*RBADDMETHOD) (
 
 RBADDMETHOD rb_add_method_copy;
 
-void disable_overwrite() {
+void disable_overwrite(VALUE current_thread) {
 	restrict_def = 1;
 }
-void enable_overwrite() {
+void enable_overwrite(VALUE current_thread) {
 	restrict_def = 0;
+}
+
+int overwrite_enabled(VALUE current_thread) {
+	return restrict_def;
 }
 
 VALUE shadow_or_create(VALUE klass);
@@ -108,14 +112,13 @@ void rb_add_method_fake(
     NODE_* node,
     int noex
 ) {
-	if (restrict_def) {
+	if (overwrite_enabled(rb_thread_current() )) {
 		if (FL_TEST(klass, FL_SINGLETON)) {
     		// singleton method over classes are illegal
 			if ( strcmp( rb_class2name(klass), "Class") == 0) {
-
 				int result;
 				if (st_lookup(RCLASS(klass)->m_tbl,id,&result) ) {
-				rb_raise(rb_eSecurityError, "Illegal singleton method %s", rb_id2name(id) );
+				rb_raise(rb_eSecurityError, "Illegal overwrite of singleton method %s", rb_id2name(id) );
 				}
 			} else {
 				rb_add_method_copy(shadow_or_create(klass),id,node,noex);
@@ -132,7 +135,7 @@ void rb_add_method_fake(
 void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
 	// shadow redirection if restrict_def (ever)
 
-	if (restrict_def) {
+	if (overwrite_enabled(rb_thread_current())) {
 	*klass = shadow_or_original(*klass);
 	}
 }

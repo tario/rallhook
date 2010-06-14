@@ -25,8 +25,8 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 
 void init_restrict_def();
 
-void disable_overwrite();
-void enable_overwrite();
+void disable_overwrite(VALUE current_thread);
+void enable_overwrite(VALUE current_thread);
 
 void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid);
 
