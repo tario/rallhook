@@ -65,12 +65,11 @@ typedef struct rb_thread_struct
     // ...
 } rb_thread_t__;
 
-int handle_method_arity = 4;
-
 typedef struct AttachedThreadInfo_ {
 	int hook_enabled;
 	int hook_enable_left;
 	VALUE hook_proc;
+	int handle_method_arity;
 } AttachedThreadInfo;
 
 AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
@@ -133,12 +132,8 @@ VALUE restore_hook_status(AttachedThreadInfo* tinfo) {
 	return Qnil;
 }
 
-int current_handle_method_arity() {
-	return handle_method_arity;
-}
-
 void set_handle_method_arity(int value) {
-	handle_method_arity = value;
+	tinfo_from_thread(rb_thread_current() )->handle_method_arity = value;
 }
 
 void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
@@ -159,9 +154,8 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		*klass = CLASS_OF(*recv);
 	}
 
-	int handle_method_arity = current_handle_method_arity();
-	argv_[0] = handle_method_arity;
-	if (handle_method_arity == 4) {
+	argv_[0] = tinfo->handle_method_arity;
+	if (tinfo->handle_method_arity == 4) {
 
 		VALUE sym;
 	    if (rb_id2name(*mid)) {
@@ -232,7 +226,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	VALUE handle_method_method =rb_obj_method(hook_proc, ID2SYM(id_handle_method) );
 	VALUE handle_method_method_arity = rb_funcall( handle_method_method, rb_intern("arity"), 0 );
-	set_handle_method_arity( FIX2INT( handle_method_method_arity ) );
+	tinfo_from_thread( rb_thread_current() )->handle_method_arity = FIX2INT( handle_method_method_arity );
 
 	put_redirect_handler( rallhook_redirect_handler );
 
@@ -277,6 +271,7 @@ VALUE thread_restore_attributes(AttachedThreadInfo* tinfo) {
 	current_tinfo->hook_enabled = tinfo->hook_enabled;
 	current_tinfo->hook_enable_left = tinfo->hook_enable_left;
 	current_tinfo->hook_proc = tinfo->hook_proc;
+	current_tinfo->handle_method_arity = tinfo->handle_method_arity;
 
 	return Qnil;
 }
@@ -291,10 +286,12 @@ VALUE rb_thread_acquire_attributes( VALUE thread ) {
 	oldattr.hook_enabled = dest->hook_enabled;
 	oldattr.hook_enable_left = dest->hook_enable_left;
 	oldattr.hook_proc = dest->hook_proc;
+	oldattr.handle_method_arity = dest->handle_method_arity;
 
 	dest->hook_enabled = orig->hook_enabled;
 	dest->hook_enable_left = orig->hook_enable_left;
 	dest->hook_proc = orig->hook_proc;
+	dest->handle_method_arity = orig->handle_method_arity;
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, thread_restore_attributes, (VALUE)&oldattr);

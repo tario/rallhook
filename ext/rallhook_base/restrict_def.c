@@ -49,6 +49,7 @@ typedef struct AttachedThreadInfo_ {
 	int hook_enabled;
 	int hook_enable_left;
 	VALUE hook_proc;
+	int handle_method_arity;
 } AttachedThreadInfo;
 
 AttachedThreadInfo* tinfo_from_thread(VALUE thread);
