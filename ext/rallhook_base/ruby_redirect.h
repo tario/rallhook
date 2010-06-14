@@ -28,4 +28,6 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 typedef void (*REDIRECTHANDLER) ( VALUE* klass, VALUE* recv, ID* mid );
 int put_redirect_handler( REDIRECTHANDLER redirect_handler);
 
+void init_redirect();
+
 #endif

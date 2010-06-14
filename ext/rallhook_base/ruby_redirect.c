@@ -22,6 +22,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 #include "ruby_symbols.h"
 #include "rb_call_fake.h"
 #include "hook_rb_call.h"
+#include "pthread.h"
 
 int code_changed = 0;
 
@@ -29,12 +30,10 @@ REDIRECTHANDLER current_redirect_handler;
 
 void init_redirect();
 
-int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
+int put_redirect_handler_( REDIRECTHANDLER redirect_handler) {
 	current_redirect_handler = redirect_handler;
 
 	if (!code_changed) {
-
-		init_redirect();
 		// insert inconditional jmp from rb_call to rb_call_copy
 
 		#ifdef __i386__
@@ -95,7 +94,26 @@ int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
 	return 0;
 }
 
+
+pthread_mutex_t put_redirect_handler_mutex;
+
+int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
+
+	pthread_mutex_lock(&put_redirect_handler_mutex);
+	put_redirect_handler_(redirect_handler);
+	pthread_mutex_unlock(&put_redirect_handler_mutex);
+}
+
+
 void init_redirect() {
+
+	pthread_mutexattr_t attr;
+
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr,  PTHREAD_MUTEX_NORMAL);
+
+	pthread_mutex_init( &put_redirect_handler_mutex, &attr);
+
 	init_hook_rb_call();
 	rb_call_fake_init();
 }

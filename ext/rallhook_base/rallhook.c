@@ -325,6 +325,7 @@ Example:
 
 	init_node();
 	init_restrict_def();
+	init_redirect();
 
 	id_call_ = rb_intern("call");
 
