@@ -65,8 +65,7 @@ typedef struct rb_thread_struct
 
     // ...
 } rb_thread_t__;
-int hook_enabled;
-int hook_enable_left;
+
 int handle_method_arity = 4;
 
 void redirect_left(VALUE current_thread, int left) {
@@ -121,7 +120,7 @@ void set_handle_method_arity(int value) {
 void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	VALUE current_thread = rb_thread_current();
-	int hook_enabled_left  = get_hook_enable_left(current_thread);
+	int hook_enable_left  = get_hook_enable_left(current_thread);
 
 	if (get_hook_enabled(current_thread) == 0 || hook_enable_left > 0){
 		if(hook_enable_left>0) hook_enable_left --;

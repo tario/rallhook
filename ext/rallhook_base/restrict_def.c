@@ -34,8 +34,6 @@ ID __unshadow___id;
 ID shadow_id;
 ID id_restrict_def;
 
-int restrict_def = 0;
-
 typedef void NODE_;
 
 typedef void (*RBADDMETHOD) (
