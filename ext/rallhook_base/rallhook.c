@@ -111,7 +111,7 @@ int get_hook_enabled(AttachedThreadInfo* tinfo) {
 }
 
 VALUE get_hook_proc() {
-	return rb_ivar_get( rb_thread_current(), id_hook_proc );
+	return tinfo_from_thread( rb_thread_current() )->hook_proc ;
 }
 
 /*
@@ -228,7 +228,7 @@ Activate the hook, it is desirable to use the RAII call to make the hook block e
 */
 VALUE hook(VALUE self, VALUE hook_proc) {
 
-	rb_ivar_set( rb_thread_current(), id_hook_proc, hook_proc );
+	tinfo_from_thread( rb_thread_current() )->hook_proc = hook_proc;
 
 	VALUE handle_method_method =rb_obj_method(hook_proc, ID2SYM(id_handle_method) );
 	VALUE handle_method_method_arity = rb_funcall( handle_method_method, rb_intern("arity"), 0 );
@@ -267,6 +267,42 @@ VALUE rehook(VALUE unused) {
 	}
 	return Qnil;
 }
+
+
+
+VALUE thread_restore_attributes(AttachedThreadInfo* tinfo) {
+
+	AttachedThreadInfo* current_tinfo = tinfo_from_thread(rb_thread_current());
+
+	current_tinfo->hook_enabled = tinfo->hook_enabled;
+	current_tinfo->hook_enable_left = tinfo->hook_enable_left;
+	current_tinfo->hook_proc = tinfo->hook_proc;
+
+	return Qnil;
+}
+
+VALUE rb_thread_acquire_attributes( VALUE thread ) {
+
+	AttachedThreadInfo* orig = tinfo_from_thread(thread);
+	AttachedThreadInfo* dest = tinfo_from_thread(rb_thread_current() );
+
+	AttachedThreadInfo oldattr;
+
+	oldattr.hook_enabled = dest->hook_enabled;
+	oldattr.hook_enable_left = dest->hook_enable_left;
+	oldattr.hook_proc = dest->hook_proc;
+
+	dest->hook_enabled = orig->hook_enabled;
+	dest->hook_enable_left = orig->hook_enable_left;
+	dest->hook_proc = orig->hook_proc;
+
+	if (rb_block_given_p() ) {
+		return rb_ensure(rb_yield, Qnil, thread_restore_attributes, (VALUE)&oldattr);
+	}
+
+	return Qnil;
+}
+
 
 extern void Init_rallhook_base() {
 
@@ -357,5 +393,7 @@ Example:
 	id_hook_enabled = rb_intern("__hook_enabled");
 	id_hook_enable_left = rb_intern("__hook_enable_left");
 	id_hook_proc = rb_intern("__hook_proc");
+
+	rb_define_method(rb_cThread, "acquire_attributes", rb_thread_acquire_attributes,0);
 
 }
