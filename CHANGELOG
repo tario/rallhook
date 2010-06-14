@@ -1,4 +1,6 @@
-0.7.0	Restrictions about overwrite instance methods disabled
+0.7.0	Concurrency support, any thread can hook without affect the hook state of the other threads
+
+		Restrictions about overwrite instance methods disabled
 
 		Added class shadows to confine the behaviour added throught methods to hook state
 
