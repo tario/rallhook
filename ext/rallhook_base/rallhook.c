@@ -67,33 +67,47 @@ typedef struct rb_thread_struct
 
 int handle_method_arity = 4;
 
-void redirect_left(VALUE current_thread, int left) {
-	rb_ivar_set(current_thread, id_hook_enable_left, INT2FIX(left) );
+typedef struct AttachedThreadInfo_ {
+	int hook_enabled;
+	int hook_enable_left;
+	VALUE hook_proc;
+} AttachedThreadInfo;
+
+AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
+	VALUE tmp = rb_ivar_get( thread, rb_intern("__tinfo") );
+
+	if (tmp == Qnil) {
+		AttachedThreadInfo* tinfo = malloc(sizeof(AttachedThreadInfo));
+		tinfo->hook_enabled = 0;
+		tinfo->hook_enable_left = 0;
+		tinfo->hook_proc = Qnil;
+
+		rb_ivar_set( thread, rb_intern("__tinfo"), (VALUE)tinfo);
+
+		return tinfo;
+	} else {
+		return (AttachedThreadInfo*)tmp;
+	}
 }
 
-void enable_redirect(VALUE current_thread) {
-	disable_overwrite(current_thread);
-	rb_ivar_set(current_thread, id_hook_enabled, 1);
+void redirect_left(AttachedThreadInfo* tinfo, int left) {
+	tinfo->hook_enable_left = left;
 }
 
-void disable_redirect(VALUE current_thread) {
-	enable_overwrite(current_thread);
-	rb_ivar_set(current_thread, id_hook_enabled, 0);
+void enable_redirect(AttachedThreadInfo* tinfo) {
+	tinfo->hook_enabled = 1;
 }
 
-int get_hook_enable_left(VALUE current_thread ) {
-
-	VALUE ret = rb_ivar_get(current_thread, id_hook_enable_left);
-	if (ret == Qnil) return 0;
-
-	return FIX2INT( rb_ivar_get(current_thread, id_hook_enable_left) );
+void disable_redirect(AttachedThreadInfo* tinfo) {
+	tinfo->hook_enabled = 0;
 }
 
-int get_hook_enabled(VALUE current_thread) {
-	VALUE ret = rb_ivar_get(current_thread, id_hook_enabled);
+int get_hook_enable_left(AttachedThreadInfo* tinfo) {
+	return tinfo->hook_enable_left;
+}
 
-	if (ret == Qnil) return 0;
-	return ret;
+int get_hook_enabled(AttachedThreadInfo* tinfo) {
+	return tinfo->hook_enabled;
 }
 
 VALUE get_hook_proc() {
@@ -104,7 +118,7 @@ VALUE get_hook_proc() {
 Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
 */
 VALUE unhook(VALUE self) {
-	disable_redirect(rb_thread_current());
+	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
 	return Qnil;
 }
 
@@ -114,8 +128,8 @@ VALUE ensured_handle_method( VALUE params ) {
 	return rb_funcall2( get_hook_proc(), id_handle_method, argc, argv);
 }
 
-VALUE restore_hook_status(VALUE current_thread) {
-	enable_redirect(current_thread);
+VALUE restore_hook_status(AttachedThreadInfo* tinfo) {
+	enable_redirect(tinfo);
 	return Qnil;
 }
 
@@ -130,11 +144,12 @@ void set_handle_method_arity(int value) {
 void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	VALUE current_thread = rb_thread_current();
-	int hook_enable_left  = get_hook_enable_left(current_thread);
+	AttachedThreadInfo* tinfo = tinfo_from_thread(current_thread);
+	int hook_enable_left  = get_hook_enable_left(tinfo);
 
-	if (get_hook_enabled(current_thread) == 0 || hook_enable_left > 0){
+	if (get_hook_enabled(tinfo) == 0 || hook_enable_left > 0){
 		if(hook_enable_left>0) hook_enable_left --;
-		redirect_left( current_thread, hook_enable_left );
+		redirect_left( tinfo, hook_enable_left );
 		return;
 	}
 
@@ -168,13 +183,13 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 	ID original_id = *mid;
 
-	disable_redirect(current_thread);
+	disable_redirect(tinfo);
 
 	rb_thread_t__* th;
 	Data_Get_Struct( current_thread, rb_thread_t__, th );
 
 	void* blockptr = th->passed_block;
-	VALUE result = rb_ensure(ensured_handle_method,(VALUE)argv_,restore_hook_status, current_thread);
+	VALUE result = rb_ensure(ensured_handle_method,(VALUE)argv_,restore_hook_status, (VALUE)tinfo);
 
 	th->passed_block = blockptr;
 
@@ -187,7 +202,7 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 			*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
 
 			if (rb_ivar_get(result,id_unhook_var) != Qnil ) {
-				disable_redirect(rb_thread_current());
+				disable_redirect(tinfo);
 			}
 
 		} else {
@@ -221,7 +236,7 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	put_redirect_handler( rallhook_redirect_handler );
 
-	enable_redirect(rb_thread_current());
+	enable_redirect(tinfo_from_thread(rb_thread_current()));
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
@@ -236,7 +251,7 @@ Disable the hook in the next N calls and reenable them. Useful to avoid infinite
 in RallHook::Helper::MethodWrapper
 */
 VALUE from(VALUE self, VALUE num) {
-	redirect_left(rb_thread_current(), FIX2INT(num)+1);
+	redirect_left(tinfo_from_thread( rb_thread_current() ), FIX2INT(num)+1);
 	return self;
 }
 
@@ -246,7 +261,7 @@ Re-enable the hook if the hook was disabled and was activated previously with Ho
 If no call to Hook#hook has made, rehook does nothing
 */
 VALUE rehook(VALUE unused) {
-	enable_redirect(rb_thread_current());
+	enable_redirect(tinfo_from_thread( rb_thread_current() ));
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, Qnil);
 	}

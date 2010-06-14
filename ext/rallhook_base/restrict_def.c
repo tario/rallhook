@@ -45,18 +45,16 @@ typedef void (*RBADDMETHOD) (
 
 RBADDMETHOD rb_add_method_copy;
 
-void disable_overwrite(VALUE current_thread) {
-	rb_ivar_set(current_thread, id_restrict_def, 1);
-}
-void enable_overwrite(VALUE current_thread) {
-	rb_ivar_set(current_thread, id_restrict_def, 0);
-}
+typedef struct AttachedThreadInfo_ {
+	int hook_enabled;
+	int hook_enable_left;
+	VALUE hook_proc;
+} AttachedThreadInfo;
+
+AttachedThreadInfo* tinfo_from_thread(VALUE thread);
 
 int overwrite_enabled(VALUE current_thread) {
-	VALUE result = rb_ivar_get(current_thread, id_restrict_def);
-
-	if (result == Qnil) return 0;
-	return result;
+	return tinfo_from_thread(current_thread)->hook_enabled ;
 }
 
 VALUE shadow_or_create(VALUE klass);
