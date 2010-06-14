@@ -30,8 +30,6 @@ VALUE rb_mMethodRedirect;
 VALUE rb_mMethodReturn;
 ID id_call_;
 
-VALUE rb_hook_proc = Qnil;
-
 ID id_call;
 ID id_method_wrapper;
 ID id_handle_method;
@@ -39,6 +37,7 @@ ID id_binding;
 ID id_method_added;
 ID id_hook_enabled;
 ID id_hook_enable_left;
+ID id_hook_proc;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -90,6 +89,10 @@ int get_hook_enabled(VALUE current_thread) {
 	return rb_ivar_get(current_thread, id_hook_enabled);
 }
 
+VALUE get_hook_proc() {
+	return rb_ivar_get( rb_thread_current(), id_hook_proc );
+}
+
 /*
 Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
 */
@@ -101,7 +104,7 @@ VALUE unhook(VALUE self) {
 VALUE ensured_handle_method( VALUE params ) {
 	int argc = (int)((VALUE*)params)[0];
 	VALUE* argv = ((VALUE*)params)+1;
-	return rb_funcall2( rb_hook_proc, id_handle_method, argc, argv);
+	return rb_funcall2( get_hook_proc(), id_handle_method, argc, argv);
 }
 
 VALUE restore_hook_status(VALUE current_thread) {
@@ -203,7 +206,8 @@ Activate the hook, it is desirable to use the RAII call to make the hook block e
 
 */
 VALUE hook(VALUE self, VALUE hook_proc) {
-	rb_hook_proc = hook_proc;
+
+	rb_ivar_set( rb_thread_current(), id_hook_proc, hook_proc );
 
 	VALUE handle_method_method =rb_obj_method(hook_proc, ID2SYM(id_handle_method) );
 	VALUE handle_method_method_arity = rb_funcall( handle_method_method, rb_intern("arity"), 0 );
@@ -330,5 +334,6 @@ Example:
 	id_method_added = rb_intern("method_added");
 	id_hook_enabled = rb_intern("__hook_enabled");
 	id_hook_enable_left = rb_intern("__hook_enable_left");
+	id_hook_proc = rb_intern("__hook_proc");
 
 }
