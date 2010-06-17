@@ -20,6 +20,7 @@ along with rallhook.  if not, see <http://www.gnu.org/licenses/>.
 =end
 require "rubygems"
 require "rallhook_base"
+require "rallhook/thread_hook"
 
 module RallHook
 #
@@ -39,6 +40,8 @@ module RallHook
 #
   class Redirect
 		include MethodRedirect
+		
+		attr_reader :recv
 
 		def initialize(klass, recv, m, unhook = nil)
 			@klass = klass
@@ -231,7 +234,6 @@ module RallHook
 # FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
 #
       def self.redirect_handler(klass,recv,method_name, method_id)
-
         if method_name
 
           mw = self.new
