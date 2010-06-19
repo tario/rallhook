@@ -147,12 +147,12 @@ Example 2: generic recall of methods
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000023">call</a>&nbsp;&nbsp;
-      <a href="#M000024">call_with_rehook</a>&nbsp;&nbsp;
-      <a href="#M000021">from</a>&nbsp;&nbsp;
-      <a href="#M000022">original_call</a>&nbsp;&nbsp;
-      <a href="#M000025">redirect_handler</a>&nbsp;&nbsp;
-      <a href="#M000020">rehook</a>&nbsp;&nbsp;
+      <a href="#M000012">call</a>&nbsp;&nbsp;
+      <a href="#M000013">call_with_rehook</a>&nbsp;&nbsp;
+      <a href="#M000010">from</a>&nbsp;&nbsp;
+      <a href="#M000011">original_call</a>&nbsp;&nbsp;
+      <a href="#M000014">redirect_handler</a>&nbsp;&nbsp;
+      <a href="#M000009">rehook</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -202,27 +202,27 @@ Example 2: generic recall of methods
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000025" class="method-detail">
-        <a name="M000025"></a>
+      <div id="method-M000014" class="method-detail">
+        <a name="M000014"></a>
 
         <div class="method-heading">
-          <a href="#M000025" class="method-signature">
+          <a href="#M000014" class="method-signature">
           <span class="method-name">redirect_handler</span><span class="method-args">(klass,recv,method_name, method_id) {|mw| ...}</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Makes a <a href="MethodWrapper.html#M000025">redirect_handler</a> to wrap a
-method <a href="MethodWrapper.html#M000023">call</a> with this <a
+Makes a <a href="MethodWrapper.html#M000014">redirect_handler</a> to wrap a
+method <a href="MethodWrapper.html#M000012">call</a> with this <a
 href="MethodWrapper.html">MethodWrapper</a>. Example:
 </p>
 <pre>
  FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
 </pre>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000025-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000025-source">
+            onclick="toggleCode('M000014-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000014-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 236</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">redirect_handler</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-identifier">recv</span>,<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">method_id</span>)
@@ -248,11 +248,11 @@ href="MethodWrapper.html">MethodWrapper</a>. Example:
 
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000023" class="method-detail">
-        <a name="M000023"></a>
+      <div id="method-M000012" class="method-detail">
+        <a name="M000012"></a>
 
         <div class="method-heading">
-          <a href="#M000023" class="method-signature">
+          <a href="#M000012" class="method-signature">
           <span class="method-name">call</span><span class="method-args">(*args)</span>
           </a>
         </div>
@@ -260,11 +260,11 @@ href="MethodWrapper.html">MethodWrapper</a>. Example:
         <div class="method-description">
           <p>
 Target of redirection, should be implemented to intercept the <a
-href="MethodWrapper.html#M000023">call</a>
+href="MethodWrapper.html#M000012">call</a>
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000023-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000023-source">
+            onclick="toggleCode('M000012-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000012-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 216</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -274,19 +274,19 @@ href="MethodWrapper.html#M000023">call</a>
         </div>
       </div>
 
-      <div id="method-M000024" class="method-detail">
-        <a name="M000024"></a>
+      <div id="method-M000013" class="method-detail">
+        <a name="M000013"></a>
 
         <div class="method-heading">
-          <a href="#M000024" class="method-signature">
+          <a href="#M000013" class="method-signature">
           <span class="method-name">call_with_rehook</span><span class="method-args">(*args) {|*x| ...}</span>
           </a>
         </div>
       
         <div class="method-description">
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000024-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000024-source">
+            onclick="toggleCode('M000013-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000013-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 219</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">call_with_rehook</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -305,22 +305,22 @@ href="MethodWrapper.html#M000023">call</a>
         </div>
       </div>
 
-      <div id="method-M000021" class="method-detail">
-        <a name="M000021"></a>
+      <div id="method-M000010" class="method-detail">
+        <a name="M000010"></a>
 
         <div class="method-heading">
-          <a href="#M000021" class="method-signature">
+          <a href="#M000010" class="method-signature">
           <span class="method-name">from</span><span class="method-args">(a)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Same as <a href="../Hook.html#M000029">Hook#from</a>
+Same as <a href="../Hook.html#M000018">Hook#from</a>
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000021-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000021-source">
+            onclick="toggleCode('M000010-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000010-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 183</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">from</span>(<span class="ruby-identifier">a</span>)
@@ -332,11 +332,11 @@ Same as <a href="../Hook.html#M000029">Hook#from</a>
         </div>
       </div>
 
-      <div id="method-M000022" class="method-detail">
-        <a name="M000022"></a>
+      <div id="method-M000011" class="method-detail">
+        <a name="M000011"></a>
 
         <div class="method-heading">
-          <a href="#M000022" class="method-signature">
+          <a href="#M000011" class="method-signature">
           <span class="method-name">original_call</span><span class="method-args">(*args) {|*blockargs| ...}</span>
           </a>
         </div>
@@ -346,8 +346,8 @@ Same as <a href="../Hook.html#M000029">Hook#from</a>
 Recall the original method(specified in initialization parameters)
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000022-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000022-source">
+            onclick="toggleCode('M000011-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000011-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 191</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">original_call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -376,11 +376,11 @@ Recall the original method(specified in initialization parameters)
         </div>
       </div>
 
-      <div id="method-M000020" class="method-detail">
-        <a name="M000020"></a>
+      <div id="method-M000009" class="method-detail">
+        <a name="M000009"></a>
 
         <div class="method-heading">
-          <a href="#M000020" class="method-signature">
+          <a href="#M000009" class="method-signature">
           <span class="method-name">rehook</span><span class="method-args">() {|| ...}</span>
           </a>
         </div>
@@ -410,14 +410,14 @@ Example:
 </pre>
 <p>
 Note: is not necesary to use <a
-href="MethodWrapper.html#M000020">rehook</a> to hook the nested calls in <a
-href="MethodWrapper.html#M000022">original_call</a> <a
-href="MethodWrapper.html#M000022">MethodWrapper#original_call</a> does that
+href="MethodWrapper.html#M000009">rehook</a> to hook the nested calls in <a
+href="MethodWrapper.html#M000011">original_call</a> <a
+href="MethodWrapper.html#M000011">MethodWrapper#original_call</a> does that
 internally
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000020-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000020-source">
+            onclick="toggleCode('M000009-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000009-source">
 <pre>
 <span class="ruby-comment cmt"># File lib/rallhook.rb, line 170</span>
       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">rehook</span>

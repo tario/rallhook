@@ -82,7 +82,7 @@
 
     <div id="description">
       <p>
-This class handles the <a href="Hook.html#M000027">hook</a>, enabling and
+This class handles the <a href="Hook.html#M000016">hook</a>, enabling and
 disable it.
 </p>
 <p>
@@ -105,10 +105,10 @@ Example:
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000029">from</a>&nbsp;&nbsp;
-      <a href="#M000027">hook</a>&nbsp;&nbsp;
-      <a href="#M000026">rehook</a>&nbsp;&nbsp;
-      <a href="#M000028">unhook</a>&nbsp;&nbsp;
+      <a href="#M000018">from</a>&nbsp;&nbsp;
+      <a href="#M000016">hook</a>&nbsp;&nbsp;
+      <a href="#M000015">rehook</a>&nbsp;&nbsp;
+      <a href="#M000017">unhook</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -130,24 +130,24 @@ Example:
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000029" class="method-detail">
-        <a name="M000029"></a>
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
 
         <div class="method-heading">
-          <a href="#M000029" class="method-signature">
+          <a href="#M000018" class="method-signature">
           <span class="method-name">from</span><span class="method-args">(p1)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Disable the <a href="Hook.html#M000027">hook</a> in the next N calls and
+Disable the <a href="Hook.html#M000016">hook</a> in the next N calls and
 reenable them. Useful to avoid infinite recursion and used in <a
 href="Helper/MethodWrapper.html">RallHook::Helper::MethodWrapper</a>
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000029-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000029-source">
+            onclick="toggleCode('M000018-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000018-source">
 <pre>
 /*
 Disable the hook in the next N calls and reenable them. Useful to avoid infinite recursion and used
@@ -160,19 +160,19 @@ VALUE from(VALUE self, VALUE num) {
         </div>
       </div>
 
-      <div id="method-M000027" class="method-detail">
-        <a name="M000027"></a>
+      <div id="method-M000016" class="method-detail">
+        <a name="M000016"></a>
 
         <div class="method-heading">
-          <a href="#M000027" class="method-signature">
+          <a href="#M000016" class="method-signature">
           <span class="method-name">hook</span><span class="method-args">(p1)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Activate the <a href="Hook.html#M000027">hook</a>, it is desirable to use
-the RAII call to make the <a href="Hook.html#M000027">hook</a> block
+Activate the <a href="Hook.html#M000016">hook</a>, it is desirable to use
+the RAII call to make the <a href="Hook.html#M000016">hook</a> block
 exception safe:
 </p>
 <pre>
@@ -181,8 +181,8 @@ exception safe:
         end # in the finish of the block, the hook are disabled
 </pre>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000027-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000027-source">
+            onclick="toggleCode('M000016-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000016-source">
 <pre>
 /*
 Activate the hook, it is desirable to use the RAII call to make the hook block exception safe:
@@ -199,26 +199,26 @@ VALUE hook(VALUE self, VALUE hook_proc) {
         </div>
       </div>
 
-      <div id="method-M000026" class="method-detail">
-        <a name="M000026"></a>
+      <div id="method-M000015" class="method-detail">
+        <a name="M000015"></a>
 
         <div class="method-heading">
-          <a href="#M000026" class="method-signature">
+          <a href="#M000015" class="method-signature">
           <span class="method-name">rehook</span><span class="method-args">()</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Re-enable the <a href="Hook.html#M000027">hook</a> if the <a
-href="Hook.html#M000027">hook</a> was disabled and was activated previously
-with <a href="Hook.html#M000027">Hook#hook</a> If no call to <a
-href="Hook.html#M000027">Hook#hook</a> has made, <a
-href="Hook.html#M000026">rehook</a> does nothing
+Re-enable the <a href="Hook.html#M000016">hook</a> if the <a
+href="Hook.html#M000016">hook</a> was disabled and was activated previously
+with <a href="Hook.html#M000016">Hook#hook</a> If no call to <a
+href="Hook.html#M000016">Hook#hook</a> has made, <a
+href="Hook.html#M000015">rehook</a> does nothing
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000026-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000026-source">
+            onclick="toggleCode('M000015-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000015-source">
 <pre>
 /*
 Re-enable the hook if the hook was disabled and was activated previously with Hook#hook
@@ -231,23 +231,23 @@ VALUE rehook(VALUE unused) {
         </div>
       </div>
 
-      <div id="method-M000028" class="method-detail">
-        <a name="M000028"></a>
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
 
         <div class="method-heading">
-          <a href="#M000028" class="method-signature">
+          <a href="#M000017" class="method-signature">
           <span class="method-name">unhook</span><span class="method-args">()</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Disable the <a href="Hook.html#M000027">hook</a>. Is not usually necesary
-because of the RAII feature of <a href="Hook.html#M000027">Hook#hook</a>
+Disable the <a href="Hook.html#M000016">hook</a>. Is not usually necesary
+because of the RAII feature of <a href="Hook.html#M000016">Hook#hook</a>
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000028-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000028-source">
+            onclick="toggleCode('M000017-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000017-source">
 <pre>
 /*
 Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
