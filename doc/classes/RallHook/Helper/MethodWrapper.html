@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: RallHook::Helper::MethodWrapper</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">RallHook::Helper::MethodWrapper</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../../files/lib/rallhook_rb.html">
+                lib/rallhook.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="../../Object.html">
+                Object
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This class acts as base to define classes that acts as receptors and
+wrappers of redirected methods. Allows interception of methods with its
+parameters and controlled recall in a hooking logic
+</p>
+<p>
+Example 1: basic modifications of arguments
+</p>
+<pre>
+ class MethodHandler
+  include RallHook::Helper
+
+  class FooMethodWrapper &lt; RallHook::MethodWrapper
+    def call(foo_argument)
+      original_call(foo_argument + 5) # add 5 in all calls to foo
+    end
+  end
+
+  def handle_method (klass,recv,m,method_id)
+   if m == :foo
+    FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+   else
+    nil
+   end
+  end
+ end
+
+ ... hooking using MethodHandler ( see Hook#hook, README and examples)
+</pre>
+<p>
+Example 2: generic recall of methods
+</p>
+<pre>
+ class MethodHandler
+  include RallHook::Helper
+
+  class GenericMethodWrapper &lt; RallHook::MethodWrapper
+    def call(*x)
+      # call with reyield if block_given
+      if block_given?
+        original_call(*x) do |*a|
+          yield(*a)
+        end
+      else
+        original_call(*x)
+      end
+    end
+  end
+
+  def handle_method (klass,recv,m,method_id)
+    return GenericMethodWrapper.redirect_handler(klass,recv,m,method_id)
+  end
+ end
+
+ ... hooking using MethodHandler ( see Hook#hook, README and examples)
+</pre>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000023">call</a>&nbsp;&nbsp;
+      <a href="#M000024">call_with_rehook</a>&nbsp;&nbsp;
+      <a href="#M000021">from</a>&nbsp;&nbsp;
+      <a href="#M000022">original_call</a>&nbsp;&nbsp;
+      <a href="#M000025">redirect_handler</a>&nbsp;&nbsp;
+      <a href="#M000020">rehook</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">klass</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">method_id</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">method_name</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">recv</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000025" class="method-detail">
+        <a name="M000025"></a>
+
+        <div class="method-heading">
+          <a href="#M000025" class="method-signature">
+          <span class="method-name">redirect_handler</span><span class="method-args">(klass,recv,method_name, method_id) {|mw| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Makes a <a href="MethodWrapper.html#M000025">redirect_handler</a> to wrap a
+method <a href="MethodWrapper.html#M000023">call</a> with this <a
+href="MethodWrapper.html">MethodWrapper</a>. Example:
+</p>
+<pre>
+ FooMethodWrapper.redirect_handler(klass,recv,m,method_id)
+</pre>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000025-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000025-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 236</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">redirect_handler</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-identifier">recv</span>,<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">method_id</span>)
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">method_name</span>
+
+          <span class="ruby-identifier">mw</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">new</span>
+          <span class="ruby-identifier">mw</span>.<span class="ruby-identifier">klass</span> = <span class="ruby-identifier">klass</span>
+          <span class="ruby-identifier">mw</span>.<span class="ruby-identifier">recv</span> = <span class="ruby-identifier">recv</span>
+          <span class="ruby-identifier">mw</span>.<span class="ruby-identifier">method_name</span> = <span class="ruby-identifier">method_name</span>
+          <span class="ruby-identifier">mw</span>.<span class="ruby-identifier">method_id</span> = <span class="ruby-identifier">method_id</span>
+          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+            <span class="ruby-keyword kw">yield</span>(<span class="ruby-identifier">mw</span>)
+          <span class="ruby-keyword kw">end</span>
+          <span class="ruby-identifier">mw</span>.<span class="ruby-identifier">redirect_with_unhook</span>(<span class="ruby-identifier">:call_with_rehook</span>)
+        <span class="ruby-keyword kw">else</span>
+          <span class="ruby-keyword kw">nil</span>
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000023" class="method-detail">
+        <a name="M000023"></a>
+
+        <div class="method-heading">
+          <a href="#M000023" class="method-signature">
+          <span class="method-name">call</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Target of redirection, should be implemented to intercept the <a
+href="MethodWrapper.html#M000023">call</a>
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000023-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000023-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 216</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000024" class="method-detail">
+        <a name="M000024"></a>
+
+        <div class="method-heading">
+          <a href="#M000024" class="method-signature">
+          <span class="method-name">call_with_rehook</span><span class="method-args">(*args) {|*x| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000024-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000024-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 219</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">call_with_rehook</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+          <span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-operator">*</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span>
+            <span class="ruby-keyword kw">yield</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">x</span>)
+          <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">else</span>
+          <span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">ensure</span>
+        <span class="ruby-identifier">rehook</span>
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000021" class="method-detail">
+        <a name="M000021"></a>
+
+        <div class="method-heading">
+          <a href="#M000021" class="method-signature">
+          <span class="method-name">from</span><span class="method-args">(a)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Same as <a href="../Hook.html#M000029">Hook#from</a>
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000021-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000021-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 183</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">from</span>(<span class="ruby-identifier">a</span>)
+        <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Hook</span>.<span class="ruby-identifier">from</span>(<span class="ruby-identifier">a</span>)
+        <span class="ruby-keyword kw">self</span>
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000022" class="method-detail">
+        <a name="M000022"></a>
+
+        <div class="method-heading">
+          <a href="#M000022" class="method-signature">
+          <span class="method-name">original_call</span><span class="method-args">(*args) {|*blockargs| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Recall the original method(specified in initialization parameters)
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000022-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000022-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 191</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">original_call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+       <span class="ruby-identifier">mname</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">method_name</span>
+       <span class="ruby-identifier">mklass</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">klass</span>
+       <span class="ruby-identifier">mid</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">method_id</span>
+       <span class="ruby-identifier">recv_</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">recv</span>
+
+       <span class="ruby-comment cmt"># original calls over the shadow of the class, not the original one</span>
+       <span class="ruby-identifier">m</span> = <span class="ruby-identifier">recv_</span>.<span class="ruby-identifier">specific_method</span>(<span class="ruby-identifier">mklass</span>.<span class="ruby-identifier">shadow</span>,<span class="ruby-identifier">mname</span>)
+
+       <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+         <span class="ruby-identifier">from</span>(<span class="ruby-value">3</span>).<span class="ruby-identifier">rehook</span> <span class="ruby-keyword kw">do</span>
+           <span class="ruby-identifier">m</span>.<span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-operator">*</span><span class="ruby-identifier">blockargs</span><span class="ruby-operator">|</span>
+             <span class="ruby-keyword kw">yield</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">blockargs</span>)
+           <span class="ruby-keyword kw">end</span>
+         <span class="ruby-keyword kw">end</span>
+       <span class="ruby-keyword kw">else</span>
+         <span class="ruby-identifier">from</span>(<span class="ruby-value">3</span>).<span class="ruby-identifier">rehook</span> <span class="ruby-keyword kw">do</span>
+           <span class="ruby-identifier">m</span>.<span class="ruby-identifier">call</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+         <span class="ruby-keyword kw">end</span>
+       <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="#M000020" class="method-signature">
+          <span class="method-name">rehook</span><span class="method-args">() {|| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Reactivate the hook status to intercept methods Allow to pass a block to
+enable the hook status only in that block
+</p>
+<p>
+Example:
+</p>
+<pre>
+ class MethodHandler
+  include RallHook::Helper
+
+  class FooMethodWrapper &lt; RallHook::MethodWrapper
+    def call(foo_argument)
+      original_call(foo_argument + 5) # add 5 in all calls to foo
+      rehook do  # the print &quot;hello world hooked&quot; are intercepted too
+         print &quot;hello world hooked\n&quot;
+      end
+    end
+  end
+
+  ... definition of handle_method that use  FooMethodWrapper as redirect, etc...
+</pre>
+<p>
+Note: is not necesary to use <a
+href="MethodWrapper.html#M000020">rehook</a> to hook the nested calls in <a
+href="MethodWrapper.html#M000022">original_call</a> <a
+href="MethodWrapper.html#M000022">MethodWrapper#original_call</a> does that
+internally
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000020-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000020-source">
+<pre>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 170</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">rehook</span>
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+          <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Hook</span>.<span class="ruby-identifier">rehook</span> <span class="ruby-keyword kw">do</span>
+            <span class="ruby-keyword kw">yield</span>
+          <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">else</span>
+          <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Hook</span>.<span class="ruby-identifier">rehook</span>
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
