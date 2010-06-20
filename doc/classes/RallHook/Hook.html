@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: RallHook::Hook</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">RallHook::Hook</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../files/ext/rallhook_base/rallhook_c.html">
+                ext/rallhook_base/rallhook.c
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="../Object.html">
+                Object
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This class handles the <a href="Hook.html#M000018">hook</a>, enabling and
+disable it.
+</p>
+<p>
+Example:
+</p>
+<pre>
+        # ... instanciate method_handler ... (see README and examples)
+
+        RallHook::Hook.hook method_hadler do
+                print &quot;hello world\n&quot; # calls to print, write or whatever are intercepted by method_handler#method_handle
+        end # in the finish of the block, the hook are disabled
+</pre>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000020">from</a>&nbsp;&nbsp;
+      <a href="#M000018">hook</a>&nbsp;&nbsp;
+      <a href="#M000017">rehook</a>&nbsp;&nbsp;
+      <a href="#M000019">unhook</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="#M000020" class="method-signature">
+          <span class="method-name">from</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Disable the <a href="Hook.html#M000018">hook</a> in the next N calls and
+reenable them. Useful to avoid infinite recursion and used in <a
+href="Helper/MethodWrapper.html">RallHook::Helper::MethodWrapper</a>
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000020-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000020-source">
+<pre>
+/*
+Disable the hook in the next N calls and reenable them. Useful to avoid infinite recursion and used
+in RallHook::Helper::MethodWrapper
+*/
+VALUE from(VALUE self, VALUE num) {
+
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="#M000018" class="method-signature">
+          <span class="method-name">hook</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Activate the <a href="Hook.html#M000018">hook</a>, it is desirable to use
+the RAII call to make the <a href="Hook.html#M000018">hook</a> block
+exception safe:
+</p>
+<pre>
+        rallhook.hook method_hadler do
+                print &quot;hello world\n&quot; # calls to print, write or whatever are intercepted by method_handler#method_handle
+        end # in the finish of the block, the hook are disabled
+</pre>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000018-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000018-source">
+<pre>
+/*
+Activate the hook, it is desirable to use the RAII call to make the hook block exception safe:
+
+        rallhook.hook method_hadler do
+                print &quot;hello world\n&quot; # calls to print, write or whatever are intercepted by method_handler#method_handle
+        end # in the finish of the block, the hook are disabled
+
+*/
+VALUE hook(VALUE self, VALUE hook_proc) {
+
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="#M000017" class="method-signature">
+          <span class="method-name">rehook</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Re-enable the <a href="Hook.html#M000018">hook</a> if the <a
+href="Hook.html#M000018">hook</a> was disabled and was activated previously
+with <a href="Hook.html#M000018">Hook#hook</a> If no call to <a
+href="Hook.html#M000018">Hook#hook</a> has made, <a
+href="Hook.html#M000017">rehook</a> does nothing
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000017-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000017-source">
+<pre>
+/*
+Re-enable the hook if the hook was disabled and was activated previously with Hook#hook
+If no call to Hook#hook has made, rehook does nothing
+*/
+VALUE rehook(VALUE unused) {
+
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="#M000019" class="method-signature">
+          <span class="method-name">unhook</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Disable the <a href="Hook.html#M000018">hook</a>. Is not usually necesary
+because of the RAII feature of <a href="Hook.html#M000018">Hook#hook</a>
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000019-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000019-source">
+<pre>
+/*
+Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
+*/
+VALUE unhook(VALUE self) {
+
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
