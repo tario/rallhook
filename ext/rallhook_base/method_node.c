@@ -97,7 +97,12 @@ VALUE rb_method_body(VALUE self) {
 	struct METHOD* method;
 	Data_Get_Struct(self,struct METHOD,method);
 
-	return Data_Wrap_Struct(rb_cNode, 0, 0, method->body);
+	if (method->body == 0) return Qnil;
+	if (method->body->nd_defn == 0) {
+		return Data_Wrap_Struct(rb_cNode, 0, 0, method->body);
+	} else {
+		return Data_Wrap_Struct(rb_cNode, 0, 0, method->body->nd_defn);
+	}
 }
 
 /*
