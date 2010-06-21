@@ -118,7 +118,6 @@ Disable the hook. Is not usually necesary because of the RAII feature of Hook#ho
 */
 VALUE unhook(VALUE self) {
 	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
-	rb_gc_enable(); // re-enable the garbage collector
 	return Qnil;
 }
 
@@ -198,6 +197,9 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 		// method named "binding" cannot be redirected
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
+
+			rb_gc_disable();
+
 			*klass = rb_ivar_get(result,id_klass_var );
 			*recv = rb_ivar_get(result,id_recv_var );
 			*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
@@ -238,8 +240,6 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 	put_redirect_handler( rallhook_redirect_handler );
 
 	enable_redirect(tinfo_from_thread(rb_thread_current()));
-
-	rb_gc_disable();
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);

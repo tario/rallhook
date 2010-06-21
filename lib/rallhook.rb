@@ -40,7 +40,7 @@ module RallHook
 #
   class Redirect
 		include MethodRedirect
-		
+
 		attr_reader :recv
 
 		def initialize(klass, recv, m, unhook = nil)
@@ -225,6 +225,7 @@ module RallHook
           call(*args)
         end
       ensure
+        GC.enable
         rehook
       end
 
