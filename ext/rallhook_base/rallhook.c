@@ -118,6 +118,13 @@ Disable the hook. Is not usually necesary because of the RAII feature of Hook#ho
 */
 VALUE unhook(VALUE self) {
 	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
+	rb_gc_enable(); // re-enable the garbage collector
+	return Qnil;
+}
+
+VALUE restore_unhook(VALUE self) {
+	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
+
 	return Qnil;
 }
 
@@ -232,6 +239,8 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	enable_redirect(tinfo_from_thread(rb_thread_current()));
 
+	rb_gc_disable();
+
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
 	}
@@ -257,7 +266,7 @@ If no call to Hook#hook has made, rehook does nothing
 VALUE rehook(VALUE unused) {
 	enable_redirect(tinfo_from_thread( rb_thread_current() ));
 	if (rb_block_given_p() ) {
-		return rb_ensure(rb_yield, Qnil, unhook, Qnil);
+		return rb_ensure(rb_yield, Qnil, restore_unhook, Qnil);
 	}
 	return Qnil;
 }
