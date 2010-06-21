@@ -118,12 +118,12 @@ Disable the hook. Is not usually necesary because of the RAII feature of Hook#ho
 */
 VALUE unhook(VALUE self) {
 	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
+	rb_gc_enable();
 	return Qnil;
 }
 
 VALUE restore_unhook(VALUE self) {
 	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
-
 	return Qnil;
 }
 
