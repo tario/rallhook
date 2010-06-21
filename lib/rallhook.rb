@@ -328,6 +328,7 @@ class Object
 # see RallHook::Helper::MethodWrapper
 #
 # NOTE: Rallhook internally disable the GC in a redirection, you must reactivate it after
+#
 # NOTE 2: If use the MethodWrapper functionallity, it reactivates the GC disabled by rallhook. You should not
 # worry about it
 #
