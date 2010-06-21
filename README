@@ -52,21 +52,21 @@ test.rb:
 
 standard output:
 
-	method call each:4001 over 123:Array 
-	method call print:7697 over main:Object 
-	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-	method call to_s:3137 over 1:Fixnum 
-	1method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call each:4001 over 123:Array
+	method call print:7697 over main:Object
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO
+	method call to_s:3137 over 1:Fixnum
+	1method call write:7649 over #<IO:0x7fb15e54fad0>:IO
 
-	method call print:7697 over main:Object 
-	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-	method call to_s:3137 over 2:Fixnum 
-	2method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call print:7697 over main:Object
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO
+	method call to_s:3137 over 2:Fixnum
+	2method call write:7649 over #<IO:0x7fb15e54fad0>:IO
 
-	method call print:7697 over main:Object 
-	method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
-	method call to_s:3137 over 3:Fixnum 
-	3method call write:7649 over #<IO:0x7fb15e54fad0>:IO 
+	method call print:7697 over main:Object
+	method call write:7649 over #<IO:0x7fb15e54fad0>:IO
+	method call to_s:3137 over 3:Fixnum
+	3method call write:7649 over #<IO:0x7fb15e54fad0>:IO
 
 === Redirecting calls
 
@@ -92,7 +92,7 @@ standard output:
 
 			nil # do nothing
 		end
-		
+
 		def bar
 			print "bar in MethodHandler\n"
 		end
@@ -131,7 +131,7 @@ standard output:
 
 	class MethodHandler < HookHandler
 		include RallHook::Helper
-		
+
 		class FooMethodWrapper < MethodWrapper
 			def call(*x)
 				# call with reyield if block_given
@@ -139,7 +139,7 @@ standard output:
 					original_call(*x) do |*a|
 						yield(*a)
 					end
-					# add "¿bar?"
+					# add "ï¿½bar?"
 					yield("bar?")
 				else
 					original_call(*x)
@@ -205,3 +205,6 @@ main.rb
 	print y.method(Y,:foo).body.file,"\n" # source2.rb
 
 
+== Copying
+
+Copyright (c) 2010 Dario Seminara, released under the GPL License (see LICENSE)
