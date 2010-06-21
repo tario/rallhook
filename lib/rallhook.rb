@@ -226,7 +226,7 @@ module RallHook
         end
       ensure
         GC.enable
-        rehook
+        ::RallHook::Hook.rehook
       end
 
 #
