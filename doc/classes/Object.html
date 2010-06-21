@@ -95,9 +95,9 @@ some methods in the <a href="Object.html">Object</a> class
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000003">redirect</a>&nbsp;&nbsp;
-      <a href="#M000002">redirect_with_unhook</a>&nbsp;&nbsp;
-      <a href="#M000004">specific_method</a>&nbsp;&nbsp;
+      <a href="#M000002">redirect</a>&nbsp;&nbsp;
+      <a href="#M000001">redirect_with_unhook</a>&nbsp;&nbsp;
+      <a href="#M000003">specific_method</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -119,18 +119,18 @@ some methods in the <a href="Object.html">Object</a> class
     <div id="methods">
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000003" class="method-detail">
-        <a name="M000003"></a>
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
 
         <div class="method-heading">
-          <a href="#M000003" class="method-signature">
+          <a href="#M000002" class="method-signature">
           <span class="method-name">redirect</span><span class="method-args">(method_name, klass = nil)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Generates a <a href="Object.html#M000003">redirect</a> message to return it
+Generates a <a href="Object.html#M000002">redirect</a> message to return it
 in handle_method to cause the redirection of the method that is beign
 processed with the object as receiver, the method_name the new target and
 the class as second parameter if specified
@@ -157,11 +157,15 @@ Example:
 
   # hook using MethodHandler, etc... (see README and examples)
 </pre>
+<p>
+NOTE: Rallhook internally disable the GC in a redirection, you must
+reactivate it after
+</p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000003-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000003-source">
+            onclick="toggleCode('M000002-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000002-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 362</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 368</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">redirect</span>(<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword kw">nil</span>)
                 <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">klass</span>
                         <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Redirect</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-keyword kw">self</span>,<span class="ruby-identifier">method_name</span>)
@@ -174,18 +178,18 @@ Example:
         </div>
       </div>
 
-      <div id="method-M000002" class="method-detail">
-        <a name="M000002"></a>
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
 
         <div class="method-heading">
-          <a href="#M000002" class="method-signature">
+          <a href="#M000001" class="method-signature">
           <span class="method-name">redirect_with_unhook</span><span class="method-args">(method_name, klass = nil)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Same as <a href="Object.html#M000003">redirect</a>, but disable the
+Same as <a href="Object.html#M000002">redirect</a>, but disable the
 hook/interception of methods (dont call handle_redirect) before make the
 call, the hook status may be restored with Hook#rehook Anyway, it is
 desirable to use MethodWrapper instead to &quot;wrap&quot; method calls
@@ -194,11 +198,16 @@ desirable to use MethodWrapper instead to &quot;wrap&quot; method calls
 see <a
 href="RallHook/Helper/MethodWrapper.html">RallHook::Helper::MethodWrapper</a>
 </p>
+<p>
+NOTE: Rallhook internally disable the GC in a redirection, you must
+reactivate it after NOTE 2: If use the MethodWrapper functionallity, it
+reactivates the GC disabled by rallhook. You should not worry about it
+</p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000002-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000002-source">
+            onclick="toggleCode('M000001-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000001-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 329</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 334</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">redirect_with_unhook</span>(<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword kw">nil</span>)
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">klass</span>
       <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Redirect</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-keyword kw">self</span>,<span class="ruby-identifier">method_name</span>,<span class="ruby-keyword kw">true</span>)
@@ -212,21 +221,21 @@ href="RallHook/Helper/MethodWrapper.html">RallHook::Helper::MethodWrapper</a>
         </div>
       </div>
 
-      <div id="method-M000004" class="method-detail">
-        <a name="M000004"></a>
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
 
         <div class="method-heading">
-          <a href="#M000004" class="method-signature">
+          <a href="#M000003" class="method-signature">
           <span class="method-name">specific_method</span><span class="method-args">(arg1, arg2=nil)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000004-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000004-source">
+            onclick="toggleCode('M000003-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000003-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 370</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 376</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">specific_method</span>(<span class="ruby-identifier">arg1</span>, <span class="ruby-identifier">arg2</span>=<span class="ruby-keyword kw">nil</span>)
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">arg2</span>
       <span class="ruby-identifier">method_name</span> = <span class="ruby-identifier">arg2</span>

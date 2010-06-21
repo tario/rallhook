@@ -88,9 +88,9 @@
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000024">handle_method</a>&nbsp;&nbsp;
-      <a href="#M000025">hook</a>&nbsp;&nbsp;
+      <a href="#M000025">handle_method</a>&nbsp;&nbsp;
       <a href="#M000026">hook</a>&nbsp;&nbsp;
+      <a href="#M000027">hook</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -112,11 +112,11 @@
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000026" class="method-detail">
-        <a name="M000026"></a>
+      <div id="method-M000027" class="method-detail">
+        <a name="M000027"></a>
 
         <div class="method-heading">
-          <a href="#M000026" class="method-signature">
+          <a href="#M000027" class="method-signature">
           <span class="method-name">hook</span><span class="method-args">() {|| ...}</span>
           </a>
         </div>
@@ -124,7 +124,7 @@
         <div class="method-description">
           <p>
 Instance handler and activate the <a
-href="HookHandler.html#M000025">hook</a> Example:
+href="HookHandler.html#M000026">hook</a> Example:
 </p>
 <pre>
   class MethodHandler &lt; Hook
@@ -138,10 +138,10 @@ href="HookHandler.html#M000025">hook</a> Example:
   end
 </pre>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000026-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000026-source">
+            onclick="toggleCode('M000027-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000027-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 301</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 302</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">hook</span>
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
       <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">new</span>.<span class="ruby-identifier">hook</span> <span class="ruby-keyword kw">do</span>
@@ -158,11 +158,11 @@ href="HookHandler.html#M000025">hook</a> Example:
 
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000024" class="method-detail">
-        <a name="M000024"></a>
+      <div id="method-M000025" class="method-detail">
+        <a name="M000025"></a>
 
         <div class="method-heading">
-          <a href="#M000024" class="method-signature">
+          <a href="#M000025" class="method-signature">
           <span class="method-name">handle_method</span><span class="method-args">()</span>
           </a>
         </div>
@@ -173,10 +173,10 @@ default method_handler of a <a href="Hook.html">Hook</a> does nothing with
 any method call
 </p>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000024-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000024-source">
+            onclick="toggleCode('M000025-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000025-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 261</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 262</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">handle_method</span>
     <span class="ruby-keyword kw">nil</span>
   <span class="ruby-keyword kw">end</span>
@@ -185,18 +185,18 @@ any method call
         </div>
       </div>
 
-      <div id="method-M000025" class="method-detail">
-        <a name="M000025"></a>
+      <div id="method-M000026" class="method-detail">
+        <a name="M000026"></a>
 
         <div class="method-heading">
-          <a href="#M000025" class="method-signature">
+          <a href="#M000026" class="method-signature">
           <span class="method-name">hook</span><span class="method-args">() {|| ...}</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-enable the <a href="HookHandler.html#M000025">hook</a>. Example
+enable the <a href="HookHandler.html#M000026">hook</a>. Example
 </p>
 <pre>
   class MethodHandler &lt; Hook
@@ -210,10 +210,10 @@ enable the <a href="HookHandler.html#M000025">hook</a>. Example
   end
 </pre>
           <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000025-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000025-source">
+            onclick="toggleCode('M000026-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000026-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 278</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 279</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">hook</span>
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
       <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Hook</span>.<span class="ruby-identifier">hook</span> <span class="ruby-keyword kw">self</span> <span class="ruby-keyword kw">do</span>
