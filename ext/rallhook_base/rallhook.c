@@ -300,6 +300,19 @@ VALUE rb_thread_acquire_attributes( VALUE thread ) {
 	return Qnil;
 }
 
+#include "signal.h"
+
+void disable_sigsegv_handler() {
+
+struct sigaction sigDisable;
+
+sigDisable.sa_handler = SIG_IGN;
+sigDisable.sa_restorer = NULL;
+
+sigaction (SIGSEGV, &sigDisable, NULL);
+
+}
+
 
 extern void Init_rallhook_base() {
 
@@ -393,4 +406,5 @@ Example:
 
 	rb_define_method(rb_cThread, "acquire_attributes", rb_thread_acquire_attributes,0);
 
+	disable_sigsegv_handler();
 }
