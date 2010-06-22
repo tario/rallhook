@@ -13,12 +13,18 @@ This package contains rallhook, a ruby C extension to intercept ruby methods cal
 * distorm ( found at https://code.google.com/p/distorm/ )
 
 
-=== Gem installation
+=== Installation
+
+* run in your system
+
+sudo gem install rallhook
+
+OR
 
 * Download the last version of the gem from http://github.com/tario/ruby-cpp/downloads
 * Install the gem with the following;
 
-gem install rallhook-X.X.X.gem
+sudo gem install rallhook-X.X.X.gem
 
 == Usage
 
