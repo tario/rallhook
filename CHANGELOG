@@ -1,3 +1,13 @@
+0.7.1	Fixed issue 9 ( http://github.com/tario/rallhook/issues#issue/9 ), "broken" object is processed by the GC due the impossibility of avoid 
+		the deletion of an object of class Redirect returned by handle_method. The hotfix disabled the GC at each redirection and enable
+		it again each time that a WRAPPER redirection concludes. Also the GC are re-enabled when the hook block is terminated. 
+		
+		MULTI-THREAD SUPPORT DISABLED
+		This hotfix changes a flag, the global state of GC enabled. Due this flag is not by thread, concurrency executions of hook blocks
+		in many thread simulaniously has unexpected and maybe undesirable behaviours
+		
+		The thread support will be added again to the next patch version 0.7.2
+
 0.7.0	Concurrency support, any thread can hook without affect the hook state of the other threads
 
 		Restrictions about overwrite instance methods disabled
