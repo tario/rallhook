@@ -81,11 +81,17 @@ AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 		tinfo->hook_enable_left = 0;
 		tinfo->hook_proc = Qnil;
 
-		rb_ivar_set( thread, rb_intern("__tinfo"), (VALUE)tinfo);
+		VALUE tinfo_obj = Data_Wrap_Struct(rb_cObject, 0, 0,tinfo);
+
+		rb_ivar_set( thread, rb_intern("__tinfo"), tinfo_obj);
 
 		return tinfo;
 	} else {
-		return (AttachedThreadInfo*)tmp;
+
+		AttachedThreadInfo* tinfo;
+		Data_Get_Struct(tmp, struct AttachedThreadInfo, tinfo);
+
+		return tinfo;
 	}
 }
 
