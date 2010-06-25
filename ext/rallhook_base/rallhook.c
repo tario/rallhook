@@ -72,6 +72,11 @@ typedef struct AttachedThreadInfo_ {
 	int handle_method_arity;
 } AttachedThreadInfo;
 
+
+void tinfo_mark(AttachedThreadInfo* tinfo) {
+	rb_gc_mark(tinfo->hook_proc);
+}
+
 AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 	VALUE tmp = rb_ivar_get( thread, rb_intern("__tinfo") );
 
@@ -81,7 +86,7 @@ AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 		tinfo->hook_enable_left = 0;
 		tinfo->hook_proc = Qnil;
 
-		VALUE tinfo_obj = Data_Wrap_Struct(rb_cObject, 0, 0,tinfo);
+		VALUE tinfo_obj = Data_Make_Struct(rb_cObject, AttachedThreadInfo, tinfo_mark, free, tinfo);
 
 		rb_ivar_set( thread, rb_intern("__tinfo"), tinfo_obj);
 
@@ -89,7 +94,7 @@ AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 	} else {
 
 		AttachedThreadInfo* tinfo;
-		Data_Get_Struct(tmp, struct AttachedThreadInfo, tinfo);
+		Data_Get_Struct(tmp, AttachedThreadInfo, tinfo);
 
 		return tinfo;
 	}
