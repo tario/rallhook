@@ -157,15 +157,11 @@ Example:
 
   # hook using MethodHandler, etc... (see README and examples)
 </pre>
-<p>
-NOTE: Rallhook internally disable the GC in a redirection, you must
-reactivate it after
-</p>
           <p><a class="source-toggle" href="#"
             onclick="toggleCode('M000002-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000002-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 369</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 362</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">redirect</span>(<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword kw">nil</span>)
                 <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">klass</span>
                         <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Redirect</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-keyword kw">self</span>,<span class="ruby-identifier">method_name</span>)
@@ -198,19 +194,11 @@ desirable to use MethodWrapper instead to &quot;wrap&quot; method calls
 see <a
 href="RallHook/Helper/MethodWrapper.html">RallHook::Helper::MethodWrapper</a>
 </p>
-<p>
-NOTE: Rallhook internally disable the GC in a redirection, you must
-reactivate it after
-</p>
-<p>
-NOTE 2: If use the MethodWrapper functionallity, it reactivates the GC
-disabled by rallhook. You should not worry about it
-</p>
           <p><a class="source-toggle" href="#"
             onclick="toggleCode('M000001-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000001-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 335</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 329</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">redirect_with_unhook</span>(<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword kw">nil</span>)
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">klass</span>
       <span class="ruby-operator">::</span><span class="ruby-constant">RallHook</span><span class="ruby-operator">::</span><span class="ruby-constant">Redirect</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">klass</span>,<span class="ruby-keyword kw">self</span>,<span class="ruby-identifier">method_name</span>,<span class="ruby-keyword kw">true</span>)
@@ -238,7 +226,7 @@ disabled by rallhook. You should not worry about it
             onclick="toggleCode('M000003-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000003-source">
 <pre>
-<span class="ruby-comment cmt"># File lib/rallhook.rb, line 377</span>
+<span class="ruby-comment cmt"># File lib/rallhook.rb, line 370</span>
   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">specific_method</span>(<span class="ruby-identifier">arg1</span>, <span class="ruby-identifier">arg2</span>=<span class="ruby-keyword kw">nil</span>)
     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">arg2</span>
       <span class="ruby-identifier">method_name</span> = <span class="ruby-identifier">arg2</span>
