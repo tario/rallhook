@@ -40,7 +40,7 @@ module RallHook
 #
   class Redirect
 		include MethodRedirect
-
+		
 		attr_reader :recv
 
 		def initialize(klass, recv, m, unhook = nil)
@@ -225,8 +225,7 @@ module RallHook
           call(*args)
         end
       ensure
-        GC.enable
-        ::RallHook::Hook.rehook
+        rehook
       end
 
 #
@@ -327,11 +326,6 @@ class Object
 #
 # see RallHook::Helper::MethodWrapper
 #
-# NOTE: Rallhook internally disable the GC in a redirection, you must reactivate it after
-#
-# NOTE 2: If use the MethodWrapper functionallity, it reactivates the GC disabled by rallhook. You should not
-# worry about it
-#
   def redirect_with_unhook(method_name, klass = nil)
     if klass
       ::RallHook::Redirect.new(klass,self,method_name,true)
@@ -364,7 +358,6 @@ class Object
 #
 #   # hook using MethodHandler, etc... (see README and examples)
 #
-# NOTE: Rallhook internally disable the GC in a redirection, you must reactivate it after
 #
   def redirect(method_name, klass = nil)
 		if klass

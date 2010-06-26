@@ -72,6 +72,11 @@ typedef struct AttachedThreadInfo_ {
 	int handle_method_arity;
 } AttachedThreadInfo;
 
+
+void tinfo_mark(AttachedThreadInfo* tinfo) {
+	rb_gc_mark(tinfo->hook_proc);
+}
+
 AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 	VALUE tmp = rb_ivar_get( thread, rb_intern("__tinfo") );
 
@@ -81,11 +86,17 @@ AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 		tinfo->hook_enable_left = 0;
 		tinfo->hook_proc = Qnil;
 
-		rb_ivar_set( thread, rb_intern("__tinfo"), (VALUE)tinfo);
+		VALUE tinfo_obj = Data_Make_Struct(rb_cObject, AttachedThreadInfo, tinfo_mark, free, tinfo);
+
+		rb_ivar_set( thread, rb_intern("__tinfo"), tinfo_obj);
 
 		return tinfo;
 	} else {
-		return (AttachedThreadInfo*)tmp;
+
+		AttachedThreadInfo* tinfo;
+		Data_Get_Struct(tmp, AttachedThreadInfo, tinfo);
+
+		return tinfo;
 	}
 }
 
@@ -117,12 +128,6 @@ VALUE get_hook_proc() {
 Disable the hook. Is not usually necesary because of the RAII feature of Hook#hook
 */
 VALUE unhook(VALUE self) {
-	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
-	rb_gc_enable();
-	return Qnil;
-}
-
-VALUE restore_unhook(VALUE self) {
 	disable_redirect(tinfo_from_thread( rb_thread_current() ) );
 	return Qnil;
 }
@@ -197,9 +202,6 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 
 		// method named "binding" cannot be redirected
 		if (rb_obj_is_kind_of(result,rb_mMethodRedirect) == Qtrue ) {
-
-			rb_gc_disable();
-
 			*klass = rb_ivar_get(result,id_klass_var );
 			*recv = rb_ivar_get(result,id_recv_var );
 			*mid = rb_to_id( rb_ivar_get(result,id_method_var) );
@@ -266,7 +268,7 @@ If no call to Hook#hook has made, rehook does nothing
 VALUE rehook(VALUE unused) {
 	enable_redirect(tinfo_from_thread( rb_thread_current() ));
 	if (rb_block_given_p() ) {
-		return rb_ensure(rb_yield, Qnil, restore_unhook, Qnil);
+		return rb_ensure(rb_yield, Qnil, unhook, Qnil);
 	}
 	return Qnil;
 }

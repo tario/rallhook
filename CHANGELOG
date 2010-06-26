@@ -1,3 +1,8 @@
+0.7.2	Fixed issue 9 by ruby-wrapping properly the rallhook thread info including the garbage collector mark function of 
+		the ruby wrapper
+
+		Removed hotfix of issue 9 improved in version 0.7.1, thread support restored
+
 0.7.1	Fixed issue 9 ( http://github.com/tario/rallhook/issues#issue/9 ), "broken" object is processed by the GC due the impossibility of avoid 
 		the deletion of an object of class Redirect returned by handle_method. The hotfix disabled the GC at each redirection and enable
 		it again each time that a WRAPPER redirection concludes. Also the GC are re-enabled when the hook block is terminated. 
