@@ -5,7 +5,25 @@ CONFIG['CC'] = 'gcc'
 ruby_version = Config::CONFIG["ruby_version"]
 ruby_version = ruby_version.split(".")[0..1].join(".")
 
-$LIBS = $LIBS + " -ldistorm64"
+def distorm
+
+  distorm_names = {
+      "/usr/lib/libdistorm3.so" => "distorm3",
+      "/usr/local/lib/libdistorm3.so" => "distorm3",
+      "/usr/lib/libdistorm64.so" => "distorm64",
+      "/usr/local/lib/libdistorm64.so" => "distorm64"
+    }
+
+  distorm_names.each do |k,v|
+    if File.exists? k then
+      return v
+    end
+  end
+
+  raise "Distorm library not found in the system"
+end
+
+$LIBS = $LIBS + " -l#{distorm()}"
 
 if ruby_version == "1.8"
 	$CFLAGS = $CFLAGS + " -DRUBY1_8"
