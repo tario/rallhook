@@ -1,3 +1,5 @@
+0.7.4	Fixed issue 12 (Compile error for ruby 1.9)
+
 0.7.3	Fixed issue 10 (Compile Error in i486 Arch (-ldistorm64 not found) )
 
 0.7.2	Fixed issue 9 by ruby-wrapping properly the rallhook thread info including the garbage collector mark function of 
