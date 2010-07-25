@@ -82,7 +82,7 @@ VALUE rb_call_copy_i(
 	if (is_fastcall == 1) {
 
 		int array[7] = { (int)klass, (int)recv, mid, argc, (int)argv, scope, (int)self };
-		rb_call_write_eax(array);
+		rb_call_write_eax((int)array);
 
 		__asm__("push %ebp\n");	// save all registers
 		__asm__("push %esi\n");
@@ -109,7 +109,7 @@ VALUE rb_call_copy_i(
 
 	} else if ( is_fastcall == 2) {
 		int array[7] = { (int)klass, (int)recv, mid, argc, (int)argv, scope, (int)self };
-		rb_call_write_eax(array);
+		rb_call_write_eax((int)array);
 
 		__asm__("push %ebp\n");	// save all registers
 		__asm__("push %esi\n");

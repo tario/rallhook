@@ -98,11 +98,15 @@ VALUE rb_method_body(VALUE self) {
 	Data_Get_Struct(self,struct METHOD,method);
 
 	if (method->body == 0) return Qnil;
-	if (method->body->nd_defn == 0) {
-		return Data_Wrap_Struct(rb_cNode, 0, 0, method->body);
-	} else {
+
+#ifdef RUBY1_8
+	// nd_defn is only present in ruby_1.8
+	if (method->body->nd_defn != 0) {
 		return Data_Wrap_Struct(rb_cNode, 0, 0, method->body->nd_defn);
 	}
+#endif
+
+	return Data_Wrap_Struct(rb_cNode, 0, 0, method->body);
 }
 
 /*
