@@ -38,6 +38,7 @@ ID id_method_added;
 ID id_hook_enabled;
 ID id_hook_enable_left;
 ID id_hook_proc;
+ID __tinfo;
 
 ID id_return_value_var, id_klass_var, id_recv_var, id_method_var, id_unhook_var;
 
@@ -78,7 +79,7 @@ void tinfo_mark(AttachedThreadInfo* tinfo) {
 }
 
 AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
-	VALUE tmp = rb_ivar_get( thread, rb_intern("__tinfo") );
+	VALUE tmp = rb_ivar_get( thread, __tinfo );
 
 	if (tmp == Qnil) {
 		AttachedThreadInfo* tinfo = malloc(sizeof(AttachedThreadInfo));
@@ -88,7 +89,7 @@ AttachedThreadInfo* tinfo_from_thread(VALUE thread) {
 
 		VALUE tinfo_obj = Data_Make_Struct(rb_cObject, AttachedThreadInfo, tinfo_mark, free, tinfo);
 
-		rb_ivar_set( thread, rb_intern("__tinfo"), tinfo_obj);
+		rb_ivar_set( thread, __tinfo, tinfo_obj);
 
 		return tinfo;
 	} else {
@@ -414,6 +415,7 @@ Example:
 	id_hook_enabled = rb_intern("__hook_enabled");
 	id_hook_enable_left = rb_intern("__hook_enable_left");
 	id_hook_proc = rb_intern("__hook_proc");
+	__tinfo = rb_intern("__tinfo");
 
 	rb_define_method(rb_cThread, "acquire_attributes", rb_thread_acquire_attributes,0);
 
