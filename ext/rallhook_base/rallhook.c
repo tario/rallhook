@@ -216,12 +216,6 @@ void rallhook_redirect_handler ( VALUE* klass, VALUE* recv, ID* mid ) {
 		}
 	}
 
-	// methods over class hook are illegal, may change the state of hook
-	if (*recv == rb_cHook ) {
-		rb_raise(rb_eSecurityError, "Illegal method call: Hook.%s", rb_id2name(*mid) );
-	}
-
-
 }
 
 /*
