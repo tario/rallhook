@@ -34,4 +34,6 @@ VALUE unshadow(VALUE klass) ;
 
 VALUE shadow_or_create(VALUE klass);
 
+void hook_rb_add_method();
+
 #endif
