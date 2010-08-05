@@ -100,8 +100,9 @@ pthread_mutex_t put_redirect_handler_mutex;
 int put_redirect_handler( REDIRECTHANDLER redirect_handler) {
 
 	pthread_mutex_lock(&put_redirect_handler_mutex);
-	put_redirect_handler_(redirect_handler);
+	int ret = put_redirect_handler_(redirect_handler);
 	pthread_mutex_unlock(&put_redirect_handler_mutex);
+	return ret;
 }
 
 
