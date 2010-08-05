@@ -131,7 +131,6 @@ void rb_add_method_fake(
 	} else {
 		rb_add_method_copy(klass,id,node,noex);
 	}
-
 }
 
 void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
@@ -144,9 +143,7 @@ void shadow_redirect(VALUE* klass, VALUE* recv, ID* mid) {
 
 int add_method_code_changed = 0;
 
-void init_restrict_def() {
-
-
+void hook_rb_add_method() {
 	if (!add_method_code_changed) {
 
 		void* handle = dlopen(current_libruby(),0x101);
@@ -163,6 +160,9 @@ void init_restrict_def() {
 
 		add_method_code_changed = 1;
 	}
+}
+
+void init_restrict_def() {
 
 	__shadow___id = rb_intern("__shadow__");
 	__unshadow___id = rb_intern("__unshadow__");

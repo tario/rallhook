@@ -238,6 +238,8 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	enable_redirect(tinfo_from_thread(rb_thread_current()));
 
+	hook_rb_add_method();
+
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
 	}
