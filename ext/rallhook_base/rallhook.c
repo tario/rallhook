@@ -241,9 +241,9 @@ VALUE hook(VALUE self, VALUE hook_proc) {
 
 	put_redirect_handler( rallhook_redirect_handler );
 
-	enable_redirect(tinfo_from_thread(rb_thread_current()));
-
 	hook_rb_add_method();
+
+	enable_redirect(tinfo_from_thread(rb_thread_current()));
 
 	if (rb_block_given_p() ) {
 		return rb_ensure(rb_yield, Qnil, unhook, self);
