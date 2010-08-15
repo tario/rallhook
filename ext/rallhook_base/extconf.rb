@@ -42,11 +42,9 @@ srcs += Dir[File.join(srcdir, "deps/distorm/*.c")]
 srcs += Dir[File.join(srcdir, "deps/distorm/src/*.c")]
 
 for f in srcs
-obj = File.basename(f, ".*") << ".o"
+obj = f[2..-1].gsub(/\.c$/, ".o")
 $objs.push(obj) unless $objs.index(obj)
 end
-
-p $objs
 
 create_makefile('rallhook_base')
 
