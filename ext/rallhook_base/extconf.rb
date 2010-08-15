@@ -34,6 +34,8 @@ else
 	print "try passing the rubyversion by argument (1.8 or 1.9)\n"
 end
 
+$CFLAGS = $CFLAGS  + " -o $@"
+
 srcdir = '.'
 
 $objs = []
