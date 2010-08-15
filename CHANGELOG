@@ -1,3 +1,5 @@
+0.8.0	Added code of diStorm library to make easier the gem install (no previous install of diStorm are required now)
+
 0.7.5	Fixed issue 13 (Segmentation fault in ruby 1.9)
 
 0.7.4	Fixed issue 12 (Compile error for ruby 1.9)
