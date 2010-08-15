@@ -34,6 +34,21 @@ else
 	print "try passing the rubyversion by argument (1.8 or 1.9)\n"
 end
 
+srcdir = '.'
+
+$objs = []
+srcs = Dir[File.join(srcdir, "*.{#{SRC_EXT.join(%q{,})}}")]
+srcs += Dir[File.join(srcdir, "deps/distorm/*.c")]
+srcs += Dir[File.join(srcdir, "deps/distorm/src/*.c")]
+
+for f in srcs
+obj = File.basename(f, ".*") << ".o"
+$objs.push(obj) unless $objs.index(obj)
+end
+
+p $objs
+
 create_makefile('rallhook_base')
+
 
 
